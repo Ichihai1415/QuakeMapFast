@@ -1,10 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QuakeMapFast
 {
@@ -23,9 +19,135 @@ namespace QuakeMapFast
                 PointInt.Add((string)json_.SelectToken(Token), P2PScale2IntN((int)json_.SelectToken("scale")));
             return PointInt;
         }
+        public static IntList Point2IntList(JObject json, string Token)
+        {
+            IntList intList = new IntList();
+            foreach (JToken json_ in json.SelectToken("points"))
+            {
+                switch ((int)json_.SelectToken("scale"))
+                {
+                    case 10:
+                        intList.S1.Add((string)json_.SelectToken(Token));
+                        break;
+                    case 20:
+                        intList.S2.Add((string)json_.SelectToken(Token));
+                        break;
+                    case 30:
+                        intList.S3.Add((string)json_.SelectToken(Token));
+                        break;
+                    case 40:
+                        intList.S4.Add((string)json_.SelectToken(Token));
+                        break;
+                    case 45:
+                        intList.S5.Add((string)json_.SelectToken(Token));
+                        break;
+                    case 50:
+                        intList.S6.Add((string)json_.SelectToken(Token));
+                        break;
+                    case 55:
+                        intList.S7.Add((string)json_.SelectToken(Token));
+                        break;
+                    case 60:
+                        intList.S8.Add((string)json_.SelectToken(Token));
+                        break;
+                    case 70:
+                        intList.S9.Add((string)json_.SelectToken(Token));
+                        break;
+                }
+            }
+            return intList;
+        }
+        public static string IntList2String(IntList intList)
+        {
+            string output = "";
+            if(intList.S9.Count!=0)
+            {
+                output += "《震度7》";
+                foreach(string Area in intList.S9)
+                    output += Area+" ";
+            }
+            if (intList.S8.Count != 0)
+            {
+                output += "《震度6強》";
+                foreach (string Area in intList.S8)
+                    output += Area + " ";
+            }
+            if (intList.S7.Count != 0)
+            {
+                output += "《震度6弱》";
+                foreach (string Area in intList.S7)
+                    output += Area + " ";
+            }
+            if (intList.S6.Count != 0)
+            {
+                output += "《震度5強》";
+                foreach (string Area in intList.S6)
+                    output += Area + " ";
+            }
+            if (intList.S5.Count != 0)
+            {
+                output += "《震度5弱》";
+                foreach (string Area in intList.S5)
+                    output += Area + " ";
+            }
+            if (intList.S4.Count != 0)
+            {
+                output += "《震度4》";
+                foreach (string Area in intList.S4)
+                    output += Area + " ";
+            }
+            if (intList.S3.Count != 0)
+            {
+                output += "《震度3》";
+                foreach (string Area in intList.S3)
+                    output += Area + " ";
+            }
+            if (intList.S2.Count != 0)
+            {
+                output += "《震度2》";
+                foreach (string Area in intList.S2)
+                    output += Area + " ";
+            }
+            if (intList.S1.Count != 0)
+            {
+                output += "《震度1》";
+                foreach (string Area in intList.S1)
+                    output += Area + " ";
+            }
+            return output;
+        }
+        public static string Point2String(JObject json, string Token)
+        {
+            return IntList2String(Point2IntList(json, Token));
+        }
+        public static void PointCorrect(ref double LatSta, ref double LatEnd, ref double LonSta, ref double LonEnd)
+        {
+            LatSta -= (LatEnd - LatSta) / 20;//差の1/20余白追加
+            LatEnd += (LatEnd - LatSta) / 20;
+            LonSta -= (LonEnd - LonSta) / 20;
+            LonEnd += (LonEnd - LonSta) / 20;
+            if (LatEnd - LatSta < 3)//緯度差を最大3に
+            {
+                double correction = (3 - (LatEnd - LatSta)) / 2d;
+                LatSta -= correction;
+                LatEnd += correction;
+            }
+            if (LonEnd - LonSta > LatEnd - LatSta)//大きいほうに合わせる
+            {
+                double correction = ((LonEnd - LonSta) - (LatEnd - LatSta)) / 2d;
+                LatSta -= correction;
+                LatEnd += correction;
+            }
+            else if (LonEnd - LonSta < LatEnd - LatSta)
+            {
+                double correction = ((LatEnd - LatSta) - (LonEnd - LonSta)) / 2d;
+                LonSta -= correction;
+                LonEnd += correction;
+            }
+        }
         public static SolidBrush IntS2Brush(string Int)
         {
-            switch(Int)
+            switch (Int)
             {
                 case "-":
                     return new SolidBrush(Color.FromArgb(80, 90, 100));
@@ -53,7 +175,7 @@ namespace QuakeMapFast
         }
         public static SolidBrush IntN2Brush(int Int)
         {
-            switch(Int)
+            switch (Int)
             {
                 case 0:
                     return new SolidBrush(Color.FromArgb(80, 90, 100));
@@ -139,5 +261,18 @@ namespace QuakeMapFast
                     return "-";
             }
         }
+        public class IntList
+        {
+            public List<string> S1 { get; set; }
+            public List<string> S2 { get; set; }
+            public List<string> S3 { get; set; }
+            public List<string> S4 { get; set; }
+            public List<string> S5 { get; set; }
+            public List<string> S6 { get; set; }
+            public List<string> S7 { get; set; }
+            public List<string> S8 { get; set; }
+            public List<string> S9 { get; set; }
+        }
+
     }
 }
