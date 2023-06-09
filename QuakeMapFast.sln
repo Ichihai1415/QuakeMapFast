@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33712.159
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuakeMapFast", "QuakeMapFast\QuakeMapFast.csproj", "{99D8DAEF-B8C9-4E36-A8C5-9A3C398EF70A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{99D8DAEF-B8C9-4E36-A8C5-9A3C398EF70A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99D8DAEF-B8C9-4E36-A8C5-9A3C398EF70A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99D8DAEF-B8C9-4E36-A8C5-9A3C398EF70A}.Debug|x64.ActiveCfg = Debug|x64
+		{99D8DAEF-B8C9-4E36-A8C5-9A3C398EF70A}.Debug|x64.Build.0 = Debug|x64
+		{99D8DAEF-B8C9-4E36-A8C5-9A3C398EF70A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99D8DAEF-B8C9-4E36-A8C5-9A3C398EF70A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99D8DAEF-B8C9-4E36-A8C5-9A3C398EF70A}.Release|x64.ActiveCfg = Release|x64
+		{99D8DAEF-B8C9-4E36-A8C5-9A3C398EF70A}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4B574652-9417-4A1B-A7C5-DCE90DF0FC6B}
+	EndGlobalSection
+EndGlobal
