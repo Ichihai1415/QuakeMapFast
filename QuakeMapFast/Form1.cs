@@ -9,7 +9,9 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Net.WebSockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -250,6 +252,8 @@ namespace QuakeMapFast
             string Text = $"震度速報【最大震度{MaxIntS}】{Time:yyyy/MM/dd HH:mm}\n{IntsArea}";
             if (Text.Length > 120)
                 Text = Text.Remove(120, Text.Length - 120) + "…";
+            BouyomiChanSocketSend($"震度速報、{IntsArea.Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
+            TelopSocketSend($"0,震度速報【最大震度{MaxIntS}】,{Text},{Int2TelopColor(MaxIntN)},False,60,-100");
             Tweet(Text, Time, $"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}\\{SaveTime:yyyyMMddHHmmss.f}.png");
 
 
@@ -327,6 +331,59 @@ namespace QuakeMapFast
 
                 }
             LastTime = Time;
+        }
+
+        public void TelopSocketSend(string Text)
+        {
+            IPEndPoint IPEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 31401);
+            try
+            {
+                using (TcpClient tcpClient = new TcpClient())
+                {
+                    tcpClient.Connect(IPEndPoint);
+                    using (NetworkStream networkStream = tcpClient.GetStream())
+                    {
+                        byte[] Bytes = new byte[4096];
+                        Bytes = Encoding.UTF8.GetBytes(Text);
+                        networkStream.Write(Bytes, 0, Bytes.Length);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+        public void BouyomiChanSocketSend(string Text)
+        {
+            try
+            {
+                byte[] Message = Encoding.UTF8.GetBytes(Text);
+                int Length = Message.Length;
+                byte Code = 0;
+                short Command = 0x0001;
+                short Speed = 100;
+                short Tone = 150;
+                short Volume = 100;
+                short Voice = 2;
+                using (TcpClient TcpClient = new TcpClient("127.0.0.1", 50001))
+                using (NetworkStream NetworkStream = TcpClient.GetStream())
+                using (BinaryWriter BinaryWriter = new BinaryWriter(NetworkStream))
+                {
+                    BinaryWriter.Write(Command);
+                    BinaryWriter.Write(Speed);
+                    BinaryWriter.Write(Tone);
+                    BinaryWriter.Write(Volume);
+                    BinaryWriter.Write(Voice);
+                    BinaryWriter.Write(Code);
+                    BinaryWriter.Write(Length);
+                    BinaryWriter.Write(Message);
+                }
+            }
+            catch
+            {
+
+            }
         }
     }
 }
