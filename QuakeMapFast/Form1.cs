@@ -42,8 +42,8 @@ namespace QuakeMapFast
             else
                 File.WriteAllText("Token.txt", "");
 
-            //Debug();//デバッグ時
-            //return;//ここの2行をつける(ここ以降行かせない)
+            Debug();//デバッグ時
+            return;//ここの2行をつける(ここ以降行かせない)
 
             while (true)
                 try
@@ -121,11 +121,11 @@ namespace QuakeMapFast
             debug = true;
             //""
             //ScalePrompt(JObject.Parse(File.ReadAllText("C:\\Users\\proje\\source\\repos\\QuakeMapFast\\QuakeMapFast\\bin\\Debug\\Log\\202305\\26\\19\\20230526190603.3438.txt")));
-            //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2023hukushima-scale-last.json")));
+            ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2023hukushima-scale-last.json")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2016kumamoto-scale-0414.json")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2015ogasawara-scale.json")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\scale-ogasawara-only.json")));
-            ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\scale-tokyo23-only.json")));
+            //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\scale-tokyo23-only.json")));
 
         }
         public void ScalePrompt(JObject json)
@@ -249,13 +249,16 @@ namespace QuakeMapFast
                 Directory.CreateDirectory($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}");
             canvas.Save($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}\\{SaveTime:yyyyMMddHHmmss.f}.png", ImageFormat.Png);
             string IntsArea = Point2String(json, "addr");
+            string IntsArea_Max3 = Point2String(json, "addr",MaxIntN-2);//最大震度から3階級(Max6->6,5,4)
             string Text = $"震度速報【最大震度{MaxIntS}】{Time:yyyy/MM/dd HH:mm}\n{IntsArea}";
             if (Text.Length > 120)
                 Text = Text.Remove(120, Text.Length - 120) + "…";
-            BouyomiChanSocketSend($"震度速報、{IntsArea.Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
-            TelopSocketSend($"0,震度速報【最大震度{MaxIntS}】,{Text},{Int2TelopColor(MaxIntN)},False,60,-100");
+            BouyomiChanSocketSend($"震度速報、{IntsArea_Max3.Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
+            TelopSocketSend($"0,震度速報【最大震度{MaxIntS}】,{IntsArea},{Int2TelopColor(MaxIntN)},False,60,1000");
+            if(debug)//デバッグ時は早く消す//長さに応じて調整
+                TelopSocketSend($"0, - テスト - 震度速報【最大震度{MaxIntS}】,{IntsArea},{Int2TelopColor(MaxIntN)},False,30,1000");
             Tweet(Text, Time, $"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}\\{SaveTime:yyyyMMddHHmmss.f}.png");
-
+            Console.WriteLine(Text);
 
             //throw new Exception("aa");
         }

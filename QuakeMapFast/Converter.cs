@@ -68,58 +68,58 @@ namespace QuakeMapFast
             }
             return intList;
         }
-        public static string IntList2String(IntList intList)
+        public static string IntList2String(IntList intList, int LowestInt = 0)
         {
             string output = "";
-            if(intList.S9.Count!=0)
+            if (intList.S9.Count != 0 && LowestInt <= 9)
             {
                 output += "《震度7》";
-                foreach(string Area in intList.S9)
-                    output += Area+" ";
+                foreach (string Area in intList.S9)
+                    output += Area + " ";
             }
-            if (intList.S8.Count != 0)
+            if (intList.S8.Count != 0 && LowestInt <= 8)
             {
                 output += "《震度6強》";
                 foreach (string Area in intList.S8)
                     output += Area + " ";
             }
-            if (intList.S7.Count != 0)
+            if (intList.S7.Count != 0 && LowestInt <= 7)
             {
                 output += "《震度6弱》";
                 foreach (string Area in intList.S7)
                     output += Area + " ";
             }
-            if (intList.S6.Count != 0)
+            if (intList.S6.Count != 0 && LowestInt <= 6)
             {
                 output += "《震度5強》";
                 foreach (string Area in intList.S6)
                     output += Area + " ";
             }
-            if (intList.S5.Count != 0)
+            if (intList.S5.Count != 0 && LowestInt <= 5)
             {
                 output += "《震度5弱》";
                 foreach (string Area in intList.S5)
                     output += Area + " ";
             }
-            if (intList.S4.Count != 0)
+            if (intList.S4.Count != 0 && LowestInt <= 4)
             {
                 output += "《震度4》";
                 foreach (string Area in intList.S4)
                     output += Area + " ";
             }
-            if (intList.S3.Count != 0)
+            if (intList.S3.Count != 0 && LowestInt <= 3)
             {
                 output += "《震度3》";
                 foreach (string Area in intList.S3)
                     output += Area + " ";
             }
-            if (intList.S2.Count != 0)
+            if (intList.S2.Count != 0 && LowestInt <= 2)
             {
                 output += "《震度2》";
                 foreach (string Area in intList.S2)
                     output += Area + " ";
             }
-            if (intList.S1.Count != 0)
+            if (intList.S1.Count != 0 && LowestInt <= 1)
             {
                 output += "《震度1》";
                 foreach (string Area in intList.S1)
@@ -127,9 +127,9 @@ namespace QuakeMapFast
             }
             return output;
         }
-        public static string Point2String(JObject json, string Token)
+        public static string Point2String(JObject json, string Token, int LowestInt = 0)
         {
-            return IntList2String(Point2IntList(json, Token));
+            return IntList2String(Point2IntList(json, Token), LowestInt);
         }
         public static void PointCorrect(ref double LatSta, ref double LatEnd, ref double LonSta, ref double LonEnd)
         {
