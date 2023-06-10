@@ -21,7 +21,18 @@ namespace QuakeMapFast
         }
         public static IntList Point2IntList(JObject json, string Token)
         {
-            IntList intList = new IntList();
+            IntList intList = new IntList
+            {
+                S1 = new List<string>(),
+                S2 = new List<string>(),
+                S3 = new List<string>(),
+                S4 = new List<string>(),
+                S5 = new List<string>(),
+                S6 = new List<string>(),
+                S7 = new List<string>(),
+                S8 = new List<string>(),
+                S9 = new List<string>()
+            };
             foreach (JToken json_ in json.SelectToken("points"))
             {
                 switch ((int)json_.SelectToken("scale"))
