@@ -52,6 +52,7 @@ namespace QuakeMapFast
                     using (ClientWebSocket client = new ClientWebSocket())
                     {
                         await client.ConnectAsync(new Uri("wss://api.p2pquake.net/v2/ws"), CancellationToken.None);
+                        ConsoleWrite("connect");
                         while (client.State == WebSocketState.Open)
                         {
                             byte[] buffer = new byte[1024 * 1024];
@@ -86,6 +87,7 @@ namespace QuakeMapFast
                                     File.WriteAllText($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.txt", $"{ex}");
                                     continue;
                                 }
+                                ConsoleWrite($"受信 code:{json.SelectToken("code")} type:{json.SelectToken("issue.type")} id:{json.SelectToken("_id")}");
                                 if (LatestID == (string)json.SelectToken("_id"))
                                     continue;
                                 LatestID = (string)json.SelectToken("_id");
@@ -93,9 +95,7 @@ namespace QuakeMapFast
                                     continue;
                                 ConsoleWrite(jsonText);
                                 if ((string)json.SelectToken("issue.type") == "ScalePrompt")
-                                {
                                     ScalePrompt(json);
-                                }
                             }
                         }
                     }
