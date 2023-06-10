@@ -224,27 +224,27 @@ namespace QuakeMapFast
             switch (Int)
             {
                 case 0:
-                    return "80,90,100,White,60,70,80,White";
+                    return "60,70,80,White,80,90,100,White";
                 case 1:
-                    return "60,80,100,White,40,60,80,White";
+                    return "40,60,80,White,60,80,100,White";
                 case 2:
-                    return "45,90,180,White,30,60,150,White";
+                    return "30,60,150,White,45,90,180,White";
                 case 3:
-                    return "50,175,175,Black,25,150,150,Black";
+                    return "25,150,150,Black,50,175,175,Black";
                 case 4:
-                    return "240,240,60,Black,200,200,40,Black";
+                    return "200,200,40,Black,240,240,60,Black";
                 case 5:
-                    return "250,150,0,Black,200,130,0,Black";
+                    return "200,130,0,Black,250,150,0,Black";
                 case 6:
-                    return "250,75,0,Black,200,50,0,Black";
+                    return "200,50,0,Black,250,75,0,Black";
                 case 7:
-                    return "200,0,0,White,180,0,0,White";
+                    return "180,0,0,White,200,0,0,White";
                 case 8:
-                    return "100,0,0,White,80,0,0,White";
+                    return "80,0,0,White,100,0,0,White";
                 case 9:
-                    return "100,0,100,White,80,0,80,White";
+                    return "80,0,80,White,100,0,100,White";
                 default:
-                    return "30,60,90,White,15,30,45,White";
+                    return "15,30,45,White,30,60,90,White";
             }
         }
 
