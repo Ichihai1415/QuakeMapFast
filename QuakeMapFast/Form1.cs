@@ -11,7 +11,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Net.WebSockets;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -27,12 +26,14 @@ namespace QuakeMapFast
         bool debug = false;
         DateTime LastTime = DateTime.MinValue;
         Tokens tokens;
+
         public Form1()
         {
             InitializeComponent();
         }
         private async void Form1_Load(object sender, EventArgs e)
         {
+            ConsoleWrite("");
             if (File.Exists("Token.txt"))
             {
                 string[] tokens_ = File.ReadAllText("Token.txt").Split(',');
@@ -42,8 +43,8 @@ namespace QuakeMapFast
             else
                 File.WriteAllText("Token.txt", "");
 
-            Debug();//デバッグ時
-            return;//ここの2行をつける(ここ以降行かせない)
+            //Debug();//デバッグ時
+            //return;//ここの2行をつける(ここ以降行かせない)
 
             while (true)
                 try
@@ -90,6 +91,7 @@ namespace QuakeMapFast
                                 LatestID = (string)json.SelectToken("_id");
                                 if (ignoreID.Contains((int)json.SelectToken("code")))
                                     continue;
+                                ConsoleWrite(jsonText);
                                 if ((string)json.SelectToken("issue.type") == "ScalePrompt")
                                 {
                                     ScalePrompt(json);
@@ -100,6 +102,7 @@ namespace QuakeMapFast
                 }
                 catch (Exception ex)
                 {
+                    ConsoleWrite(ex.ToString());
                     if (ex.Message.Contains("リモート サーバーに接続できません。") || ex.Message.Contains("内部 WebSocket エラーが発生しました。"))
                         continue;
                     if (!Directory.Exists($"Log"))
@@ -118,24 +121,28 @@ namespace QuakeMapFast
         /// </summary>
         public void Debug()
         {
+            ConsoleWrite("[info]デバッグモードです。");
             debug = true;
             //""
             //ScalePrompt(JObject.Parse(File.ReadAllText("C:\\Users\\proje\\source\\repos\\QuakeMapFast\\QuakeMapFast\\bin\\Debug\\Log\\202305\\26\\19\\20230526190603.3438.txt")));
-            ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2023hukushima-scale-last.json")));
+            //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2023hukushima-scale-last.json")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2016kumamoto-scale-0414.json")));
-            //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2015ogasawara-scale.json")));
+            ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2015ogasawara-scale.json")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\scale-ogasawara-only.json")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\scale-tokyo23-only.json")));
 
         }
         public void ScalePrompt(JObject json)
         {
+            DateTime StartTime = DateTime.Now;
+            ConsoleWrite("//////////震度速報//////////");
 
             DateTime Time = Convert.ToDateTime((string)json.SelectToken("earthquake.time"));
             int MaxIntN = P2PScale2IntN((int)json.SelectToken("earthquake.maxScale"));
             string MaxIntS = P2PScale2IntS((int)json.SelectToken("earthquake.maxScale"));
             Dictionary<string, int> AreaInt = Points2Dic(json, "addr");
 
+            ConsoleWrite("座標計算開始");
             JObject mapjson = JObject.Parse(Resources._20190125_AreaForecastLocalE_GIS_name_0_1);
             double LatSta = 999;
             double LatEnd = -999;
@@ -171,6 +178,7 @@ namespace QuakeMapFast
             PointCorrect(ref LatSta, ref LatEnd, ref LonSta, ref LonEnd);//補正
             double Zoom = 1080d / (LatEnd - LatSta);
 
+            ConsoleWrite("画像描画開始");
             Bitmap canvas = new Bitmap(1920, 1080);
             Graphics g = Graphics.FromImage(canvas);
             g.Clear(Color.FromArgb(30, 60, 90));
@@ -207,6 +215,7 @@ namespace QuakeMapFast
                     g.FillPath(new SolidBrush(Color.FromArgb(60, 90, 120)), Maps);
                 g.DrawPath(new Pen(Color.FromArgb(255, 255, 255), 2), Maps);
             }
+            ConsoleWrite("情報描画開始");
 
             g.FillRectangle(Brushes.Black, 1080, 0, 840, 1080);
 
@@ -249,17 +258,17 @@ namespace QuakeMapFast
                 Directory.CreateDirectory($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}");
             canvas.Save($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}\\{SaveTime:yyyyMMddHHmmss.f}.png", ImageFormat.Png);
             string IntsArea = Point2String(json, "addr");
-            string IntsArea_Max3 = Point2String(json, "addr",MaxIntN-2);//最大震度から3階級(Max6->6,5,4)
+            string IntsArea_Max3 = Point2String(json, "addr", MaxIntN - 2);//最大震度から3階級(Max6->6,5,4)
             string Text = $"震度速報【最大震度{MaxIntS}】{Time:yyyy/MM/dd HH:mm}\n{IntsArea}";
             if (Text.Length > 120)
                 Text = Text.Remove(120, Text.Length - 120) + "…";
             BouyomiChanSocketSend($"震度速報、{IntsArea_Max3.Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
             TelopSocketSend($"0,震度速報【最大震度{MaxIntS}】,{IntsArea},{Int2TelopColor(MaxIntN)},False,60,1000");
-            if(debug)//デバッグ時は早く消す//長さに応じて調整
+            if (debug)//デバッグ時は早く消す//長さに応じて調整
                 TelopSocketSend($"0, - テスト - 震度速報【最大震度{MaxIntS}】,{IntsArea},{Int2TelopColor(MaxIntN)},False,30,1000");
             Tweet(Text, Time, $"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}\\{SaveTime:yyyyMMddHHmmss.f}.png");
-            Console.WriteLine(Text);
 
+            ConsoleWrite($"//////////震度速報終了//////////処理時間:{(DateTime.Now-StartTime).TotalMilliseconds}ms");
             //throw new Exception("aa");
         }
         public void Destination(JObject json)
@@ -292,6 +301,8 @@ namespace QuakeMapFast
         }
         public async void Tweet(string Text, DateTime Time, string ImagePath = "")
         {
+            ConsoleWrite("ツイート送信開始");
+            ConsoleWrite("Text:" + Text);
             bool Reply = Time == LastTime;
             if (!debug)
                 try
@@ -312,7 +323,10 @@ namespace QuakeMapFast
                             });
                     else
                     {
+                        ConsoleWrite("Image:" + ImagePath);
+                        ConsoleWrite("画像送信開始");
                         MediaUploadResult mur = await tokens.Media.UploadAsync(media: new FileInfo(ImagePath));
+                        ConsoleWrite("画像送信終了　ツイート開始");
                         if (Reply)
                             status = await tokens.Statuses.UpdateAsync(new
                             {
@@ -333,11 +347,16 @@ namespace QuakeMapFast
                 {
 
                 }
+            else
+                ConsoleWrite("[info]デバッグモードのためツイートはしません。");
             LastTime = Time;
+            ConsoleWrite("ツイート送信終了");
         }
 
         public void TelopSocketSend(string Text)
         {
+            ConsoleWrite("テロップ送信開始");
+            ConsoleWrite("Text:" + Text);
             IPEndPoint IPEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 31401);
             try
             {
@@ -354,11 +373,14 @@ namespace QuakeMapFast
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                ConsoleWrite(ex.ToString());
             }
+            ConsoleWrite("テロップ送信終了");
         }
         public void BouyomiChanSocketSend(string Text)
         {
+            ConsoleWrite("棒読みちゃん送信開始");
+            ConsoleWrite("Text:" + Text);
             try
             {
                 byte[] Message = Encoding.UTF8.GetBytes(Text);
@@ -383,10 +405,15 @@ namespace QuakeMapFast
                     BinaryWriter.Write(Message);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-
+                ConsoleWrite(ex.ToString());
             }
+            ConsoleWrite("棒読みちゃん送信完了");
+        }
+        public void ConsoleWrite(string Text)
+        {
+            Console.WriteLine($"{DateTime.Now:HH:mm:ss.ffff} {Text}");
         }
     }
 }
