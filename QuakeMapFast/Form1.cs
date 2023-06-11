@@ -331,14 +331,14 @@ namespace QuakeMapFast
                             status = await tokens.Statuses.UpdateAsync(new
                             {
                                 status = Text,
-                                media_id = mur.MediaId,
+                                media_ids = mur.MediaId,
                                 in_reply_to_status_id = LastTweetID
                             });
                         else
                             status = await tokens.Statuses.UpdateAsync(new
                             {
                                 status = Text,
-                                media_id = mur.MediaId
+                                media_ids = mur.MediaId
                             });
                     }
                     LastTweetID = status.Id;
