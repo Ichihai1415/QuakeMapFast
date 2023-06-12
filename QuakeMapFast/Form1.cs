@@ -132,6 +132,10 @@ namespace QuakeMapFast
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\scale-tokyo23-only.json")));
 
         }
+        /// <summary>
+        /// 震度速報
+        /// </summary>
+        /// <param name="json"></param>
         public void ScalePrompt(JObject json)
         {
             DateTime StartTime = DateTime.Now;
@@ -262,10 +266,10 @@ namespace QuakeMapFast
             string Text = $"震度速報【最大震度{MaxIntS}】{Time:yyyy/MM/dd HH:mm}\n{IntsArea}";
             if (Text.Length > 120)
                 Text = Text.Remove(120, Text.Length - 120) + "…";
-            BouyomiChanSocketSend($"震度速報、{IntsArea_Max3.Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
-            TelopSocketSend($"0,震度速報【最大震度{MaxIntS}】,{IntsArea},{Int2TelopColor(MaxIntN)},False,60,1000");
+            BouyomiChanSocketSend($"震度速報、{IntsArea_Max3.Replace("\n", "").Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
+            TelopSocketSend($"0,震度速報【最大震度{MaxIntS}】,{IntsArea.Replace("\n", "")},{Int2TelopColor(MaxIntN)},False,60,1000");
             if (debug)//デバッグ時は早く消す//長さに応じて調整
-                TelopSocketSend($"0, - テスト - 震度速報【最大震度{MaxIntS}】,{IntsArea},{Int2TelopColor(MaxIntN)},False,30,1000");
+                TelopSocketSend($"0, - テスト - 震度速報【最大震度{MaxIntS}】,{IntsArea.Replace("\n", "")},{Int2TelopColor(MaxIntN)},False,30,1000");
             Tweet(Text, Time, $"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}\\{SaveTime:yyyyMMddHHmmss.f}.png");
 
             ConsoleWrite($"//////////震度速報終了//////////処理時間:{(DateTime.Now - StartTime).TotalMilliseconds}ms");
@@ -299,6 +303,13 @@ namespace QuakeMapFast
         {
 
         }
+        /// <summary>
+        /// ツイートします
+        /// </summary>
+        /// <param name="Text">ツイートするテキスト</param>
+        /// <param name="Time">リプライ判別用発生時刻</param>
+        /// <param name="ImagePath">画像を送信する場合の画像のパス</param>
+        /// <remarks>Timeが最後に送信した情報の発生時刻と一致する場合リプライします</remarks>
         public async void Tweet(string Text, DateTime Time, string ImagePath = "")
         {
             ConsoleWrite("ツイート送信開始");
@@ -353,6 +364,10 @@ namespace QuakeMapFast
             ConsoleWrite("ツイート送信終了");
         }
 
+        /// <summary>
+        /// TelopにSocket送信します
+        /// </summary>
+        /// <param name="Text">Telopに送信するテキスト(Telop方式)</param>
         public void TelopSocketSend(string Text)
         {
             ConsoleWrite("テロップ送信開始");
@@ -377,6 +392,10 @@ namespace QuakeMapFast
             }
             ConsoleWrite("テロップ送信終了");
         }
+        /// <summary>
+        /// 棒読みちゃんにSocket送信します
+        /// </summary>
+        /// <param name="Text">読み上げさせるテキスト</param>
         public void BouyomiChanSocketSend(string Text)
         {
             ConsoleWrite("棒読みちゃん送信開始");
@@ -411,8 +430,15 @@ namespace QuakeMapFast
             }
             ConsoleWrite("棒読みちゃん送信完了");
         }
+        /// <summary>
+        /// コンソールにタイムスタンプ付きで出力します
+        /// </summary>
+        /// <param name="Text">表示するテキスト</param>
         public void ConsoleWrite(string Text)
         {
+            if (debug)
+                if (Text.StartsWith("0,震度速報"))
+                    return;
             Console.WriteLine($"{DateTime.Now:HH:mm:ss.ffff} {Text}");
         }
     }
