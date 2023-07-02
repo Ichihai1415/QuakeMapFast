@@ -127,10 +127,11 @@ namespace QuakeMapFast
             //ScalePrompt(JObject.Parse(File.ReadAllText("C:\\Users\\proje\\source\\repos\\QuakeMapFast\\QuakeMapFast\\bin\\Debug\\Log\\202305\\26\\19\\20230526190603.3438.txt")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2023hukushima-scale-last.json")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2016kumamoto-scale-0414.json")));
-            ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2015ogasawara-scale.json")));
+            //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2015ogasawara-scale.json")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\scale-ogasawara-only.json")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\scale-tokyo23-only.json")));
-
+            ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2018oosakahokubu-scale-last.json")));
+            
         }
         /// <summary>
         /// 震度速報
@@ -270,6 +271,14 @@ namespace QuakeMapFast
             TelopSocketSend($"0,震度速報【最大震度{MaxIntS}】,{IntsArea.Replace("\n", "")},{Int2TelopColor(MaxIntN)},False,60,1000");
             if (debug)//デバッグ時は早く消す//長さに応じて調整
                 TelopSocketSend($"0, - テスト - 震度速報【最大震度{MaxIntS}】,{IntsArea.Replace("\n", "")},{Int2TelopColor(MaxIntN)},False,30,1000");
+
+
+            Console.WriteLine("/////////////////////////////////////手動用\n");
+            Console.WriteLine(Path.GetFullPath($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}"));
+            Console.WriteLine(Path.GetFullPath($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}\\{SaveTime:yyyyMMddHHmmss.f}.png\n"));
+            Console.WriteLine(Text);
+            Console.WriteLine("\n/////////////////////////////////////手動用");
+            
             Tweet(Text, Time, $"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}\\{SaveTime:yyyyMMddHHmmss.f}.png");
 
             ConsoleWrite($"//////////震度速報終了//////////処理時間:{(DateTime.Now - StartTime).TotalMilliseconds}ms");
