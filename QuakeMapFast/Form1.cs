@@ -33,6 +33,7 @@ namespace QuakeMapFast
         }
         private async void Form1_Load(object sender, EventArgs e)
         {
+            Location = new Point(50, 50);
             ConsoleWrite("");
             if (File.Exists("Token.txt"))
             {

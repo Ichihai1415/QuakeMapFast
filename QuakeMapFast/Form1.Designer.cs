@@ -34,7 +34,7 @@
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.ClientSize = new System.Drawing.Size(640, 360);
+            this.ClientSize = new System.Drawing.Size(1280, 720);
             this.Name = "Form1";
             this.Text = "QuakeMapFast";
             this.Load += new System.EventHandler(this.Form1_Load);
