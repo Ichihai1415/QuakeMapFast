@@ -26,6 +26,8 @@ namespace QuakeMapFast
         bool debug = false;
         DateTime LastTime = DateTime.MinValue;
         Tokens tokens;
+
+        string LastText = "";
         Bitmap LastCanvas = new Bitmap(1920, 1080);
 
         public Form1()
@@ -283,6 +285,7 @@ namespace QuakeMapFast
             Clipboard.SetImage(canvas);
 
             Tweet(Text, Time, $"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}\\{SaveTime:yyyyMMddHHmmss.f}.png");
+            LastText = Text;
             LastCanvas = (Bitmap)canvas.Clone();
             ConsoleWrite($"//////////震度速報終了//////////処理時間:{(DateTime.Now - StartTime).TotalMilliseconds}ms");
             //throw new Exception("aa");
@@ -465,7 +468,7 @@ namespace QuakeMapFast
 
         private void TSMI_TextCopy_Click(object sender, EventArgs e)
         {
-            Clipboard.SetText(Text);
+            Clipboard.SetText(LastText);
         }
 
         private void TSMI_ImageCopy_Click(object sender, EventArgs e)
