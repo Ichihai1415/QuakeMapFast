@@ -26,6 +26,7 @@ namespace QuakeMapFast
         bool debug = false;
         DateTime LastTime = DateTime.MinValue;
         Tokens tokens;
+        Bitmap LastCanvas = new Bitmap(1920, 1080);
 
         public Form1()
         {
@@ -276,43 +277,52 @@ namespace QuakeMapFast
 
             Console.WriteLine("/////////////////////////////////////手動用\n");
             Console.WriteLine(Path.GetFullPath($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}"));
-            Console.WriteLine(Path.GetFullPath($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}\\{SaveTime:yyyyMMddHHmmss.f}.png\n"));
             Console.WriteLine(Text);
             Console.WriteLine("\n/////////////////////////////////////手動用");
-            
-            Tweet(Text, Time, $"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}\\{SaveTime:yyyyMMddHHmmss.f}.png");
+            Clipboard.SetText(Text);
+            Clipboard.SetImage(canvas);
 
+            Tweet(Text, Time, $"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}\\{SaveTime:yyyyMMddHHmmss.f}.png");
+            LastCanvas = (Bitmap)canvas.Clone();
             ConsoleWrite($"//////////震度速報終了//////////処理時間:{(DateTime.Now - StartTime).TotalMilliseconds}ms");
             //throw new Exception("aa");
         }
+
         public void Destination(JObject json)
         {
 
         }
+
         public void ScaleAndDestination(JObject json)
         {
 
         }
+
         public void DetailScale(JObject json)
         {
 
         }
+
         public void Foreign(JObject json)
         {
 
         }
+
         public void Other(JObject json)
         {
 
         }
+
         public void Tsunami(JObject json)
         {
 
         }
+
         public void EEW(JObject json)
         {
 
         }
+
         /// <summary>
         /// ツイートします
         /// </summary>
@@ -440,6 +450,7 @@ namespace QuakeMapFast
             }
             ConsoleWrite("棒読みちゃん送信完了");
         }
+
         /// <summary>
         /// コンソールにタイムスタンプ付きで出力します
         /// </summary>
@@ -450,6 +461,16 @@ namespace QuakeMapFast
                 if (Text.StartsWith("0,震度速報"))
                     return;
             Console.WriteLine($"{DateTime.Now:HH:mm:ss.ffff} {Text}");
+        }
+
+        private void TSMI_TextCopy_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetText(Text);
+        }
+
+        private void TSMI_ImageCopy_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetImage(LastCanvas);
         }
     }
 }
