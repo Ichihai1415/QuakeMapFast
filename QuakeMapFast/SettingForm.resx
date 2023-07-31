@@ -117,20 +117,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="AppData_README" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\AppData_README.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-  </data>
-  <data name="IntLegend" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\QuakeMapFast - legend.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Koruri_LICENSE" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Koruri-LICENSE;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;shift_jis</value>
-  </data>
-  <data name="Koruri_Regular" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Koruri-Regular.ttf;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="_20190125_AreaForecastLocalE_GIS_name_0_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\20190125_AreaForecastLocalE_GIS-name-0.1.geojson;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="GroupBox_Bouyomi_Text.Text" xml:space="preserve">
+    <value>有効:
+
+声質:                    0:画面上の設定  1:女性1  2:女性2  3:男性1  4:男性2
+                             5:中性  6:ロボット  7:機械1  8:機械2  10001～:SAPI5
+
+音量:                 速度:                 音程:                        -1で画面上の設定</value>
   </data>
 </root>

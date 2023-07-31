@@ -7,6 +7,34 @@ namespace QuakeMapFast
     public static class Converter
     {
         /// <summary>
+        /// P2Pのcodeと説明
+        /// </summary>
+        public static Dictionary<int,string> P2PInfoCodeName = new Dictionary<int,string>
+        {
+            { 551, "(地震情報)" },
+            { 552, "(津波予報)" },
+            { 554, "(緊急地震速報 発表検出)" },
+            { 555, "(各地域ピア数)" },
+            { 556, "(緊急地震速報(警報))" },
+            { 561, "(地震感知情報)" },
+            { 9611, "(地震感知情報 解析結果)" }
+        };
+
+        /// <summary>
+        /// P2Pの地震情報のtypeと説明
+        /// </summary>
+        public static Dictionary<string, string> P2PInfoTypeName = new Dictionary<string, string>
+        {
+            { "", "-" },
+            { "ScalePrompt", "(震度速報)" },
+            { "Destination", "(震源に関する情報)" },
+            { "ScaleAndDestination", "(震度・震源に関する情報)" },
+            { "DetailScale", "(各地の震度に関する情報)" },
+            { "Foreign", "(遠地地震に関する情報)" },
+            { "Other", "(その他の情報)" }
+        };
+
+        /// <summary>
         /// 震度別のList<string>
         /// </summary>
         public class IntList

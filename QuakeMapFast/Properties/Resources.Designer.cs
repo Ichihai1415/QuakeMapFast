@@ -71,12 +71,62 @@ namespace QuakeMapFast.Properties {
         }
         
         /// <summary>
+        ///   ※このファイルは更新確認にも使用しています。
+        ///
+        ///ここのフォルダの&quot;user.config&quot;はソフトの設定の一次保存です。実行ファイルと同じ場所にも保存されます(UserSetting.xml)。
+        ///
+        ///実行ファイルの場所を変えるか更新すると別の場所に新しく保存されます。
+        ///例えば&quot;...\AppData\Local\Ichihai1415\QuakeMapFast.exe_Url_4tliypkkuk2tnq0h0u0kv2ufqonh5203\0.1.0.0\user.config&quot;の場合、&quot;QuakeMapFast.exe_Url_4tliypkkuk2tnq0h0u0kv2ufqonh5203&quot;の部分は実行ファイルのパスによって変わり、&quot;0.1.0.0&quot;がバージョンによって変わります。
+        ///実行ファイルと同じフォルダの&quot;AppDataPath.txt&quot;というファイルにその実行ファイルで使用しているファイルのパスが記載されているので、これ以外のものは削除できます。ソフトを利用しない場合はこれも削除されます。削除した状態で起動すると設定の初期化がが行われます。
+        ///
+        ///ソフトの起動時にはあればここのフォルダ [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string AppData_README {
+            get {
+                return ResourceManager.GetString("AppData_README", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
         internal static System.Drawing.Bitmap IntLegend {
             get {
                 object obj = ResourceManager.GetObject("IntLegend", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Apache License
+        ///                           Version 2.0, January 2004
+        ///                        http://www.apache.org/licenses/
+        ///
+        ///   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+        ///
+        ///   1. Definitions.
+        ///
+        ///      &quot;License&quot; shall mean the terms and conditions for use, reproduction,
+        ///      and distribution as defined by Sections 1 through 9 of this document.
+        ///
+        ///      &quot;Licensor&quot; shall mean the copyright owner or entity authorized by
+        ///      the copyright owner that is granting the License.
+        ///
+        ///      &quot; [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Koruri_LICENSE {
+            get {
+                return ResourceManager.GetString("Koruri_LICENSE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Byte[] のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static byte[] Koruri_Regular {
+            get {
+                object obj = ResourceManager.GetObject("Koruri_Regular", resourceCulture);
+                return ((byte[])(obj));
             }
         }
     }

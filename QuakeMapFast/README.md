@@ -1,1 +1,62 @@
-﻿P2PQuakeAPIのWebsocketを使用して素早く画像を描画します。
+﻿# 注意
+このソフトは現在ベータ版です。以下の**進捗**や**予定**を確認してください。
+
+<div display="flex">
+  <img src="https://github.com/Ichihai1415/QuakeMapFast/blob/release/image/v0.1.0-1.png" width="24%" />
+  <img src="https://github.com/Ichihai1415/QuakeMapFast/blob/release/image/v0.1.0-2.png" width="24%" />
+  <img src="https://github.com/Ichihai1415/QuakeMapFast/blob/release/image/v0.1.0-3.png" width="24%" />
+  <img src="https://github.com/Ichihai1415/QuakeMapFast/blob/release/image/v0.1.0-4.png" width="24%" />
+</div>
+
+# 仕様
+- [P2P地震情報 WebSocket API](https://www.p2pquake.net/develop/json_api_v2/#/P2P%E5%9C%B0%E9%9C%87%E6%83%85%E5%A0%B1%20API/get_ws)を使用して素早く画像を描画します。
+> 緊急地震速報 発表検出(554)、各地域ピア数(555)、地震感知情報(561)、地震感知情報 解析結果(9611)は処理をしません。
+- 情報受信時に描画・保存・読み上げ送信・テロップ送信ができます。
+- 起動直後の情報未受信時は何も表示されません(緑色)。
+
+### 描画
+1920x1080の画像を描画します。フォントは[Koruri Regular](https://koruri.github.io/)を使用しています。震度配色は[Kiwi Monitor カラースキーム 第2版](https://kiwimonitor.amebaownd.com/posts/8214427)を改変したものです。
+
+### 保存
+jsonデータ・画像を保存できます。画像を公開する場合著作権表示を消さないようにしてください。
+
+### 読み上げ送信
+棒読みちゃんにSocket通信で読み上げ指令を送信できます。震度速報では最大震度から3階級まで読み上げ。
+
+### テロップ送信
+拙作ソフトの[Telop](https://github.com/Ichihai1415/Telop)にSocket通信で情報を表示させることができます。
+背景色・文字色は描画の震度別色と同じ、60秒表示。
+
+### その他
+- コンソールに情報を出力します。
+- **※API v2には対応していないためできない可能性が高いですが**自動ツイートができます。(API申請が必要) 
+`Token.txt`を作成して`ConsumerKey,ConsumerSecret,AccessToken,AccessSecret`(トークンは各自のものに)のように保存すればできます。設定はありません。120文字を超えると以降の文字は…に置き換えられます。
+- 投稿用に右クリックメニューで画像やテキストのクリップボードへのコピーができます。
+- OBS等向けに描画から一定時間以外は緑(0,255,0)にする機能があります。(起動直後も同じ)
+- `AppDataPath.txt`に設定の一次保存先のパスがあります。このファイルがあるフォルダには`readme.txt`も作られます。あわせて確認をお勧めします。
+- 画像の例が`https://github.com/Ichihai1415/QuakeMapFast/blob/release/image/`にあります。
+
+# 進捗
+<!--※"- [x]"は済、"- [ ]"は未です。-->
+(情報の詳細は[こちら](https://www.p2pquake.net/develop/json_api_v2/#/P2P%E5%9C%B0%E9%9C%87%E6%83%85%E5%A0%B1%20API/get_history)を確認してください)
+- [ ] 地震情報(551)
+> - [x] 震度速報
+> - [ ] 震源に関する情報
+> - [ ] 震度・震源に関する情報
+> - [ ] 各地の震度に関する情報
+> - [ ] 遠地地震に関する情報
+- [ ] 津波予報(552)
+- [ ] 緊急地震速報(警報)(556)
+
+# 予定
+- アイコン
+- 過去の再現
+- 起動時に最新情報の取得
+- 配色の自由な指定
+- テキストを自由に決めれるように
+
+# 履歴
+## v0.1.0
+2023/07/31
+
+震度速報のみ

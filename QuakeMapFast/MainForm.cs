@@ -3,9 +3,11 @@ using Newtonsoft.Json.Linq;
 using QuakeMapFast.Properties;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -13,39 +15,86 @@ using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using static QuakeMapFast.Converter;
 
 namespace QuakeMapFast
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
-        readonly int[] ignoreID = { 554, 555, 561, 9611 };//表示しない
+        public static readonly string Version = "0.1.0";//こことアセンブリを変える
+        readonly int[] ignoreCode = { 554, 555, 561, 9611 };//表示しない
+        public static readonly Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
         string LatestID = "";
         long LastTweetID = 0;
         bool debug = false;
         DateTime LastTime = DateTime.MinValue;
-        Tokens tokens;
+        public FontFamily font;
+        Tokens tokens = null;
 
         string LastText = "";
         Bitmap LastCanvas = new Bitmap(1920, 1080);
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
         }
+
         private async void Form1_Load(object sender, EventArgs e)
         {
-            Location = new Point(50, 50);
-            ConsoleWrite("");
+            //ConsoleWrite("");
+            ConsoleWrite("起動しました");
+            Console.WriteLine($"/////QuakeMapFast v{Version}/////");
+            string AppDataReadmePath = config.FilePath.Replace("user.config", "readme.txt");
+            if (!File.Exists(AppDataReadmePath))//更新時
+            {
+                ConsoleWrite("更新等を検知しました");
+                Settings.Default.Window_Size = new Size(0, 0);//変えないとSaveで作られない
+                Settings.Default.Save();//ディレクトリとか作成
+                Settings.Default.Reset();//一応直しとく
+                Settings.Default.Save();//一応保存
+                File.WriteAllText(AppDataReadmePath, Resources.AppData_README);
+                ConsoleWrite($"[Main]AppData - readmeファイル(\"{AppDataReadmePath}\")をコピーしました");
+            }
+            if (File.Exists("UserSetting.xml"))//AppDataに保存
+            {
+                File.Copy("UserSetting.xml", config.FilePath, true);
+                ConsoleWrite($"[Main]設定ファイルをAppDataにコピー完了");
+            }
+            File.WriteAllText("AppDataPath.txt", config.FilePath);
+
+            SettingReload();
+
+            if (!Directory.Exists("Font"))
+            {
+                Directory.CreateDirectory("Font");
+                ConsoleWrite($"[Main]Fontフォルダを作成しました");
+            }
+            if (!File.Exists("Font\\Koruri-Regular.ttf"))
+            {
+                File.WriteAllBytes("Font\\Koruri-Regular.ttf", Resources.Koruri_Regular);
+                ConsoleWrite($"[Main]フォントファイル(\"Font\\Koruri-Regular.ttf\")をコピーしました");
+            }
+            if (!File.Exists("Font\\LICENSE"))
+            {
+                File.WriteAllText("Font\\LICENSE", Resources.Koruri_LICENSE);
+                ConsoleWrite($"[Main]フォントライセンスファイル(\"Font\\LICENSE\")をコピーしました");
+            }
+            PrivateFontCollection pfc = new PrivateFontCollection();
+            pfc.AddFontFile("Font\\Koruri-Regular.ttf");
+            font = pfc.Families[0];
+            ConsoleWrite($"[Main]フォント確認完了");
+
             if (File.Exists("Token.txt"))
             {
                 string[] tokens_ = File.ReadAllText("Token.txt").Split(',');
                 if (tokens_.Length == 4)
+                {
                     tokens = Tokens.Create(tokens_[0], tokens_[1], tokens_[2], tokens_[3]);
+                    ConsoleWrite($"[Main]tokenを確認完了");
+                }
             }
-            else
-                File.WriteAllText("Token.txt", "");
 
             //Debug();//デバッグ時
             //return;//ここの2行をつける(ここ以降行かせない)
@@ -56,7 +105,7 @@ namespace QuakeMapFast
                     using (ClientWebSocket client = new ClientWebSocket())
                     {
                         await client.ConnectAsync(new Uri("wss://api.p2pquake.net/v2/ws"), CancellationToken.None);
-                        ConsoleWrite("connect");
+                        ConsoleWrite("[Main]接続しました");
                         while (client.State == WebSocketState.Open)
                         {
                             byte[] buffer = new byte[1024 * 1024];
@@ -64,15 +113,18 @@ namespace QuakeMapFast
                             if (result.MessageType == WebSocketMessageType.Text)
                             {
                                 string jsonText = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                                if (!Directory.Exists($"Log"))
-                                    Directory.CreateDirectory($"Log");
-                                if (!Directory.Exists($"Log\\{DateTime.Now:yyyyMM}"))
-                                    Directory.CreateDirectory($"Log\\{DateTime.Now:yyyyMM}");
-                                if (!Directory.Exists($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}"))
-                                    Directory.CreateDirectory($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}");
-                                if (!Directory.Exists($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}"))
-                                    Directory.CreateDirectory($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}");
-                                File.WriteAllText($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.txt", jsonText);
+                                if (Settings.Default.Save_JSON)
+                                {
+                                    if (!Directory.Exists($"Log"))
+                                        Directory.CreateDirectory($"Log");
+                                    if (!Directory.Exists($"Log\\{DateTime.Now:yyyyMM}"))
+                                        Directory.CreateDirectory($"Log\\{DateTime.Now:yyyyMM}");
+                                    if (!Directory.Exists($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}"))
+                                        Directory.CreateDirectory($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}");
+                                    if (!Directory.Exists($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}"))
+                                        Directory.CreateDirectory($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}");
+                                    File.WriteAllText($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.txt", jsonText);
+                                }
                                 JObject json;
                                 try
                                 {
@@ -91,11 +143,11 @@ namespace QuakeMapFast
                                     File.WriteAllText($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.txt", $"{ex}");
                                     continue;
                                 }
-                                ConsoleWrite($"受信 code:{json.SelectToken("code")} type:{json.SelectToken("issue.type")} id:{json.SelectToken("_id")}");
+                                ConsoleWrite($"[Main]受信 code:{json.SelectToken("code")}{P2PInfoCodeName[(int)json.SelectToken("code")]} type:{json.SelectToken("issue.type")}{P2PInfoTypeName[(string)json.SelectToken("issue.type") ?? ""]} id:{json.SelectToken("_id")}");
                                 if (LatestID == (string)json.SelectToken("_id"))
                                     continue;
                                 LatestID = (string)json.SelectToken("_id");
-                                if (ignoreID.Contains((int)json.SelectToken("code")))
+                                if (ignoreCode.Contains((int)json.SelectToken("code")))
                                     continue;
                                 ConsoleWrite(jsonText);
                                 if ((string)json.SelectToken("issue.type") == "ScalePrompt")
@@ -106,26 +158,31 @@ namespace QuakeMapFast
                 }
                 catch (Exception ex)
                 {
-                    ConsoleWrite(ex.ToString());
-                    if (ex.Message.Contains("リモート サーバーに接続できません。") || ex.Message.Contains("内部 WebSocket エラーが発生しました。"))
-                        continue;
-                    if (!Directory.Exists($"Log"))
-                        Directory.CreateDirectory($"Log");
-                    if (!Directory.Exists($"Log\\Error"))
-                        Directory.CreateDirectory($"Log\\Error");
-                    if (!Directory.Exists($"Log\\Error\\{DateTime.Now:yyyyMM}"))
-                        Directory.CreateDirectory($"Log\\Error\\{DateTime.Now:yyyyMM}");
-                    if (!Directory.Exists($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}"))
-                        Directory.CreateDirectory($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}");
-                    File.WriteAllText($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.txt", $"{ex}");
+                    ConsoleWrite($"[Main]{ex}");
+                    if (!(ex.Message.Contains("リモート サーバーに接続できません。") || ex.Message.Contains("内部 WebSocket エラーが発生しました。")))
+                    {
+                        if (!Directory.Exists($"Log"))
+                            Directory.CreateDirectory($"Log");
+                        if (!Directory.Exists($"Log\\Error"))
+                            Directory.CreateDirectory($"Log\\Error");
+                        if (!Directory.Exists($"Log\\Error\\{DateTime.Now:yyyyMM}"))
+                            Directory.CreateDirectory($"Log\\Error\\{DateTime.Now:yyyyMM}");
+                        if (!Directory.Exists($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}"))
+                            Directory.CreateDirectory($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}");
+                        File.WriteAllText($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.txt", $"{ex}");
+                    }
+                    await Task.Delay(1000);
+                    ConsoleWrite("[Main]再接続します");
                 }
         }
+
         /// <summary>
         /// デバッグはここでやるように
         /// </summary>
+        /// <remarks>パスは開発者のものです。変える場合、APIの情報リストから<b><u>情報は一つ、最初と最後の[]は付けない</u></b>ようにして抜き出してください。</remarks>
         public void Debug()
         {
-            ConsoleWrite("[info]デバッグモードです。");
+            ConsoleWrite("[Main]デバッグモードです。");
             debug = true;
             //""
             //ScalePrompt(JObject.Parse(File.ReadAllText("C:\\Users\\proje\\source\\repos\\QuakeMapFast\\QuakeMapFast\\bin\\Debug\\Log\\202305\\26\\19\\20230526190603.3438.txt")));
@@ -135,8 +192,24 @@ namespace QuakeMapFast
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\scale-ogasawara-only.json")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\scale-tokyo23-only.json")));
             ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2018oosakahokubu-scale-last.json")));
-            
+
         }
+
+        /// <summary>
+        /// 設定を読み込みます。
+        /// </summary>
+        /// <remarks>Reloadして`UserSetting.xml`に保存します。</remarks>
+        public void SettingReload()
+        {
+            ConsoleWrite($"[Main]設定読み込み開始");
+            Settings.Default.Reload();
+            if (File.Exists(config.FilePath))
+                File.Copy(config.FilePath, "UserSetting.xml", true);
+            ClientSize = Settings.Default.Window_Size;
+            Location = Settings.Default.Window_Location;
+            ConsoleWrite($"[Main]設定読み込み終了");
+        }
+
         /// <summary>
         /// 震度速報
         /// </summary>
@@ -144,14 +217,14 @@ namespace QuakeMapFast
         public void ScalePrompt(JObject json)
         {
             DateTime StartTime = DateTime.Now;
-            ConsoleWrite("//////////震度速報//////////");
+            Console.WriteLine("//////////震度速報//////////");
 
             DateTime Time = Convert.ToDateTime((string)json.SelectToken("earthquake.time"));
             int MaxIntN = P2PScale2IntN((int)json.SelectToken("earthquake.maxScale"));
             string MaxIntS = P2PScale2IntS((int)json.SelectToken("earthquake.maxScale"));
             Dictionary<string, int> AreaInt = Points2Dic(json, "addr");
 
-            ConsoleWrite("座標計算開始");
+            ConsoleWrite("[ScalePrompt]座標計算開始");
             JObject mapjson = JObject.Parse(Resources._20190125_AreaForecastLocalE_GIS_name_0_1);
             double LatSta = 999;
             double LatEnd = -999;
@@ -187,7 +260,7 @@ namespace QuakeMapFast
             PointCorrect(ref LatSta, ref LatEnd, ref LonSta, ref LonEnd);//補正
             double Zoom = 1080d / (LatEnd - LatSta);
 
-            ConsoleWrite("画像描画開始");
+            ConsoleWrite("[ScalePrompt]画像描画開始");
             Bitmap canvas = new Bitmap(1920, 1080);
             Graphics g = Graphics.FromImage(canvas);
             g.Clear(Color.FromArgb(30, 60, 90));
@@ -224,12 +297,12 @@ namespace QuakeMapFast
                     g.FillPath(new SolidBrush(Color.FromArgb(60, 90, 120)), Maps);
                 g.DrawPath(new Pen(Color.FromArgb(255, 255, 255), 2), Maps);
             }
-            ConsoleWrite("情報描画開始");
+            ConsoleWrite("[ScalePrompt]情報描画開始");
 
             g.FillRectangle(Brushes.Black, 1080, 0, 840, 1080);
 
-            g.DrawString("震度速報", new Font("Koruri Regular", 50), Brushes.White, 1090, 10);
-            g.DrawString(Time.ToString("yyyy/MM/dd HH:mm"), new Font("Koruri Regular", 30), Brushes.White, 1095, 85);
+            g.DrawString("震度速報", new Font(font, 50), Brushes.White, 1090, 10);
+            g.DrawString(Time.ToString("yyyy/MM/dd HH:mm"), new Font(font, 30), Brushes.White, 1095, 85);
 
 
             Pen pen = new Pen(IntN2Brush(MaxIntN), 51)
@@ -238,11 +311,11 @@ namespace QuakeMapFast
             };
             g.DrawRectangle(pen, 1125, 175, 750, 150);
             g.FillRectangle(IntN2Brush(MaxIntN), 1150, 200, 700, 100);
-            g.DrawString("最大震度", new Font("Koruri Regular", 50), IntN2TextBrush(MaxIntN), 1150, 240);
+            g.DrawString("最大震度", new Font(font, 50), IntN2TextBrush(MaxIntN), 1150, 240);
             if (MaxIntS.Contains("弱") || MaxIntS.Contains("強"))
-                g.DrawString(MaxIntS, new Font("Koruri Regular", 90, FontStyle.Bold), IntN2TextBrush(MaxIntN), 1550, 175);
+                g.DrawString(MaxIntS, new Font(font, 90, FontStyle.Bold), IntN2TextBrush(MaxIntN), 1550, 175);
             else
-                g.DrawString(MaxIntS, new Font("Koruri Regular", 90, FontStyle.Bold), IntN2TextBrush(MaxIntN), 1600, 175);
+                g.DrawString(MaxIntS, new Font(font, 90, FontStyle.Bold), IntN2TextBrush(MaxIntN), 1600, 175);
 
             string MaxIntAreas = "";
             foreach (KeyValuePair<string, int> area in AreaInt)
@@ -250,22 +323,25 @@ namespace QuakeMapFast
                 if (area.Value == MaxIntN)
                     MaxIntAreas += $"{area.Key}\n";
             }
-            g.DrawString(MaxIntAreas, new Font("Koruri Regular", 40), Brushes.White, 1100, 360);
+            g.DrawString(MaxIntAreas, new Font(font, 40), Brushes.White, 1100, 360);
 
             g.FillRectangle(Brushes.Black, 1080, 900, 840, 180);
-            g.DrawString("日本地図データ:気象庁\n世界地図データ:National Earth\nそれぞれ加工して使用\nデータ:気象庁", new Font("Koruri Regular", 20), Brushes.White, 1090, 910);
+            g.DrawString("日本地図データ:気象庁\n世界地図データ:National Earth\nそれぞれ加工して使用\nデータ:気象庁", new Font(font, 20), Brushes.White, 1090, 910);
             g.DrawImage(Resources.IntLegend, 1500, 906, 410, 164);
 
             g.Dispose();
             BackgroundImage = canvas;
             DateTime SaveTime = DateTime.Now;
-            if (!Directory.Exists($"output"))
-                Directory.CreateDirectory($"output");
-            if (!Directory.Exists($"output\\{SaveTime:yyyyMM}"))
-                Directory.CreateDirectory($"output\\{SaveTime:yyyyMM}");
-            if (!Directory.Exists($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}"))
-                Directory.CreateDirectory($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}");
-            canvas.Save($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}\\{SaveTime:yyyyMMddHHmmss.f}.png", ImageFormat.Png);
+            if (Settings.Default.Save_Image)
+            {
+                if (!Directory.Exists($"output"))
+                    Directory.CreateDirectory($"output");
+                if (!Directory.Exists($"output\\{SaveTime:yyyyMM}"))
+                    Directory.CreateDirectory($"output\\{SaveTime:yyyyMM}");
+                if (!Directory.Exists($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}"))
+                    Directory.CreateDirectory($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}");
+                canvas.Save($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}\\{SaveTime:yyyyMMddHHmmss.ff}.png", ImageFormat.Png);
+            }
             string IntsArea = Point2String(json, "addr");
             string IntsArea_Max3 = Point2String(json, "addr", MaxIntN - 2);//最大震度から3階級(Max6->6,5,4)
             string Text = $"震度速報【最大震度{MaxIntS}】{Time:yyyy/MM/dd HH:mm}\n{IntsArea}";
@@ -275,19 +351,15 @@ namespace QuakeMapFast
             TelopSocketSend($"0,震度速報【最大震度{MaxIntS}】,{IntsArea.Replace("\n", "")},{Int2TelopColor(MaxIntN)},False,60,1000");
             if (debug)//デバッグ時は早く消す//長さに応じて調整
                 TelopSocketSend($"0, - テスト - 震度速報【最大震度{MaxIntS}】,{IntsArea.Replace("\n", "")},{Int2TelopColor(MaxIntN)},False,30,1000");
-
-
-            Console.WriteLine("/////////////////////////////////////手動用\n");
-            Console.WriteLine(Path.GetFullPath($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}"));
-            Console.WriteLine(Text);
-            Console.WriteLine("\n/////////////////////////////////////手動用");
+            ConsoleWrite($"[ScalePrompt]{Path.GetFullPath($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}")}に保存しました");
             Clipboard.SetText(Text);
             Clipboard.SetImage(canvas);
 
             Tweet(Text, Time, $"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}\\{SaveTime:yyyyMMddHHmmss.f}.png");
             LastText = Text;
             LastCanvas = (Bitmap)canvas.Clone();
-            ConsoleWrite($"//////////震度速報終了//////////処理時間:{(DateTime.Now - StartTime).TotalMilliseconds}ms");
+            ConsoleWrite($"[ScalePrompt]処理時間:{(DateTime.Now - StartTime).TotalMilliseconds}ms");
+            Console.WriteLine("//////////震度速報終了//////////");
             //throw new Exception("aa");
         }
 
@@ -335,66 +407,72 @@ namespace QuakeMapFast
         /// <remarks>Timeが最後に送信した情報の発生時刻と一致する場合リプライします</remarks>
         public async void Tweet(string Text, DateTime Time, string ImagePath = "")
         {
-            ConsoleWrite("ツイート送信開始");
-            ConsoleWrite("Text:" + Text);
-            bool Reply = Time == LastTime;
+            if (tokens == null)
+                return;
             if (!debug)
-                try
-                {
-                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
-                    Status status;
-                    if (ImagePath == "")
-                        if (Reply)
-                            status = await tokens.Statuses.UpdateAsync(new
-                            {
-                                status = Text,
-                                in_reply_to_status_id = LastTweetID
-                            });
-                        else
-                            status = await tokens.Statuses.UpdateAsync(new
-                            {
-                                status = Text
-                            });
+            {
+                ConsoleWrite("[Tweet]デバッグモードのためツイートはしません。");
+                return;
+            }
+            ConsoleWrite("[Tweet]ツイート送信開始");
+            ConsoleWrite("[Tweet]Text:" + Text);
+            bool Reply = Time == LastTime;
+            try
+            {
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+                Status status;
+                if (ImagePath == "")
+                    if (Reply)
+                        status = await tokens.Statuses.UpdateAsync(new
+                        {
+                            status = Text,
+                            in_reply_to_status_id = LastTweetID
+                        });
                     else
-                    {
-                        ConsoleWrite("Image:" + ImagePath);
-                        ConsoleWrite("画像送信開始");
-                        MediaUploadResult mur = await tokens.Media.UploadAsync(media: new FileInfo(ImagePath));
-                        ConsoleWrite("画像送信終了　ツイート開始");
-                        if (Reply)
-                            status = await tokens.Statuses.UpdateAsync(new
-                            {
-                                status = Text,
-                                media_ids = mur.MediaId,
-                                in_reply_to_status_id = LastTweetID
-                            });
-                        else
-                            status = await tokens.Statuses.UpdateAsync(new
-                            {
-                                status = Text,
-                                media_ids = mur.MediaId
-                            });
-                    }
-                    LastTweetID = status.Id;
-                }
-                catch
+                        status = await tokens.Statuses.UpdateAsync(new
+                        {
+                            status = Text
+                        });
+                else
                 {
-
+                    ConsoleWrite("[Tweet]Image:" + ImagePath);
+                    ConsoleWrite("[Tweet]画像送信開始");
+                    MediaUploadResult mur = await tokens.Media.UploadAsync(media: new FileInfo(ImagePath));
+                    ConsoleWrite("[Tweet]画像送信終了　ツイート開始");
+                    if (Reply)
+                        status = await tokens.Statuses.UpdateAsync(new
+                        {
+                            status = Text,
+                            media_ids = mur.MediaId,
+                            in_reply_to_status_id = LastTweetID
+                        });
+                    else
+                        status = await tokens.Statuses.UpdateAsync(new
+                        {
+                            status = Text,
+                            media_ids = mur.MediaId
+                        });
                 }
-            else
-                ConsoleWrite("[info]デバッグモードのためツイートはしません。");
+                LastTweetID = status.Id;
+            }
+            catch (Exception ex)
+            {
+                ConsoleWrite($"[Tweet]{ex}");
+            }
             LastTime = Time;
-            ConsoleWrite("ツイート送信終了");
+            ConsoleWrite("[Tweet]ツイート送信終了");
         }
 
         /// <summary>
         /// TelopにSocket送信します
         /// </summary>
         /// <param name="Text">Telopに送信するテキスト(Telop方式)</param>
-        public void TelopSocketSend(string Text)
+        public static void TelopSocketSend(string Text)
         {
-            ConsoleWrite("テロップ送信開始");
-            ConsoleWrite("Text:" + Text);
+            if (!Settings.Default.Telop_Enable)
+                return;
+            ConsoleWrite("[Telop]テロップ送信開始");
+            ConsoleWrite("[Telop]Text:" + Text);
             IPEndPoint IPEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 31401);
             try
             {
@@ -411,9 +489,9 @@ namespace QuakeMapFast
             }
             catch (Exception ex)
             {
-                ConsoleWrite(ex.ToString());
+                ConsoleWrite("[Telop]" + ex.ToString());
             }
-            ConsoleWrite("テロップ送信終了");
+            ConsoleWrite("[Telop]テロップ送信終了");
         }
         /// <summary>
         /// 棒読みちゃんにSocket送信します
@@ -421,48 +499,47 @@ namespace QuakeMapFast
         /// <param name="Text">読み上げさせるテキスト</param>
         public void BouyomiChanSocketSend(string Text)
         {
-            ConsoleWrite("棒読みちゃん送信開始");
-            ConsoleWrite("Text:" + Text);
+            if (!Settings.Default.Bouyomi_Enable)
+                return;
+            ConsoleWrite("[Bouyomi]棒読みちゃん送信開始");
+            ConsoleWrite("[Bouyomi]Text:" + Text);
             try
             {
                 byte[] Message = Encoding.UTF8.GetBytes(Text);
                 int Length = Message.Length;
                 byte Code = 0;
                 short Command = 0x0001;
-                short Speed = 100;
-                short Tone = 150;
-                short Volume = 100;
-                short Voice = 2;
-                using (TcpClient TcpClient = new TcpClient("127.0.0.1", 50001))
-                using (NetworkStream NetworkStream = TcpClient.GetStream())
-                using (BinaryWriter BinaryWriter = new BinaryWriter(NetworkStream))
+                short Speed = Settings.Default.Bouyomi_Speed;
+                short Tone = Settings.Default.Bouyomi_Tone;
+                short Volume = Settings.Default.Bouyomi_Volume;
+                short Voice = Settings.Default.Bouyomi_Voice;
+                using (TcpClient tcpClient = new TcpClient("127.0.0.1", 50001))
+                using (NetworkStream networkStream = tcpClient.GetStream())
+                using (BinaryWriter binaryWriter = new BinaryWriter(networkStream))
                 {
-                    BinaryWriter.Write(Command);
-                    BinaryWriter.Write(Speed);
-                    BinaryWriter.Write(Tone);
-                    BinaryWriter.Write(Volume);
-                    BinaryWriter.Write(Voice);
-                    BinaryWriter.Write(Code);
-                    BinaryWriter.Write(Length);
-                    BinaryWriter.Write(Message);
+                    binaryWriter.Write(Command);
+                    binaryWriter.Write(Speed);
+                    binaryWriter.Write(Tone);
+                    binaryWriter.Write(Volume);
+                    binaryWriter.Write(Voice);
+                    binaryWriter.Write(Code);
+                    binaryWriter.Write(Length);
+                    binaryWriter.Write(Message);
                 }
             }
             catch (Exception ex)
             {
-                ConsoleWrite(ex.ToString());
+                ConsoleWrite($"[Bouyomi]{ex}");
             }
-            ConsoleWrite("棒読みちゃん送信完了");
+            ConsoleWrite("[Bouyomi]棒読みちゃん送信完了");
         }
 
         /// <summary>
         /// コンソールにタイムスタンプ付きで出力します
         /// </summary>
         /// <param name="Text">表示するテキスト</param>
-        public void ConsoleWrite(string Text)
+        public static void ConsoleWrite(string Text)
         {
-            if (debug)
-                if (Text.StartsWith("0,震度速報"))
-                    return;
             Console.WriteLine($"{DateTime.Now:HH:mm:ss.ffff} {Text}");
         }
 
@@ -474,6 +551,36 @@ namespace QuakeMapFast
         private void TSMI_ImageCopy_Click(object sender, EventArgs e)
         {
             Clipboard.SetImage(LastCanvas);
+        }
+
+        private void Form1_BackgroundImageChanged(object sender, EventArgs e)
+        {
+            if (Settings.Default.BackGreenTime == 0)
+                return;
+            if (BackgroundImage != null)
+            {
+                GBTimer.Enabled = false;//切り替わり前に再更新した場合タイマーのリセット
+                GBTimer.Interval = Settings.Default.BackGreenTime * 1000;
+                GBTimer.Enabled = true;
+            }
+        }
+
+        private void GBTimer_Tick(object sender, EventArgs e)
+        {
+            BackgroundImage = null;
+            GBTimer.Enabled = false;
+        }
+
+        private void TSMI_Setting_Click(object sender, EventArgs e)
+        {
+            SettingForm setting = new SettingForm();
+            setting.FormClosed += SettingForm_MainForm_Closed;
+            setting.Show();
+        }
+
+        public void SettingForm_MainForm_Closed(object sender, FormClosedEventArgs e)
+        {
+            SettingReload();
         }
     }
 }
