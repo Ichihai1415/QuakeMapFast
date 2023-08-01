@@ -4,11 +4,13 @@ using QuakeMapFast.Properties;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -23,12 +25,21 @@ namespace QuakeMapFast
 {
     public partial class MainForm : Form
     {
-        public static readonly string Version = "0.1.0";//こことアセンブリを変える
+        /*
+         * 更新時確認
+         * 
+         * ↓のバージョン
+         * アセンブリ
+         * README.md
+         * JSON-sample.zip(F:\色々\json\P2Pquake) ResourceのCommentにバージョンを書いておく
+         */
+        public static readonly string Version = "0.1.1";//こことアセンブリを変える
         readonly int[] ignoreCode = { 554, 555, 561, 9611 };//表示しない
         public static readonly Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
         string LatestID = "";
         long LastTweetID = 0;
-        bool debug = false;
+        public static bool ReadJSON = false;
+        public static bool debug = false;
         DateTime LastTime = DateTime.MinValue;
         public FontFamily font;
         Tokens tokens = null;
@@ -46,23 +57,27 @@ namespace QuakeMapFast
             //ConsoleWrite("");
             ConsoleWrite("起動しました");
             Console.WriteLine($"/////QuakeMapFast v{Version}/////");
+
             string AppDataReadmePath = config.FilePath.Replace("user.config", "readme.txt");
-            if (!File.Exists(AppDataReadmePath))//更新時
+            if (!File.Exists(AppDataReadmePath))//初回/更新時
             {
-                ConsoleWrite("更新等を検知しました");
+                ConsoleWrite("初回または更新等を検知しました");
                 Settings.Default.Window_Size = new Size(0, 0);//変えないとSaveで作られない
                 Settings.Default.Save();//ディレクトリとか作成
                 Settings.Default.Reset();//一応直しとく
                 Settings.Default.Save();//一応保存
+                Console.WriteLine("設定は右クリックメニューからできます。");
                 File.WriteAllText(AppDataReadmePath, Resources.AppData_README);
-                ConsoleWrite($"[Main]AppData - readmeファイル(\"{AppDataReadmePath}\")をコピーしました");
+                ConsoleWrite($"[Main]AppData-readmeファイル(\"{AppDataReadmePath}\")をコピーしました");
             }
             if (File.Exists("UserSetting.xml"))//AppDataに保存
             {
                 File.Copy("UserSetting.xml", config.FilePath, true);
                 ConsoleWrite($"[Main]設定ファイルをAppDataにコピー完了");
+                Console.WriteLine("以前の設定を復元しました。");
             }
             File.WriteAllText("AppDataPath.txt", config.FilePath);
+                ConsoleWrite($"[Main]\"AppDataPath.txt\"に設定ファイルのパスを保存しました");
 
             SettingReload();
 
@@ -94,6 +109,34 @@ namespace QuakeMapFast
                     tokens = Tokens.Create(tokens_[0], tokens_[1], tokens_[2], tokens_[3]);
                     ConsoleWrite($"[Main]tokenを確認完了");
                 }
+            }
+
+            ReadJSON = File.Exists("ReadPath.txt");
+            if (ReadJSON)
+            {
+                TSMI_ReadJSON.Text = "JSON読み込みモードをオフにする";
+                ConsoleWrite($"[ReadJSON]JSON読み込みモードです。");
+                try
+                {
+                    string path = File.ReadAllText("ReadPath.txt").Replace("\"","");
+                    string jsonText = File.ReadAllText(path);
+                    Console.WriteLine($"path:{path}");
+                    Console.WriteLine(jsonText);
+                    JObject json = JObject.Parse(jsonText);
+                    ConsoleWrite($"[ReadJSON]処理開始 code:{json.SelectToken("code")}{P2PInfoCodeName[(int)json.SelectToken("code")]} type:{json.SelectToken("issue.type")}{P2PInfoTypeName[(string)json.SelectToken("issue.type") ?? ""]} id:{json.SelectToken("_id")}");
+                    if (ignoreCode.Contains((int)json.SelectToken("code")))
+                        goto ReadJSONEnd;
+                    if ((string)json.SelectToken("issue.type") == "ScalePrompt")
+                        ScalePrompt(json);
+                }
+                catch (Exception ex)
+                {
+                    ConsoleWrite($"[ReadJSON]{ex}");
+                }
+            ReadJSONEnd:;
+                ConsoleWrite($"[ReadJSON]処理が終了しました。通常の取得を行います。");
+                ReadJSON = false;
+                Console.WriteLine($"次回から通常モードにする場合、右クリックメニューの\"JSON読み込みモードをオフにする\"を押すか\"ReadPath.txt\"を削除して再起動してください。。");
             }
 
             //Debug();//デバッグ時
@@ -132,6 +175,7 @@ namespace QuakeMapFast
                                 }
                                 catch (Exception ex)
                                 {
+                                    ConsoleWrite($"[Main]{ex}");
                                     if (!Directory.Exists($"Log"))
                                         Directory.CreateDirectory($"Log");
                                     if (!Directory.Exists($"Log\\Error"))
@@ -182,7 +226,7 @@ namespace QuakeMapFast
         /// <remarks>パスは開発者のものです。変える場合、APIの情報リストから<b><u>情報は一つ、最初と最後の[]は付けない</u></b>ようにして抜き出してください。</remarks>
         public void Debug()
         {
-            ConsoleWrite("[Main]デバッグモードです。");
+            ConsoleWrite("[Main]デバッグモードです");
             debug = true;
             //""
             //ScalePrompt(JObject.Parse(File.ReadAllText("C:\\Users\\proje\\source\\repos\\QuakeMapFast\\QuakeMapFast\\bin\\Debug\\Log\\202305\\26\\19\\20230526190603.3438.txt")));
@@ -198,7 +242,7 @@ namespace QuakeMapFast
         /// <summary>
         /// 設定を読み込みます。
         /// </summary>
-        /// <remarks>Reloadして`UserSetting.xml`に保存します。</remarks>
+        /// <remarks>ReloadしてUserSetting.xmlに保存します。</remarks>
         public void SettingReload()
         {
             ConsoleWrite($"[Main]設定読み込み開始");
@@ -217,7 +261,6 @@ namespace QuakeMapFast
         public void ScalePrompt(JObject json)
         {
             DateTime StartTime = DateTime.Now;
-            Console.WriteLine("//////////震度速報//////////");
 
             DateTime Time = Convert.ToDateTime((string)json.SelectToken("earthquake.time"));
             int MaxIntN = P2PScale2IntN((int)json.SelectToken("earthquake.maxScale"));
@@ -290,7 +333,6 @@ namespace QuakeMapFast
                             Maps.AddPolygon(points.ToArray());
                     }
                 }
-
                 if (AreaInt.ContainsKey((string)mapjson_1.SelectToken("properties.name")))
                     g.FillPath(IntN2Brush(AreaInt[(string)mapjson_1.SelectToken("properties.name")]), Maps);
                 else
@@ -328,6 +370,8 @@ namespace QuakeMapFast
             g.FillRectangle(Brushes.Black, 1080, 900, 840, 180);
             g.DrawString("日本地図データ:気象庁\n世界地図データ:National Earth\nそれぞれ加工して使用\nデータ:気象庁", new Font(font, 20), Brushes.White, 1090, 910);
             g.DrawImage(Resources.IntLegend, 1500, 906, 410, 164);
+            if (debug||ReadJSON)
+                g.DrawString("《現在の情報ではありません》", new Font(font, 50), Brushes.White, 0, 0);
 
             g.Dispose();
             BackgroundImage = canvas;
@@ -341,6 +385,7 @@ namespace QuakeMapFast
                 if (!Directory.Exists($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}"))
                     Directory.CreateDirectory($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}");
                 canvas.Save($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}\\{SaveTime:yyyyMMddHHmmss.ff}.png", ImageFormat.Png);
+            ConsoleWrite($"[ScalePrompt]output\\{SaveTime:yyyyMM}\\{SaveTime:dd}に保存しました");
             }
             string IntsArea = Point2String(json, "addr");
             string IntsArea_Max3 = Point2String(json, "addr", MaxIntN - 2);//最大震度から3階級(Max6->6,5,4)
@@ -349,9 +394,8 @@ namespace QuakeMapFast
                 Text = Text.Remove(120, Text.Length - 120) + "…";
             BouyomiChanSocketSend($"震度速報、{IntsArea_Max3.Replace("\n", "").Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
             TelopSocketSend($"0,震度速報【最大震度{MaxIntS}】,{IntsArea.Replace("\n", "")},{Int2TelopColor(MaxIntN)},False,60,1000");
-            if (debug)//デバッグ時は早く消す//長さに応じて調整
-                TelopSocketSend($"0, - テスト - 震度速報【最大震度{MaxIntS}】,{IntsArea.Replace("\n", "")},{Int2TelopColor(MaxIntN)},False,30,1000");
-            ConsoleWrite($"[ScalePrompt]{Path.GetFullPath($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}")}に保存しました");
+            if (debug||ReadJSON)
+                TelopSocketSend($"0,《現在の情報ではありません》震度速報【最大震度{MaxIntS}】,{IntsArea.Replace("\n", "")},{Int2TelopColor(MaxIntN)},False,60,1000");
             Clipboard.SetText(Text);
             Clipboard.SetImage(canvas);
 
@@ -359,7 +403,6 @@ namespace QuakeMapFast
             LastText = Text;
             LastCanvas = (Bitmap)canvas.Clone();
             ConsoleWrite($"[ScalePrompt]処理時間:{(DateTime.Now - StartTime).TotalMilliseconds}ms");
-            Console.WriteLine("//////////震度速報終了//////////");
             //throw new Exception("aa");
         }
 
@@ -409,12 +452,17 @@ namespace QuakeMapFast
         {
             if (tokens == null)
                 return;
-            if (!debug)
+            if (debug)
             {
                 ConsoleWrite("[Tweet]デバッグモードのためツイートはしません。");
                 return;
             }
-            ConsoleWrite("[Tweet]ツイート送信開始");
+            if (ReadJSON)
+            {
+                ConsoleWrite("[Tweet]JSON読み込みモードのためツイートはしません。");
+                return;
+            }
+                ConsoleWrite("[Tweet]ツイート送信開始");
             ConsoleWrite("[Tweet]Text:" + Text);
             bool Reply = Time == LastTime;
             try
@@ -502,6 +550,10 @@ namespace QuakeMapFast
             if (!Settings.Default.Bouyomi_Enable)
                 return;
             ConsoleWrite("[Bouyomi]棒読みちゃん送信開始");
+            if (debug)
+                Text = "デバッグ中です。現在の情報ではありません。" + Text;
+                if (ReadJSON)
+                Text = "JSON読み込みモード中です。現在の情報ではありません。" + Text;
             ConsoleWrite("[Bouyomi]Text:" + Text);
             try
             {
@@ -581,6 +633,33 @@ namespace QuakeMapFast
         public void SettingForm_MainForm_Closed(object sender, FormClosedEventArgs e)
         {
             SettingReload();
+        }
+
+        private void TSMI_ReadJSON_Click(object sender, EventArgs e)
+        {
+            if (TSMI_ReadJSON.Text== "JSON読み込みモードをオフにする")
+            {
+                ConsoleWrite("[Main]JSON読み込みモードをオフにします");
+                File.Delete("ReadPath.txt");
+                ConsoleWrite("[Main]再起動します");
+                Application.Restart();
+            }
+            else
+            {
+                ConsoleWrite("[Main]JSON読み込みモードの準備をします");
+                File.WriteAllBytes("JSON-sample.zip", Resources.JSON_sample);
+                if(Directory.Exists("JSON-sample"))
+                Directory.Delete("JSON-sample",true);
+                ZipFile.ExtractToDirectory("JSON-sample.zip", ".");
+                File.Delete("JSON-sample.zip");
+                ConsoleWrite("[Main]JSONのサンプルをコピーしました(\"JSON-sample\"フォルダ)");
+
+                File.WriteAllText("ReadPath.txt", "");
+                Console.WriteLine("\"ReadPath.txt\"にJSONデータのパスを入力してください。メモ帳を起動しています…");
+                Process.Start("notepad.exe", "ReadPath.txt");
+                Console.WriteLine("パスは実行ファイルからの相対パス(\"JSON-sample\\sample.json\"など)か絶対パスで入力してください。");
+                Console.WriteLine("入力し終わったら保存してソフトを再起動してください。");
+            }
         }
     }
 }
