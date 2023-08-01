@@ -62,7 +62,7 @@ namespace QuakeMapFast.Properties {
         
         /// <summary>
         ///   {&quot;type&quot;:&quot;FeatureCollection&quot;, &quot;features&quot;: [
-        ///{&quot;type&quot;:&quot;Feature&quot;,&quot;geometry&quot;:{&quot;type&quot;:&quot;Polygon&quot;,&quot;coordinates&quot;:[[[141.49062527873366,43.68444110807076],[141.46871167290544,43.70077944061876],[141.4173361086746,43.711196946182156],[141.4049841631886,43.73778610844221],[141.37127333259832,43.72762055874182],[141.3374300003943,43.73749444121552],[141.33107277558815,43.70759666685274],[141.34945888511947,43.66745444076986],[141.35221555090698,43.64120250539139],[141.3655327756171,43.617426667107054],[141.3827990529340 [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        ///{&quot;type&quot;:&quot;Feature&quot;,&quot;geometry&quot;:{&quot;type&quot;:&quot;Polygon&quot;,&quot;coordinates&quot;:[[[141.49062527873366,43.68444110807076],[141.46871167290544,43.70077944061876],[141.4173361086746,43.711196946182156],[141.4049841631886,43.73778610844221],[141.37127333259832,43.72762055874182],[141.3374300003943,43.73749444121552],[141.33107277558815,43.70759666685274],[141.34945888511947,43.66745444076986],[141.35221555090698,43.64120250539139],[141.3655327756171,43.617426667107054],[141.382799052934 [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string _20190125_AreaForecastLocalE_GIS_name_0_1 {
             get {
@@ -73,13 +73,14 @@ namespace QuakeMapFast.Properties {
         /// <summary>
         ///   ※このファイルは更新確認にも使用しています。
         ///
-        ///ここのフォルダの&quot;user.config&quot;はソフトの設定の一次保存です。実行ファイルと同じ場所にも保存されます(UserSetting.xml)。
+        ///
+        ///ここのフォルダの&quot;user.config&quot;はソフトの設定の一次保存です。実行ファイルと同じ場所にも保存されます。(&quot;UserSetting.xml&quot;)
         ///
         ///実行ファイルの場所を変えるか更新すると別の場所に新しく保存されます。
         ///例えば&quot;...\AppData\Local\Ichihai1415\QuakeMapFast.exe_Url_4tliypkkuk2tnq0h0u0kv2ufqonh5203\0.1.0.0\user.config&quot;の場合、&quot;QuakeMapFast.exe_Url_4tliypkkuk2tnq0h0u0kv2ufqonh5203&quot;の部分は実行ファイルのパスによって変わり、&quot;0.1.0.0&quot;がバージョンによって変わります。
-        ///実行ファイルと同じフォルダの&quot;AppDataPath.txt&quot;というファイルにその実行ファイルで使用しているファイルのパスが記載されているので、これ以外のものは削除できます。ソフトを利用しない場合はこれも削除されます。削除した状態で起動すると設定の初期化がが行われます。
+        ///実行ファイルと同じフォルダの&quot;AppDataPath.txt&quot;というファイルにその実行ファイルで使用しているファイルのパスが記載されているので、これ以外のものは削除できます。ソフトをもう利用しない場合はこれも削除できます。このファイルを削除した状態で起動すると設定の初期化が行われます。
         ///
-        ///ソフトの起動時にはあればここのフォルダ [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        ///ソフトの起動時 [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string AppData_README {
             get {
@@ -94,6 +95,16 @@ namespace QuakeMapFast.Properties {
             get {
                 object obj = ResourceManager.GetObject("IntLegend", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Byte[] のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static byte[] JSON_sample {
+            get {
+                object obj = ResourceManager.GetObject("JSON_sample", resourceCulture);
+                return ((byte[])(obj));
             }
         }
         
