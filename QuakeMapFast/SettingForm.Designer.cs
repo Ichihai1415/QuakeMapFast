@@ -39,20 +39,21 @@
             this.WindowSize_Width = new System.Windows.Forms.NumericUpDown();
             this.GroupBox_Display_Text = new System.Windows.Forms.Label();
             this.GroupBox_Bouyomi = new System.Windows.Forms.GroupBox();
+            this.BouyomiTest = new System.Windows.Forms.Button();
+            this.Bouyomi_Enable = new System.Windows.Forms.CheckBox();
+            this.Bouyomi_Tone = new System.Windows.Forms.NumericUpDown();
+            this.Bouyomi_Speed = new System.Windows.Forms.NumericUpDown();
+            this.Bouyomi_Volume = new System.Windows.Forms.NumericUpDown();
+            this.Bouyomi_Voice = new System.Windows.Forms.NumericUpDown();
             this.GroupBox_Bouyomi_Text = new System.Windows.Forms.Label();
             this.GroupBox_Telop = new System.Windows.Forms.GroupBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.Bouyomi_Voice = new System.Windows.Forms.NumericUpDown();
-            this.Bouyomi_Volume = new System.Windows.Forms.NumericUpDown();
-            this.Bouyomi_Speed = new System.Windows.Forms.NumericUpDown();
-            this.Bouyomi_Tone = new System.Windows.Forms.NumericUpDown();
-            this.GroupBox_Telop_Text = new System.Windows.Forms.Label();
-            this.Bouyomi_Enable = new System.Windows.Forms.CheckBox();
-            this.Telop_Enable = new System.Windows.Forms.CheckBox();
-            this.BouyomiTest = new System.Windows.Forms.Button();
             this.TelopTest = new System.Windows.Forms.Button();
+            this.Telop_Enable = new System.Windows.Forms.CheckBox();
+            this.GroupBox_Telop_Text = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             this.SettingSave = new System.Windows.Forms.Button();
             this.SettingReset = new System.Windows.Forms.Button();
+            this.AutoCopy = new System.Windows.Forms.CheckBox();
             this.GroupBox_Display.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.BackGreenTime)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.WindowLocation_Y)).BeginInit();
@@ -60,15 +61,16 @@
             ((System.ComponentModel.ISupportInitialize)(this.WindowSize_Height)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.WindowSize_Width)).BeginInit();
             this.GroupBox_Bouyomi.SuspendLayout();
-            this.GroupBox_Telop.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.Bouyomi_Voice)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Bouyomi_Volume)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Bouyomi_Speed)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Bouyomi_Tone)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Bouyomi_Speed)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Bouyomi_Volume)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Bouyomi_Voice)).BeginInit();
+            this.GroupBox_Telop.SuspendLayout();
             this.SuspendLayout();
             // 
             // GroupBox_Display
             // 
+            this.GroupBox_Display.Controls.Add(this.AutoCopy);
             this.GroupBox_Display.Controls.Add(this.BackGreenTime);
             this.GroupBox_Display.Controls.Add(this.WindowLocation_Y);
             this.GroupBox_Display.Controls.Add(this.Save_Image);
@@ -82,7 +84,7 @@
             this.GroupBox_Display.Margin = new System.Windows.Forms.Padding(4);
             this.GroupBox_Display.Name = "GroupBox_Display";
             this.GroupBox_Display.Padding = new System.Windows.Forms.Padding(4);
-            this.GroupBox_Display.Size = new System.Drawing.Size(384, 171);
+            this.GroupBox_Display.Size = new System.Drawing.Size(384, 196);
             this.GroupBox_Display.TabIndex = 0;
             this.GroupBox_Display.TabStop = false;
             this.GroupBox_Display.Text = "表示・処理関連";
@@ -192,10 +194,10 @@
             this.GroupBox_Display_Text.AutoSize = true;
             this.GroupBox_Display_Text.Location = new System.Drawing.Point(8, 20);
             this.GroupBox_Display_Text.Name = "GroupBox_Display_Text";
-            this.GroupBox_Display_Text.Size = new System.Drawing.Size(250, 135);
+            this.GroupBox_Display_Text.Size = new System.Drawing.Size(250, 165);
             this.GroupBox_Display_Text.TabIndex = 0;
             this.GroupBox_Display_Text.Text = "ウィンドウサイズ:                   x\r\n\r\nウィンドウ位置:                    ,\r\n\r\n受信したデータの保存:\r\n\r\n" +
-    "画像の保存:\r\n\r\n受信してから真緑になる時間:                 s(0で無効)\r\n";
+    "画像の保存:\r\n\r\n受信してから真緑になる時間:                 s(0で無効)\r\n\r\nクリップボードへの自動コピー:\r\n";
             // 
             // GroupBox_Bouyomi
             // 
@@ -213,65 +215,42 @@
             this.GroupBox_Bouyomi.TabStop = false;
             this.GroupBox_Bouyomi.Text = "棒読みちゃん送信";
             // 
-            // GroupBox_Bouyomi_Text
+            // BouyomiTest
             // 
-            this.GroupBox_Bouyomi_Text.AutoSize = true;
-            this.GroupBox_Bouyomi_Text.Location = new System.Drawing.Point(6, 19);
-            this.GroupBox_Bouyomi_Text.Name = "GroupBox_Bouyomi_Text";
-            this.GroupBox_Bouyomi_Text.Size = new System.Drawing.Size(353, 90);
-            this.GroupBox_Bouyomi_Text.TabIndex = 0;
-            this.GroupBox_Bouyomi_Text.Text = resources.GetString("GroupBox_Bouyomi_Text.Text");
+            this.BouyomiTest.Location = new System.Drawing.Point(58, 17);
+            this.BouyomiTest.Name = "BouyomiTest";
+            this.BouyomiTest.Size = new System.Drawing.Size(75, 23);
+            this.BouyomiTest.TabIndex = 12;
+            this.BouyomiTest.Text = "送信テスト";
+            this.BouyomiTest.UseVisualStyleBackColor = true;
+            this.BouyomiTest.Click += new System.EventHandler(this.BouyomiTest_Click);
             // 
-            // GroupBox_Telop
+            // Bouyomi_Enable
             // 
-            this.GroupBox_Telop.Controls.Add(this.TelopTest);
-            this.GroupBox_Telop.Controls.Add(this.Telop_Enable);
-            this.GroupBox_Telop.Controls.Add(this.GroupBox_Telop_Text);
-            this.GroupBox_Telop.Location = new System.Drawing.Point(404, 145);
-            this.GroupBox_Telop.Name = "GroupBox_Telop";
-            this.GroupBox_Telop.Size = new System.Drawing.Size(384, 55);
-            this.GroupBox_Telop.TabIndex = 2;
-            this.GroupBox_Telop.TabStop = false;
-            this.GroupBox_Telop.Text = "Telop送信";
+            this.Bouyomi_Enable.AutoSize = true;
+            this.Bouyomi_Enable.Location = new System.Drawing.Point(37, 21);
+            this.Bouyomi_Enable.Name = "Bouyomi_Enable";
+            this.Bouyomi_Enable.Size = new System.Drawing.Size(15, 14);
+            this.Bouyomi_Enable.TabIndex = 11;
+            this.Bouyomi_Enable.UseVisualStyleBackColor = true;
             // 
-            // label2
+            // Bouyomi_Tone
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 426);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(464, 15);
-            this.label2.TabIndex = 3;
-            this.label2.Text = "詳細はREADME.mdなどを確認してください。このウィンドウを閉じると設定が再読み込みされます。";
-            // 
-            // Bouyomi_Voice
-            // 
-            this.Bouyomi_Voice.Location = new System.Drawing.Point(40, 47);
-            this.Bouyomi_Voice.Maximum = new decimal(new int[] {
-            32767,
-            0,
-            0,
-            0});
-            this.Bouyomi_Voice.Name = "Bouyomi_Voice";
-            this.Bouyomi_Voice.Size = new System.Drawing.Size(52, 23);
-            this.Bouyomi_Voice.TabIndex = 8;
-            // 
-            // Bouyomi_Volume
-            // 
-            this.Bouyomi_Volume.Location = new System.Drawing.Point(40, 92);
-            this.Bouyomi_Volume.Maximum = new decimal(new int[] {
+            this.Bouyomi_Tone.Location = new System.Drawing.Point(196, 92);
+            this.Bouyomi_Tone.Maximum = new decimal(new int[] {
             999,
             0,
             0,
             0});
-            this.Bouyomi_Volume.Minimum = new decimal(new int[] {
+            this.Bouyomi_Tone.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             -2147483648});
-            this.Bouyomi_Volume.Name = "Bouyomi_Volume";
-            this.Bouyomi_Volume.Size = new System.Drawing.Size(39, 23);
-            this.Bouyomi_Volume.TabIndex = 8;
-            this.Bouyomi_Volume.Value = new decimal(new int[] {
+            this.Bouyomi_Tone.Name = "Bouyomi_Tone";
+            this.Bouyomi_Tone.Size = new System.Drawing.Size(39, 23);
+            this.Bouyomi_Tone.TabIndex = 10;
+            this.Bouyomi_Tone.Value = new decimal(new int[] {
             1,
             0,
             0,
@@ -299,64 +278,60 @@
             0,
             -2147483648});
             // 
-            // Bouyomi_Tone
+            // Bouyomi_Volume
             // 
-            this.Bouyomi_Tone.Location = new System.Drawing.Point(196, 92);
-            this.Bouyomi_Tone.Maximum = new decimal(new int[] {
+            this.Bouyomi_Volume.Location = new System.Drawing.Point(40, 92);
+            this.Bouyomi_Volume.Maximum = new decimal(new int[] {
             999,
             0,
             0,
             0});
-            this.Bouyomi_Tone.Minimum = new decimal(new int[] {
+            this.Bouyomi_Volume.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             -2147483648});
-            this.Bouyomi_Tone.Name = "Bouyomi_Tone";
-            this.Bouyomi_Tone.Size = new System.Drawing.Size(39, 23);
-            this.Bouyomi_Tone.TabIndex = 10;
-            this.Bouyomi_Tone.Value = new decimal(new int[] {
+            this.Bouyomi_Volume.Name = "Bouyomi_Volume";
+            this.Bouyomi_Volume.Size = new System.Drawing.Size(39, 23);
+            this.Bouyomi_Volume.TabIndex = 8;
+            this.Bouyomi_Volume.Value = new decimal(new int[] {
             1,
             0,
             0,
             -2147483648});
             // 
-            // GroupBox_Telop_Text
+            // Bouyomi_Voice
             // 
-            this.GroupBox_Telop_Text.AutoSize = true;
-            this.GroupBox_Telop_Text.Location = new System.Drawing.Point(6, 24);
-            this.GroupBox_Telop_Text.Name = "GroupBox_Telop_Text";
-            this.GroupBox_Telop_Text.Size = new System.Drawing.Size(34, 15);
-            this.GroupBox_Telop_Text.TabIndex = 0;
-            this.GroupBox_Telop_Text.Text = "有効:";
+            this.Bouyomi_Voice.Location = new System.Drawing.Point(40, 47);
+            this.Bouyomi_Voice.Maximum = new decimal(new int[] {
+            32767,
+            0,
+            0,
+            0});
+            this.Bouyomi_Voice.Name = "Bouyomi_Voice";
+            this.Bouyomi_Voice.Size = new System.Drawing.Size(52, 23);
+            this.Bouyomi_Voice.TabIndex = 8;
             // 
-            // Bouyomi_Enable
+            // GroupBox_Bouyomi_Text
             // 
-            this.Bouyomi_Enable.AutoSize = true;
-            this.Bouyomi_Enable.Location = new System.Drawing.Point(37, 21);
-            this.Bouyomi_Enable.Name = "Bouyomi_Enable";
-            this.Bouyomi_Enable.Size = new System.Drawing.Size(15, 14);
-            this.Bouyomi_Enable.TabIndex = 11;
-            this.Bouyomi_Enable.UseVisualStyleBackColor = true;
+            this.GroupBox_Bouyomi_Text.AutoSize = true;
+            this.GroupBox_Bouyomi_Text.Location = new System.Drawing.Point(6, 19);
+            this.GroupBox_Bouyomi_Text.Name = "GroupBox_Bouyomi_Text";
+            this.GroupBox_Bouyomi_Text.Size = new System.Drawing.Size(353, 90);
+            this.GroupBox_Bouyomi_Text.TabIndex = 0;
+            this.GroupBox_Bouyomi_Text.Text = resources.GetString("GroupBox_Bouyomi_Text.Text");
             // 
-            // Telop_Enable
+            // GroupBox_Telop
             // 
-            this.Telop_Enable.AutoSize = true;
-            this.Telop_Enable.Location = new System.Drawing.Point(37, 26);
-            this.Telop_Enable.Name = "Telop_Enable";
-            this.Telop_Enable.Size = new System.Drawing.Size(15, 14);
-            this.Telop_Enable.TabIndex = 1;
-            this.Telop_Enable.UseVisualStyleBackColor = true;
-            // 
-            // BouyomiTest
-            // 
-            this.BouyomiTest.Location = new System.Drawing.Point(58, 17);
-            this.BouyomiTest.Name = "BouyomiTest";
-            this.BouyomiTest.Size = new System.Drawing.Size(75, 23);
-            this.BouyomiTest.TabIndex = 12;
-            this.BouyomiTest.Text = "送信テスト";
-            this.BouyomiTest.UseVisualStyleBackColor = true;
-            this.BouyomiTest.Click += new System.EventHandler(this.BouyomiTest_Click);
+            this.GroupBox_Telop.Controls.Add(this.TelopTest);
+            this.GroupBox_Telop.Controls.Add(this.Telop_Enable);
+            this.GroupBox_Telop.Controls.Add(this.GroupBox_Telop_Text);
+            this.GroupBox_Telop.Location = new System.Drawing.Point(404, 145);
+            this.GroupBox_Telop.Name = "GroupBox_Telop";
+            this.GroupBox_Telop.Size = new System.Drawing.Size(384, 55);
+            this.GroupBox_Telop.TabIndex = 2;
+            this.GroupBox_Telop.TabStop = false;
+            this.GroupBox_Telop.Text = "Telop送信";
             // 
             // TelopTest
             // 
@@ -367,6 +342,33 @@
             this.TelopTest.Text = "送信テスト";
             this.TelopTest.UseVisualStyleBackColor = true;
             this.TelopTest.Click += new System.EventHandler(this.TelopTest_Click);
+            // 
+            // Telop_Enable
+            // 
+            this.Telop_Enable.AutoSize = true;
+            this.Telop_Enable.Location = new System.Drawing.Point(37, 26);
+            this.Telop_Enable.Name = "Telop_Enable";
+            this.Telop_Enable.Size = new System.Drawing.Size(15, 14);
+            this.Telop_Enable.TabIndex = 1;
+            this.Telop_Enable.UseVisualStyleBackColor = true;
+            // 
+            // GroupBox_Telop_Text
+            // 
+            this.GroupBox_Telop_Text.AutoSize = true;
+            this.GroupBox_Telop_Text.Location = new System.Drawing.Point(6, 24);
+            this.GroupBox_Telop_Text.Name = "GroupBox_Telop_Text";
+            this.GroupBox_Telop_Text.Size = new System.Drawing.Size(34, 15);
+            this.GroupBox_Telop_Text.TabIndex = 0;
+            this.GroupBox_Telop_Text.Text = "有効:";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(12, 426);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(464, 15);
+            this.label2.TabIndex = 3;
+            this.label2.Text = "詳細はREADME.mdなどを確認してください。このウィンドウを閉じると設定が再読み込みされます。";
             // 
             // SettingSave
             // 
@@ -387,6 +389,15 @@
             this.SettingReset.Text = "リセット";
             this.SettingReset.UseVisualStyleBackColor = true;
             this.SettingReset.Click += new System.EventHandler(this.SettingReset_Click);
+            // 
+            // AutoCopy
+            // 
+            this.AutoCopy.AutoSize = true;
+            this.AutoCopy.Location = new System.Drawing.Point(144, 172);
+            this.AutoCopy.Name = "AutoCopy";
+            this.AutoCopy.Size = new System.Drawing.Size(15, 14);
+            this.AutoCopy.TabIndex = 8;
+            this.AutoCopy.UseVisualStyleBackColor = true;
             // 
             // SettingForm
             // 
@@ -415,12 +426,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.WindowSize_Width)).EndInit();
             this.GroupBox_Bouyomi.ResumeLayout(false);
             this.GroupBox_Bouyomi.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Bouyomi_Tone)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Bouyomi_Speed)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Bouyomi_Volume)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Bouyomi_Voice)).EndInit();
             this.GroupBox_Telop.ResumeLayout(false);
             this.GroupBox_Telop.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.Bouyomi_Voice)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Bouyomi_Volume)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Bouyomi_Speed)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Bouyomi_Tone)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -452,5 +463,6 @@
         private System.Windows.Forms.Button TelopTest;
         private System.Windows.Forms.Button SettingSave;
         private System.Windows.Forms.Button SettingReset;
+        private System.Windows.Forms.CheckBox AutoCopy;
     }
 }

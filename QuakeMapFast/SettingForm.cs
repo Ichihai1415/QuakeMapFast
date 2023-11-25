@@ -29,6 +29,7 @@ namespace QuakeMapFast
             Save_JSON.Checked = Settings.Default.Save_JSON;
             Save_Image.Checked = Settings.Default.Save_Image;
             BackGreenTime.Value = Settings.Default.BackGreenTime;
+            AutoCopy.Checked = Settings.Default.AutoCopy;
 
             Bouyomi_Enable.Checked = Settings.Default.Bouyomi_Enable;
             Bouyomi_Voice.Value = Settings.Default.Bouyomi_Voice;
@@ -48,6 +49,7 @@ namespace QuakeMapFast
             Settings.Default.Save_JSON = Save_JSON.Checked;
             Settings.Default.Save_Image = Save_Image.Checked;
             Settings.Default.BackGreenTime = (int)BackGreenTime.Value;
+            Settings.Default.AutoCopy = AutoCopy.Checked;
 
             Settings.Default.Bouyomi_Enable = Bouyomi_Enable.Checked;
             Settings.Default.Bouyomi_Voice = (short)Bouyomi_Voice.Value;

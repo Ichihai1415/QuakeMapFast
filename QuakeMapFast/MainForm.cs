@@ -1,5 +1,4 @@
-﻿using CoreTweet;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using QuakeMapFast.Properties;
 using System;
 using System.Collections.Generic;
@@ -33,16 +32,13 @@ namespace QuakeMapFast
          * README.md
          * JSON-sample.zip(F:\色々\json\P2Pquake) ResourceのCommentにバージョンを書いておく
          */
-        public static readonly string Version = "0.1.1";//こことアセンブリを変える
+        public static readonly string Version = "0.1.2";//こことアセンブリを変える
         readonly int[] ignoreCode = { 554, 555, 561, 9611 };//表示しない
         public static readonly Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
         string LatestID = "";
-        long LastTweetID = 0;
         public static bool ReadJSON = false;
         public static bool debug = false;
-        DateTime LastTime = DateTime.MinValue;
         public FontFamily font;
-        Tokens tokens = null;
 
         string LastText = "";
         Bitmap LastCanvas = new Bitmap(1920, 1080);
@@ -77,7 +73,7 @@ namespace QuakeMapFast
                 Console.WriteLine("以前の設定を復元しました。");
             }
             File.WriteAllText("AppDataPath.txt", config.FilePath);
-                ConsoleWrite($"[Main]\"AppDataPath.txt\"に設定ファイルのパスを保存しました");
+            ConsoleWrite($"[Main]\"AppDataPath.txt\"に設定ファイルのパスを保存しました");
 
             SettingReload();
 
@@ -101,16 +97,6 @@ namespace QuakeMapFast
             font = pfc.Families[0];
             ConsoleWrite($"[Main]フォント確認完了");
 
-            if (File.Exists("Token.txt"))
-            {
-                string[] tokens_ = File.ReadAllText("Token.txt").Split(',');
-                if (tokens_.Length == 4)
-                {
-                    tokens = Tokens.Create(tokens_[0], tokens_[1], tokens_[2], tokens_[3]);
-                    ConsoleWrite($"[Main]tokenを確認完了");
-                }
-            }
-
             ReadJSON = File.Exists("ReadPath.txt");
             if (ReadJSON)
             {
@@ -118,7 +104,7 @@ namespace QuakeMapFast
                 ConsoleWrite($"[ReadJSON]JSON読み込みモードです。");
                 try
                 {
-                    string path = File.ReadAllText("ReadPath.txt").Replace("\"","");
+                    string path = File.ReadAllText("ReadPath.txt").Replace("\"", "");
                     string jsonText = File.ReadAllText(path);
                     Console.WriteLine($"path:{path}");
                     Console.WriteLine(jsonText);
@@ -151,52 +137,62 @@ namespace QuakeMapFast
                         ConsoleWrite("[Main]接続しました");
                         while (client.State == WebSocketState.Open)
                         {
-                            byte[] buffer = new byte[1024 * 1024];
-                            WebSocketReceiveResult result = await client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                            if (result.MessageType == WebSocketMessageType.Text)
+                            byte[] buffer = new byte[1024 * 1024];//分割されるからこんなに要らないかも
+                            int bytesRead = 0;
+                            while (true)
                             {
-                                string jsonText = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                                if (Settings.Default.Save_JSON)
+                                ArraySegment<byte> segment = new ArraySegment<byte>(buffer, bytesRead, buffer.Length - bytesRead);
+                                WebSocketReceiveResult result = await client.ReceiveAsync(segment, CancellationToken.None);
+                                if (result.MessageType == WebSocketMessageType.Close)
                                 {
-                                    if (!Directory.Exists($"Log"))
-                                        Directory.CreateDirectory($"Log");
-                                    if (!Directory.Exists($"Log\\{DateTime.Now:yyyyMM}"))
-                                        Directory.CreateDirectory($"Log\\{DateTime.Now:yyyyMM}");
-                                    if (!Directory.Exists($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}"))
-                                        Directory.CreateDirectory($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}");
-                                    if (!Directory.Exists($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}"))
-                                        Directory.CreateDirectory($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}");
-                                    File.WriteAllText($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.txt", jsonText);
+                                    await client.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
+                                    break;
                                 }
-                                JObject json;
-                                try
-                                {
-                                    json = JObject.Parse(jsonText);
-                                }
-                                catch (Exception ex)
-                                {
-                                    ConsoleWrite($"[Main]{ex}");
-                                    if (!Directory.Exists($"Log"))
-                                        Directory.CreateDirectory($"Log");
-                                    if (!Directory.Exists($"Log\\Error"))
-                                        Directory.CreateDirectory($"Log\\Error");
-                                    if (!Directory.Exists($"Log\\Error\\{DateTime.Now:yyyyMM}"))
-                                        Directory.CreateDirectory($"Log\\Error\\{DateTime.Now:yyyyMM}");
-                                    if (!Directory.Exists($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}"))
-                                        Directory.CreateDirectory($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}");
-                                    File.WriteAllText($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.txt", $"{ex}");
-                                    continue;
-                                }
-                                ConsoleWrite($"[Main]受信 code:{json.SelectToken("code")}{P2PInfoCodeName[(int)json.SelectToken("code")]} type:{json.SelectToken("issue.type")}{P2PInfoTypeName[(string)json.SelectToken("issue.type") ?? ""]} id:{json.SelectToken("_id")}");
-                                if (LatestID == (string)json.SelectToken("_id"))
-                                    continue;
-                                LatestID = (string)json.SelectToken("_id");
-                                if (ignoreCode.Contains((int)json.SelectToken("code")))
-                                    continue;
-                                ConsoleWrite(jsonText);
-                                if ((string)json.SelectToken("issue.type") == "ScalePrompt")
-                                    ScalePrompt(json);
+                                bytesRead += result.Count;
+                                if (result.EndOfMessage)
+                                    break;
                             }
+                            string jsonText = Encoding.UTF8.GetString(buffer);
+                            if (Settings.Default.Save_JSON)
+                            {
+                                if (!Directory.Exists($"Log"))
+                                    Directory.CreateDirectory($"Log");
+                                if (!Directory.Exists($"Log\\{DateTime.Now:yyyyMM}"))
+                                    Directory.CreateDirectory($"Log\\{DateTime.Now:yyyyMM}");
+                                if (!Directory.Exists($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}"))
+                                    Directory.CreateDirectory($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}");
+                                if (!Directory.Exists($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}"))
+                                    Directory.CreateDirectory($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}");
+                                File.WriteAllText($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.txt", jsonText);
+                            }
+                            JObject json;
+                            try
+                            {
+                                json = JObject.Parse(jsonText);
+                            }
+                            catch (Exception ex)
+                            {
+                                ConsoleWrite($"[Main](JSON変換失敗){ex}");
+                                if (!Directory.Exists($"Log"))
+                                    Directory.CreateDirectory($"Log");
+                                if (!Directory.Exists($"Log\\Error"))
+                                    Directory.CreateDirectory($"Log\\Error");
+                                if (!Directory.Exists($"Log\\Error\\{DateTime.Now:yyyyMM}"))
+                                    Directory.CreateDirectory($"Log\\Error\\{DateTime.Now:yyyyMM}");
+                                if (!Directory.Exists($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}"))
+                                    Directory.CreateDirectory($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}");
+                                File.WriteAllText($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.txt", $"{ex}");
+                                continue;
+                            }
+                            ConsoleWrite($"[Main]受信 code:{json.SelectToken("code")}{P2PInfoCodeName[(int)json.SelectToken("code")]} type:{json.SelectToken("issue.type")}{P2PInfoTypeName[(string)json.SelectToken("issue.type") ?? ""]} id:{json.SelectToken("_id")}");
+                            if (LatestID == (string)json.SelectToken("_id"))
+                                continue;
+                            LatestID = (string)json.SelectToken("_id");
+                            if (ignoreCode.Contains((int)json.SelectToken("code")))
+                                continue;
+                            ConsoleWrite(jsonText);
+                            if ((string)json.SelectToken("issue.type") == "ScalePrompt")
+                                ScalePrompt(json);
                         }
                     }
                 }
@@ -258,7 +254,7 @@ namespace QuakeMapFast
         /// 震度速報
         /// </summary>
         /// <param name="json"></param>
-        public void ScalePrompt(JObject json)
+        public async void ScalePrompt(JObject json)
         {
             DateTime StartTime = DateTime.Now;
 
@@ -303,7 +299,7 @@ namespace QuakeMapFast
             PointCorrect(ref LatSta, ref LatEnd, ref LonSta, ref LonEnd);//補正
             double Zoom = 1080d / (LatEnd - LatSta);
 
-            ConsoleWrite("[ScalePrompt]画像描画開始");
+            ConsoleWrite("[ScalePrompt]画像描画開始");//todo:都道府県線を太く
             Bitmap canvas = new Bitmap(1920, 1080);
             Graphics g = Graphics.FromImage(canvas);
             g.Clear(Color.FromArgb(30, 60, 90));
@@ -370,7 +366,7 @@ namespace QuakeMapFast
             g.FillRectangle(Brushes.Black, 1080, 900, 840, 180);
             g.DrawString("日本地図データ:気象庁\n世界地図データ:National Earth\nそれぞれ加工して使用\nデータ:気象庁", new Font(font, 20), Brushes.White, 1090, 910);
             g.DrawImage(Resources.IntLegend, 1500, 906, 410, 164);
-            if (debug||ReadJSON)
+            if (debug || ReadJSON)
                 g.DrawString("《現在の情報ではありません》", new Font(font, 50), Brushes.White, 0, 0);
 
             g.Dispose();
@@ -385,7 +381,7 @@ namespace QuakeMapFast
                 if (!Directory.Exists($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}"))
                     Directory.CreateDirectory($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}");
                 canvas.Save($"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}\\{SaveTime:yyyyMMddHHmmss.ff}.png", ImageFormat.Png);
-            ConsoleWrite($"[ScalePrompt]output\\{SaveTime:yyyyMM}\\{SaveTime:dd}に保存しました");
+                ConsoleWrite($"[ScalePrompt]output\\{SaveTime:yyyyMM}\\{SaveTime:dd}に保存しました");
             }
             string IntsArea = Point2String(json, "addr");
             string IntsArea_Max3 = Point2String(json, "addr", MaxIntN - 2);//最大震度から3階級(Max6->6,5,4)
@@ -394,12 +390,16 @@ namespace QuakeMapFast
                 Text = Text.Remove(120, Text.Length - 120) + "…";
             BouyomiChanSocketSend($"震度速報、{IntsArea_Max3.Replace("\n", "").Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
             TelopSocketSend($"0,震度速報【最大震度{MaxIntS}】,{IntsArea.Replace("\n", "")},{Int2TelopColor(MaxIntN)},False,60,1000");
-            if (debug||ReadJSON)
+            if (debug || ReadJSON)
                 TelopSocketSend($"0,《現在の情報ではありません》震度速報【最大震度{MaxIntS}】,{IntsArea.Replace("\n", "")},{Int2TelopColor(MaxIntN)},False,60,1000");
-            Clipboard.SetText(Text);
-            Clipboard.SetImage(canvas);
 
-            Tweet(Text, Time, $"output\\{SaveTime:yyyyMM}\\{SaveTime:dd}\\{SaveTime:yyyyMMddHHmmss.f}.png");
+            if (Settings.Default.AutoCopy)
+            {
+                Clipboard.SetText(Text);
+                await Task.Delay(1);//テキストがクリップボードに保存されないから仮
+                Clipboard.SetImage(canvas);
+            }
+
             LastText = Text;
             LastCanvas = (Bitmap)canvas.Clone();
             ConsoleWrite($"[ScalePrompt]処理時間:{(DateTime.Now - StartTime).TotalMilliseconds}ms");
@@ -439,76 +439,6 @@ namespace QuakeMapFast
         public void EEW(JObject json)
         {
 
-        }
-
-        /// <summary>
-        /// ツイートします
-        /// </summary>
-        /// <param name="Text">ツイートするテキスト</param>
-        /// <param name="Time">リプライ判別用発生時刻</param>
-        /// <param name="ImagePath">画像を送信する場合の画像のパス</param>
-        /// <remarks>Timeが最後に送信した情報の発生時刻と一致する場合リプライします</remarks>
-        public async void Tweet(string Text, DateTime Time, string ImagePath = "")
-        {
-            if (tokens == null)
-                return;
-            if (debug)
-            {
-                ConsoleWrite("[Tweet]デバッグモードのためツイートはしません。");
-                return;
-            }
-            if (ReadJSON)
-            {
-                ConsoleWrite("[Tweet]JSON読み込みモードのためツイートはしません。");
-                return;
-            }
-                ConsoleWrite("[Tweet]ツイート送信開始");
-            ConsoleWrite("[Tweet]Text:" + Text);
-            bool Reply = Time == LastTime;
-            try
-            {
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
-                Status status;
-                if (ImagePath == "")
-                    if (Reply)
-                        status = await tokens.Statuses.UpdateAsync(new
-                        {
-                            status = Text,
-                            in_reply_to_status_id = LastTweetID
-                        });
-                    else
-                        status = await tokens.Statuses.UpdateAsync(new
-                        {
-                            status = Text
-                        });
-                else
-                {
-                    ConsoleWrite("[Tweet]Image:" + ImagePath);
-                    ConsoleWrite("[Tweet]画像送信開始");
-                    MediaUploadResult mur = await tokens.Media.UploadAsync(media: new FileInfo(ImagePath));
-                    ConsoleWrite("[Tweet]画像送信終了　ツイート開始");
-                    if (Reply)
-                        status = await tokens.Statuses.UpdateAsync(new
-                        {
-                            status = Text,
-                            media_ids = mur.MediaId,
-                            in_reply_to_status_id = LastTweetID
-                        });
-                    else
-                        status = await tokens.Statuses.UpdateAsync(new
-                        {
-                            status = Text,
-                            media_ids = mur.MediaId
-                        });
-                }
-                LastTweetID = status.Id;
-            }
-            catch (Exception ex)
-            {
-                ConsoleWrite($"[Tweet]{ex}");
-            }
-            LastTime = Time;
-            ConsoleWrite("[Tweet]ツイート送信終了");
         }
 
         /// <summary>
@@ -552,7 +482,7 @@ namespace QuakeMapFast
             ConsoleWrite("[Bouyomi]棒読みちゃん送信開始");
             if (debug)
                 Text = "デバッグ中です。現在の情報ではありません。" + Text;
-                if (ReadJSON)
+            if (ReadJSON)
                 Text = "JSON読み込みモード中です。現在の情報ではありません。" + Text;
             ConsoleWrite("[Bouyomi]Text:" + Text);
             try
@@ -637,7 +567,7 @@ namespace QuakeMapFast
 
         private void TSMI_ReadJSON_Click(object sender, EventArgs e)
         {
-            if (TSMI_ReadJSON.Text== "JSON読み込みモードをオフにする")
+            if (TSMI_ReadJSON.Text == "JSON読み込みモードをオフにする")
             {
                 ConsoleWrite("[Main]JSON読み込みモードをオフにします");
                 File.Delete("ReadPath.txt");
@@ -648,8 +578,8 @@ namespace QuakeMapFast
             {
                 ConsoleWrite("[Main]JSON読み込みモードの準備をします");
                 File.WriteAllBytes("JSON-sample.zip", Resources.JSON_sample);
-                if(Directory.Exists("JSON-sample"))
-                Directory.Delete("JSON-sample",true);
+                if (Directory.Exists("JSON-sample"))
+                    Directory.Delete("JSON-sample", true);
                 ZipFile.ExtractToDirectory("JSON-sample.zip", ".");
                 File.Delete("JSON-sample.zip");
                 ConsoleWrite("[Main]JSONのサンプルをコピーしました(\"JSON-sample\"フォルダ)");
