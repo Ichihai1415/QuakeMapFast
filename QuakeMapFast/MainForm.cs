@@ -1,5 +1,4 @@
-﻿using CoreTweet;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using QuakeMapFast.Properties;
 using System;
 using System.Collections.Generic;
@@ -37,12 +36,9 @@ namespace QuakeMapFast
         readonly int[] ignoreCode = { 554, 555, 561, 9611 };//表示しない
         public static readonly Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
         string LatestID = "";
-        long LastTweetID = 0;
         public static bool ReadJSON = false;
         public static bool debug = false;
-        DateTime LastTime = DateTime.MinValue;
         public FontFamily font;
-        Tokens tokens = null;
 
         string LastText = "";
         Bitmap LastCanvas = new Bitmap(1920, 1080);
@@ -100,16 +96,6 @@ namespace QuakeMapFast
             pfc.AddFontFile("Font\\Koruri-Regular.ttf");
             font = pfc.Families[0];
             ConsoleWrite($"[Main]フォント確認完了");
-
-            if (File.Exists("Token.txt"))
-            {
-                string[] tokens_ = File.ReadAllText("Token.txt").Split(',');
-                if (tokens_.Length == 4)
-                {
-                    tokens = Tokens.Create(tokens_[0], tokens_[1], tokens_[2], tokens_[3]);
-                    ConsoleWrite($"[Main]tokenを確認完了");
-                }
-            }
 
             ReadJSON = File.Exists("ReadPath.txt");
             if (ReadJSON)
@@ -406,9 +392,13 @@ namespace QuakeMapFast
             TelopSocketSend($"0,震度速報【最大震度{MaxIntS}】,{IntsArea.Replace("\n", "")},{Int2TelopColor(MaxIntN)},False,60,1000");
             if (debug || ReadJSON)
                 TelopSocketSend($"0,《現在の情報ではありません》震度速報【最大震度{MaxIntS}】,{IntsArea.Replace("\n", "")},{Int2TelopColor(MaxIntN)},False,60,1000");
-            Clipboard.SetText(Text);
-            await Task.Delay(1);//テキストがクリップボードに保存されないから仮
-            Clipboard.SetImage(canvas);
+
+            if (Settings.Default.AutoCopy)
+            {
+                Clipboard.SetText(Text);
+                await Task.Delay(1);//テキストがクリップボードに保存されないから仮
+                Clipboard.SetImage(canvas);
+            }
 
             LastText = Text;
             LastCanvas = (Bitmap)canvas.Clone();
@@ -449,78 +439,6 @@ namespace QuakeMapFast
         public void EEW(JObject json)
         {
 
-        }
-
-        /// <summary>
-        /// ツイートします
-        /// </summary>
-        /// <param name="Text">ツイートするテキスト</param>
-        /// <param name="Time">リプライ判別用発生時刻</param>
-        /// <param name="ImagePath">画像を送信する場合の画像のパス</param>
-        /// <remarks>Timeが最後に送信した情報の発生時刻と一致する場合リプライします</remarks>
-        public async void Tweet(string Text, DateTime Time, string ImagePath = "")
-        {
-            /*
-            if (tokens == null)
-                return;
-            if (debug)
-            {
-                ConsoleWrite("[Tweet]デバッグモードのためツイートはしません。");
-                return;
-            }
-            if (ReadJSON)
-            {
-                ConsoleWrite("[Tweet]JSON読み込みモードのためツイートはしません。");
-                return;
-            }
-            ConsoleWrite("[Tweet]ツイート送信開始");
-            ConsoleWrite("[Tweet]Text:" + Text);
-            bool Reply = Time == LastTime;
-            try
-            {
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
-                Status status;
-                if (ImagePath == "")
-                    if (Reply)
-                        status = await tokens.Statuses.UpdateAsync(new
-                        {
-                            status = Text,
-                            in_reply_to_status_id = LastTweetID
-                        });
-                    else
-                        status = await tokens.Statuses.UpdateAsync(new
-                        {
-                            status = Text
-                        });
-                else
-                {
-                    ConsoleWrite("[Tweet]Image:" + ImagePath);
-                    ConsoleWrite("[Tweet]画像送信開始");
-                    MediaUploadResult mur = await tokens.Media.UploadAsync(media: new FileInfo(ImagePath));
-                    ConsoleWrite("[Tweet]画像送信終了　ツイート開始");
-                    if (Reply)
-                        status = await tokens.Statuses.UpdateAsync(new
-                        {
-                            status = Text,
-                            media_ids = mur.MediaId,
-                            in_reply_to_status_id = LastTweetID
-                        });
-                    else
-                        status = await tokens.Statuses.UpdateAsync(new
-                        {
-                            status = Text,
-                            media_ids = mur.MediaId
-                        });
-                }
-                LastTweetID = status.Id;
-            }
-            catch (Exception ex)
-            {
-                ConsoleWrite($"[Tweet]{ex}");
-            }
-            LastTime = Time;
-            ConsoleWrite("[Tweet]ツイート送信終了");
-            */
         }
 
         /// <summary>
