@@ -276,7 +276,7 @@ namespace QuakeMapFast
             LatEnd += (LatEnd - LatSta) / 20;
             LonSta -= (LonEnd - LonSta) / 20;
             LonEnd += (LonEnd - LonSta) / 20;
-            if (LatEnd - LatSta < 3)//緯度差を最大3に
+            if (LatEnd - LatSta < 3)//緯度差を最小3に
             {
                 double correction = (3 - (LatEnd - LatSta)) / 2d;
                 LatSta -= correction;
