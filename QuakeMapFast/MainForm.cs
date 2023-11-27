@@ -30,9 +30,9 @@ namespace QuakeMapFast
          * ↓のバージョン
          * アセンブリ
          * README.md
-         * JSON-sample.zip(F:\色々\json\P2Pquake) ResourceのCommentにバージョンを書いておく
+         * (JSON-sample.zip(...\json\P2Pquake)更新時にResourceのCommentにバージョンを書いておく
          */
-        public static readonly string Version = "0.1.2";//こことアセンブリを変える
+        public static readonly string Version = "0.1.3";//こことアセンブリを変える
         readonly int[] ignoreCode = { 554, 555, 561, 9611 };//表示しない
         public static readonly Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
         string LatestID = "";
@@ -43,6 +43,12 @@ namespace QuakeMapFast
         string LastText = "";
         Bitmap LastCanvas = new Bitmap(1920, 1080);
 
+        public static ConsoleColor c_d = Console.ForegroundColor;
+        public static ConsoleColor c_r = ConsoleColor.Red;
+        public static ConsoleColor c_g = ConsoleColor.Green;
+        public static ConsoleColor c_c = ConsoleColor.Cyan;
+        public static ConsoleColor c_y = ConsoleColor.Yellow;
+
         public MainForm()
         {
             InitializeComponent();
@@ -52,7 +58,9 @@ namespace QuakeMapFast
         {
             //ConsoleWrite("");
             ConsoleWrite("起動しました");
-            Console.WriteLine($"/////QuakeMapFast v{Version}/////");
+            Console.ForegroundColor = c_c;
+            Console.WriteLine($"/////QuakeMapFast v{Version}/////\nhttps://github.com/Ichihai1415/QuakeMapFast\nこのコンソールを閉じるとQuakeMapFastが終了します。\nその他READMEを参照してください。");
+            Console.ForegroundColor = c_d;
 
             string AppDataReadmePath = config.FilePath.Replace("user.config", "readme.txt");
             if (!File.Exists(AppDataReadmePath))//初回/更新時
@@ -60,8 +68,8 @@ namespace QuakeMapFast
                 ConsoleWrite("初回または更新等を検知しました");
                 Settings.Default.Window_Size = new Size(0, 0);//変えないとSaveで作られない
                 Settings.Default.Save();//ディレクトリとか作成
-                Settings.Default.Reset();//一応直しとく
-                Settings.Default.Save();//一応保存
+                Settings.Default.Reset();//一応直しとく(初期化して保存するため)
+                Settings.Default.Save();//一応保存(初期化したのを保存、UserSetting.xmlがあれば後で上書き)
                 Console.WriteLine("設定は右クリックメニューからできます。");
                 File.WriteAllText(AppDataReadmePath, Resources.AppData_README);
                 ConsoleWrite($"[Main]AppData-readmeファイル(\"{AppDataReadmePath}\")をコピーしました");
@@ -107,7 +115,7 @@ namespace QuakeMapFast
                     string path = File.ReadAllText("ReadPath.txt").Replace("\"", "");
                     string jsonText = File.ReadAllText(path);
                     Console.WriteLine($"path:{path}");
-                    Console.WriteLine(jsonText);
+                    ConsoleWrite(jsonText, c_g);
                     JObject json = JObject.Parse(jsonText);
                     ConsoleWrite($"[ReadJSON]処理開始 code:{json.SelectToken("code")}{P2PInfoCodeName[(int)json.SelectToken("code")]} type:{json.SelectToken("issue.type")}{P2PInfoTypeName[(string)json.SelectToken("issue.type") ?? ""]} id:{json.SelectToken("_id")}");
                     if (ignoreCode.Contains((int)json.SelectToken("code")))
@@ -133,6 +141,7 @@ namespace QuakeMapFast
                 {
                     using (ClientWebSocket client = new ClientWebSocket())
                     {
+                    connect:
                         await client.ConnectAsync(new Uri("wss://api.p2pquake.net/v2/ws"), CancellationToken.None);
                         ConsoleWrite("[Main]接続しました");
                         while (client.State == WebSocketState.Open)
@@ -146,13 +155,21 @@ namespace QuakeMapFast
                                 if (result.MessageType == WebSocketMessageType.Close)
                                 {
                                     await client.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
-                                    break;
+                                    ConsoleWrite("[Main]切断されました。再接続します。");
+                                    goto connect;
+                                }
+                                else if (result.MessageType != WebSocketMessageType.Text)
+                                {
+                                    ConsoleWrite($"[Main]未対応のタイプです(WebSocketMessageType.{result.MessageType})", c_y);
+                                    continue;
                                 }
                                 bytesRead += result.Count;
                                 if (result.EndOfMessage)
                                     break;
                             }
-                            string jsonText = Encoding.UTF8.GetString(buffer);
+                            string jsonText = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                            if (jsonText == string.Empty)
+                                continue;
                             if (Settings.Default.Save_JSON)
                             {
                                 if (!Directory.Exists($"Log"))
@@ -172,7 +189,7 @@ namespace QuakeMapFast
                             }
                             catch (Exception ex)
                             {
-                                ConsoleWrite($"[Main](JSON変換失敗){ex}");
+                                ConsoleWrite($"[Main](JSON変換失敗){ex}", c_r);
                                 if (!Directory.Exists($"Log"))
                                     Directory.CreateDirectory($"Log");
                                 if (!Directory.Exists($"Log\\Error"))
@@ -190,7 +207,7 @@ namespace QuakeMapFast
                             LatestID = (string)json.SelectToken("_id");
                             if (ignoreCode.Contains((int)json.SelectToken("code")))
                                 continue;
-                            ConsoleWrite(jsonText);
+                            ConsoleWrite(jsonText, c_g);
                             if ((string)json.SelectToken("issue.type") == "ScalePrompt")
                                 ScalePrompt(json);
                         }
@@ -198,7 +215,7 @@ namespace QuakeMapFast
                 }
                 catch (Exception ex)
                 {
-                    ConsoleWrite($"[Main]{ex}");
+                    ConsoleWrite($"[Main]{ex}", c_r);
                     if (!(ex.Message.Contains("リモート サーバーに接続できません。") || ex.Message.Contains("内部 WebSocket エラーが発生しました。")))
                     {
                         if (!Directory.Exists($"Log"))
@@ -212,7 +229,7 @@ namespace QuakeMapFast
                         File.WriteAllText($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.txt", $"{ex}");
                     }
                     await Task.Delay(1000);
-                    ConsoleWrite("[Main]再接続します");
+                    ConsoleWrite("[Main]切断されました。再接続します。");
                 }
         }
 
@@ -386,8 +403,7 @@ namespace QuakeMapFast
             string IntsArea = Point2String(json, "addr");
             string IntsArea_Max3 = Point2String(json, "addr", MaxIntN - 2);//最大震度から3階級(Max6->6,5,4)
             string Text = $"震度速報【最大震度{MaxIntS}】{Time:yyyy/MM/dd HH:mm}\n{IntsArea}";
-            if (Text.Length > 120)
-                Text = Text.Remove(120, Text.Length - 120) + "…";
+            ConsoleWrite(Text, c_c);
             BouyomiChanSocketSend($"震度速報、{IntsArea_Max3.Replace("\n", "").Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
             TelopSocketSend($"0,震度速報【最大震度{MaxIntS}】,{IntsArea.Replace("\n", "")},{Int2TelopColor(MaxIntN)},False,60,1000");
             if (debug || ReadJSON)
@@ -467,7 +483,7 @@ namespace QuakeMapFast
             }
             catch (Exception ex)
             {
-                ConsoleWrite("[Telop]" + ex.ToString());
+                ConsoleWrite($"[Telop]{ex}", c_r);
             }
             ConsoleWrite("[Telop]テロップ送信終了");
         }
@@ -511,7 +527,7 @@ namespace QuakeMapFast
             }
             catch (Exception ex)
             {
-                ConsoleWrite($"[Bouyomi]{ex}");
+                ConsoleWrite($"[Bouyomi]{ex}", c_r);
             }
             ConsoleWrite("[Bouyomi]棒読みちゃん送信完了");
         }
@@ -523,6 +539,17 @@ namespace QuakeMapFast
         public static void ConsoleWrite(string Text)
         {
             Console.WriteLine($"{DateTime.Now:HH:mm:ss.ffff} {Text}");
+        }
+
+        /// <summary>
+        /// コンソールに色あり、タイムスタンプ付きで出力します
+        /// </summary>
+        /// <param name="Text">表示するテキスト</param>
+        public static void ConsoleWrite(string Text, ConsoleColor color)
+        {
+            Console.ForegroundColor = color;
+            Console.WriteLine($"{DateTime.Now:HH:mm:ss.ffff} {Text}");
+            Console.ForegroundColor = c_d;
         }
 
         private void TSMI_TextCopy_Click(object sender, EventArgs e)
