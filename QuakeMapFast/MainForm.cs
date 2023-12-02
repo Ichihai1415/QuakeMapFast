@@ -32,7 +32,7 @@ namespace QuakeMapFast
          * README.md
          * (JSON-sample.zip(...\json\P2Pquake)更新時にResourceのCommentにバージョンを書いておく
          */
-        public static readonly string Version = "0.1.3";//こことアセンブリを変える
+        public static readonly string Version = "0.1.4";//こことアセンブリを変える
         readonly int[] ignoreCode = { 554, 555, 561, 9611 };//表示しない
         public static readonly Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
         string LatestID = "";
@@ -201,11 +201,15 @@ namespace QuakeMapFast
                                 File.WriteAllText($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.txt", $"{ex}");
                                 continue;
                             }
-                            ConsoleWrite($"[Main]受信 code:{json.SelectToken("code")}{P2PInfoCodeName[(int)json.SelectToken("code")]} type:{json.SelectToken("issue.type")}{P2PInfoTypeName[(string)json.SelectToken("issue.type") ?? ""]} id:{json.SelectToken("_id")}");
-                            if (LatestID == (string)json.SelectToken("_id"))
+                            int code = (int)json.SelectToken("code");
+                            string id = (string)json.SelectToken("_id");
+                            string codeInfo = P2PInfoCodeName.Keys.Contains(code) ? P2PInfoCodeName[code] : "-";
+                            string issueInfo = P2PInfoTypeName.Keys.Contains((string)json.SelectToken("issue.type") ?? "") ? P2PInfoTypeName[(string)json.SelectToken("issue.type") ?? ""] : "-";
+                            ConsoleWrite($"[Main]受信 code:{json.SelectToken("code")}{codeInfo} type:{json.SelectToken("issue.type")}{issueInfo} id:{id}");
+                            if (LatestID == id)
                                 continue;
-                            LatestID = (string)json.SelectToken("_id");
-                            if (ignoreCode.Contains((int)json.SelectToken("code")))
+                            LatestID = id;
+                            if (ignoreCode.Contains(code))
                                 continue;
                             ConsoleWrite(jsonText, c_g);
                             if ((string)json.SelectToken("issue.type") == "ScalePrompt")
