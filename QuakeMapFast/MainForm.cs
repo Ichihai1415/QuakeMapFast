@@ -586,7 +586,7 @@ namespace QuakeMapFast
 
         private void TSMI_Setting_Click(object sender, EventArgs e)
         {
-            SettingForm setting = new SettingForm();
+            ControlForm setting = new ControlForm();
             setting.FormClosed += SettingForm_MainForm_Closed;
             setting.Show();
         }

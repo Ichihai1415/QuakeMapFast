@@ -1,6 +1,6 @@
 ﻿namespace QuakeMapFast
 {
-    partial class SettingForm
+    partial class ControlForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ControlForm));
             this.GroupBox_Display = new System.Windows.Forms.GroupBox();
             this.BackGreenTime = new System.Windows.Forms.NumericUpDown();
             this.WindowLocation_Y = new System.Windows.Forms.NumericUpDown();

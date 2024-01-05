@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace QuakeMapFast
 {
-    public partial class SettingForm : Form
+    public partial class ControlForm : Form
     {
-        public SettingForm()
+        public ControlForm()
         {
             InitializeComponent();
         }
@@ -66,12 +66,12 @@ namespace QuakeMapFast
 
         private void SettingReset_Click(object sender, EventArgs e)
         {
-            DialogResult Result = MessageBox.Show("リセットしてもよろしいですか？\nリセットすると設定画面を開き直します。", "WQV - setting", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+            DialogResult Result = MessageBox.Show("リセットしてもよろしいですか？\nリセットすると設定画面を開き直します。", "確認", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
             if (Result == DialogResult.Yes)
             {
                 MainForm.ConsoleWrite("[Setting]設定をリセットします");
                 Settings.Default.Reset();
-                SettingForm Setting = new SettingForm();
+                ControlForm Setting = new ControlForm();
                 Configuration Config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
                 if (File.Exists("UserSetting.xml"))
                     File.Delete("UserSetting.xml");
