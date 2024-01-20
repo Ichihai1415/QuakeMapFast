@@ -1,6 +1,6 @@
 ﻿namespace QuakeMapFast
 {
-    partial class SettingForm
+    partial class CtrlForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,8 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CtrlForm));
             this.GroupBox_Display = new System.Windows.Forms.GroupBox();
+            this.AutoCopy = new System.Windows.Forms.CheckBox();
             this.BackGreenTime = new System.Windows.Forms.NumericUpDown();
             this.WindowLocation_Y = new System.Windows.Forms.NumericUpDown();
             this.Save_Image = new System.Windows.Forms.CheckBox();
@@ -50,10 +51,10 @@
             this.TelopTest = new System.Windows.Forms.Button();
             this.Telop_Enable = new System.Windows.Forms.CheckBox();
             this.GroupBox_Telop_Text = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
+            this.TextEnd = new System.Windows.Forms.Label();
             this.SettingSave = new System.Windows.Forms.Button();
             this.SettingReset = new System.Windows.Forms.Button();
-            this.AutoCopy = new System.Windows.Forms.CheckBox();
+            this.JSONread = new System.Windows.Forms.Button();
             this.GroupBox_Display.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.BackGreenTime)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.WindowLocation_Y)).BeginInit();
@@ -88,6 +89,16 @@
             this.GroupBox_Display.TabIndex = 0;
             this.GroupBox_Display.TabStop = false;
             this.GroupBox_Display.Text = "表示・処理関連";
+            // 
+            // AutoCopy
+            // 
+            this.AutoCopy.AutoSize = true;
+            this.AutoCopy.Location = new System.Drawing.Point(144, 169);
+            this.AutoCopy.Name = "AutoCopy";
+            this.AutoCopy.Size = new System.Drawing.Size(144, 19);
+            this.AutoCopy.TabIndex = 8;
+            this.AutoCopy.Text = "(されない場合があります)";
+            this.AutoCopy.UseVisualStyleBackColor = true;
             // 
             // BackGreenTime
             // 
@@ -132,10 +143,11 @@
             // Save_JSON
             // 
             this.Save_JSON.AutoSize = true;
-            this.Save_JSON.Location = new System.Drawing.Point(117, 82);
+            this.Save_JSON.Location = new System.Drawing.Point(117, 80);
             this.Save_JSON.Name = "Save_JSON";
-            this.Save_JSON.Size = new System.Drawing.Size(15, 14);
+            this.Save_JSON.Size = new System.Drawing.Size(176, 19);
             this.Save_JSON.TabIndex = 4;
+            this.Save_JSON.Text = "(処理しないものも保存されます)";
             this.Save_JSON.UseVisualStyleBackColor = true;
             // 
             // WindowLocation_X
@@ -317,7 +329,7 @@
             this.GroupBox_Bouyomi_Text.AutoSize = true;
             this.GroupBox_Bouyomi_Text.Location = new System.Drawing.Point(6, 19);
             this.GroupBox_Bouyomi_Text.Name = "GroupBox_Bouyomi_Text";
-            this.GroupBox_Bouyomi_Text.Size = new System.Drawing.Size(353, 90);
+            this.GroupBox_Bouyomi_Text.Size = new System.Drawing.Size(369, 90);
             this.GroupBox_Bouyomi_Text.TabIndex = 0;
             this.GroupBox_Bouyomi_Text.Text = resources.GetString("GroupBox_Bouyomi_Text.Text");
             // 
@@ -361,14 +373,14 @@
             this.GroupBox_Telop_Text.TabIndex = 0;
             this.GroupBox_Telop_Text.Text = "有効:";
             // 
-            // label2
+            // TextEnd
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 426);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(464, 15);
-            this.label2.TabIndex = 3;
-            this.label2.Text = "詳細はREADME.mdなどを確認してください。このウィンドウを閉じると設定が再読み込みされます。";
+            this.TextEnd.AutoSize = true;
+            this.TextEnd.Location = new System.Drawing.Point(12, 426);
+            this.TextEnd.Name = "TextEnd";
+            this.TextEnd.Size = new System.Drawing.Size(218, 15);
+            this.TextEnd.TabIndex = 3;
+            this.TextEnd.Text = "詳細はREADME.mdなどを確認してください。";
             // 
             // SettingSave
             // 
@@ -390,23 +402,25 @@
             this.SettingReset.UseVisualStyleBackColor = true;
             this.SettingReset.Click += new System.EventHandler(this.SettingReset_Click);
             // 
-            // AutoCopy
+            // JSONread
             // 
-            this.AutoCopy.AutoSize = true;
-            this.AutoCopy.Location = new System.Drawing.Point(144, 172);
-            this.AutoCopy.Name = "AutoCopy";
-            this.AutoCopy.Size = new System.Drawing.Size(15, 14);
-            this.AutoCopy.TabIndex = 8;
-            this.AutoCopy.UseVisualStyleBackColor = true;
+            this.JSONread.Location = new System.Drawing.Point(276, 415);
+            this.JSONread.Name = "JSONread";
+            this.JSONread.Size = new System.Drawing.Size(261, 23);
+            this.JSONread.TabIndex = 6;
+            this.JSONread.Text = "JSON読み込み(コンソールにパスを入力してください)";
+            this.JSONread.UseVisualStyleBackColor = true;
+            this.JSONread.Click += new System.EventHandler(this.JSONread_Click);
             // 
-            // SettingForm
+            // CtrlForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.JSONread);
             this.Controls.Add(this.SettingReset);
             this.Controls.Add(this.SettingSave);
-            this.Controls.Add(this.label2);
+            this.Controls.Add(this.TextEnd);
             this.Controls.Add(this.GroupBox_Telop);
             this.Controls.Add(this.GroupBox_Bouyomi);
             this.Controls.Add(this.GroupBox_Display);
@@ -414,9 +428,9 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
-            this.Name = "SettingForm";
-            this.Text = "QuMast - setting";
-            this.Load += new System.EventHandler(this.SettingForm_Load);
+            this.Name = "CtrlForm";
+            this.Text = "QuMast - コントロール画面";
+            this.Load += new System.EventHandler(this.CtrlForm_Load);
             this.GroupBox_Display.ResumeLayout(false);
             this.GroupBox_Display.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.BackGreenTime)).EndInit();
@@ -450,7 +464,7 @@
         private System.Windows.Forms.NumericUpDown BackGreenTime;
         private System.Windows.Forms.GroupBox GroupBox_Bouyomi;
         private System.Windows.Forms.GroupBox GroupBox_Telop;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label TextEnd;
         private System.Windows.Forms.Label GroupBox_Bouyomi_Text;
         private System.Windows.Forms.NumericUpDown Bouyomi_Voice;
         private System.Windows.Forms.NumericUpDown Bouyomi_Volume;
@@ -464,5 +478,6 @@
         private System.Windows.Forms.Button SettingSave;
         private System.Windows.Forms.Button SettingReset;
         private System.Windows.Forms.CheckBox AutoCopy;
+        private System.Windows.Forms.Button JSONread;
     }
 }
