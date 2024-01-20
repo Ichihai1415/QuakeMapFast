@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
@@ -33,7 +34,7 @@ namespace QuakeMapFast
          README.md
          (JSON-sample.zip(...\json\P2Pquake)更新時にResourceのCommentにバージョンを書いておく
          */
-        public static readonly string version = "0.2.0";
+        public static readonly string version = "0.2.1";
         readonly int[] ignoreCode = { 554, 555, 561, 9611 };//表示しない
         public static readonly Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
         string latestID = "";
@@ -140,7 +141,7 @@ namespace QuakeMapFast
                                 continue;
                             if (Settings.Default.Save_JSON)
                             {
-                                Directory.CreateDirectory($"Log\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}");
+                                Directory.CreateDirectory($"output\\json\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}");
                                 File.WriteAllText($"output\\json\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.json", jsonText);
                             }
                             JObject json;
@@ -150,7 +151,7 @@ namespace QuakeMapFast
 
                                 int code = (int)json["code"];
                                 string id = (string)json["_id"];
-                                string type = (string)json["issue"]["type"];
+                                string type = (string)json.SelectToken("issue.type");//ないときあるからこれで
                                 string codeInfo = P2PInfoCodeName.Keys.Contains(code) ? P2PInfoCodeName[code] : "-";
                                 string issueInfo = P2PInfoTypeName.Keys.Contains(type ?? "") ? P2PInfoTypeName[type ?? ""] : "-";
                                 ConWrite($"[Get]受信 code:{code}{codeInfo} type:{type}{issueInfo} id:{id}");
@@ -305,6 +306,14 @@ namespace QuakeMapFast
             readJSON = true;
             try
             {
+                ConWrite("[JSONread_Click]JSON読み込みモードの準備をします");
+                File.WriteAllBytes("JSON-sample.zip", Resources.JSON_sample);
+                if (Directory.Exists("JSON-sample"))
+                    Directory.Delete("JSON-sample", true);
+                ZipFile.ExtractToDirectory("JSON-sample.zip", ".");
+                File.Delete("JSON-sample.zip");
+                ConWrite("[JSONread_Click]JSONのサンプルをコピーしました(\"JSON-sample\"フォルダ)");
+
                 ConWrite("[JSONread_Click]ファイルのパスを入力してください。");
                 string jsonText = File.ReadAllText(Console.ReadLine().Replace("\"", ""));
                 var json = JObject.Parse(jsonText);
