@@ -1,15 +1,16 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 
 namespace QuakeMapFast
 {
-    public static class Converter
+    public static class Conv
     {
         /// <summary>
         /// P2Pのcodeと説明
         /// </summary>
-        public static Dictionary<int,string> P2PInfoCodeName = new Dictionary<int,string>
+        public static Dictionary<int, string> P2PInfoCodeName = new Dictionary<int, string>
         {
             { 551, "(地震情報)" },
             { 552, "(津波予報)" },
@@ -118,24 +119,21 @@ namespace QuakeMapFast
         /// <summary>
         /// jsonから指定した区分の地区ごとの震度のDictionaryを返します。
         /// </summary>
-        /// <param name="json">json</param>
-        /// <param name="Token">addr(地点・区分)/pref(県)</param>
+        /// <param name="points">jsonのpoints</param>
+        /// <param name="token">addr(地点・区分)/pref(県)</param>
         /// <returns>Dictionary<地区, int形式の震度></returns>
-        public static Dictionary<string, int> Points2Dic(JObject json, string Token)
+        public static Dictionary<string, int> Points2Dic(JToken points, string token)
         {
-            Dictionary<string, int> PointInt = new Dictionary<string, int>();
-            foreach (JToken json_ in json.SelectToken("points"))
-                PointInt.Add((string)json_.SelectToken(Token), P2PScale2IntN((int)json_.SelectToken("scale")));
-            return PointInt;
+            return points.ToDictionary(pt => (string)pt[token], pt => P2PScale2IntN((int)pt["scale"]));
         }
 
         /// <summary>
         /// jsonから震度別の指定した区分の地区を返します。
         /// </summary>
         /// <param name="json">json</param>
-        /// <param name="Token">addr(地点・区分)/pref(県)</param>
+        /// <param name="token">addr(地点・区分)/pref(県)</param>
         /// <returns>IntList</returns>
-        public static IntList Point2IntList(JObject json, string Token)
+        public static IntList Point2IntList(JObject json, string token)
         {
             IntList intList = new IntList
             {
@@ -149,36 +147,36 @@ namespace QuakeMapFast
                 S8 = new List<string>(),
                 S9 = new List<string>()
             };
-            foreach (JToken json_ in json.SelectToken("points"))
+            foreach (JToken json_ in json["points"])
             {
-                switch ((int)json_.SelectToken("scale"))
+                switch ((int)json_["scale"])
                 {
                     case 10:
-                        intList.S1.Add((string)json_.SelectToken(Token));
+                        intList.S1.Add((string)json_[token]);
                         break;
                     case 20:
-                        intList.S2.Add((string)json_.SelectToken(Token));
+                        intList.S2.Add((string)json_[token]);
                         break;
                     case 30:
-                        intList.S3.Add((string)json_.SelectToken(Token));
+                        intList.S3.Add((string)json_[token]);
                         break;
                     case 40:
-                        intList.S4.Add((string)json_.SelectToken(Token));
+                        intList.S4.Add((string)json_[token]);
                         break;
                     case 45:
-                        intList.S5.Add((string)json_.SelectToken(Token));
+                        intList.S5.Add((string)json_[token]);
                         break;
                     case 50:
-                        intList.S6.Add((string)json_.SelectToken(Token));
+                        intList.S6.Add((string)json_[token]);
                         break;
                     case 55:
-                        intList.S7.Add((string)json_.SelectToken(Token));
+                        intList.S7.Add((string)json_[token]);
                         break;
                     case 60:
-                        intList.S8.Add((string)json_.SelectToken(Token));
+                        intList.S8.Add((string)json_[token]);
                         break;
                     case 70:
-                        intList.S9.Add((string)json_.SelectToken(Token));
+                        intList.S9.Add((string)json_[token]);
                         break;
                 }
             }
@@ -189,67 +187,31 @@ namespace QuakeMapFast
         /// IntListから震度別の文字列を返します。
         /// </summary>
         /// <param name="intList">IntList</param>
-        /// <param name="MininumInt">文字列にする最小の震度</param>
+        /// <param name="mininumInt">文字列にする最小の震度</param>
         /// <returns>震度別の文字列</returns>
         /// <remarks>例:《震度4》○○ ○○ \n《震度3》○○ ○○ </remarks>
-        public static string IntList2String(IntList intList, int MininumInt = 0)
+        public static string IntList2String(IntList intList, int mininumInt = 0)
         {
             string output = "\n";
-            if (intList.S9.Count != 0 && MininumInt <= 9)
-            {
-                output += "\n《震度7》";
-                foreach (string Area in intList.S9)
-                    output += Area + " ";
-            }
-            if (intList.S8.Count != 0 && MininumInt <= 8)
-            {
-                output += "\n《震度6強》";
-                foreach (string Area in intList.S8)
-                    output += Area + " ";
-            }
-            if (intList.S7.Count != 0 && MininumInt <= 7)
-            {
-                output += "\n《震度6弱》";
-                foreach (string Area in intList.S7)
-                    output += Area + " ";
-            }
-            if (intList.S6.Count != 0 && MininumInt <= 6)
-            {
-                output += "\n《震度5強》";
-                foreach (string Area in intList.S6)
-                    output += Area + " ";
-            }
-            if (intList.S5.Count != 0 && MininumInt <= 5)
-            {
-                output += "\n《震度5弱》";
-                foreach (string Area in intList.S5)
-                    output += Area + " ";
-            }
-            if (intList.S4.Count != 0 && MininumInt <= 4)
-            {
-                output += "\n《震度4》";
-                foreach (string Area in intList.S4)
-                    output += Area + " ";
-            }
-            if (intList.S3.Count != 0 && MininumInt <= 3)
-            {
-                output += "\n《震度3》";
-                foreach (string Area in intList.S3)
-                    output += Area + " ";
-            }
-            if (intList.S2.Count != 0 && MininumInt <= 2)
-            {
-                output += "\n《震度2》";
-                foreach (string Area in intList.S2)
-                    output += Area + " ";
-            }
-            if (intList.S1.Count != 0 && MininumInt <= 1)
-            {
-                output += "\n《震度1》";
-                foreach (string Area in intList.S1)
-                    output += Area + " ";
-            }
-            return output.Replace("\n\n","");
+            if (intList.S9.Count != 0 && mininumInt <= 9)
+                output += "\n《震度7》" + string.Join(" ", intList.S9);
+            if (intList.S8.Count != 0 && mininumInt <= 8)
+                output += "\n《震度6強》" + string.Join(" ", intList.S8);
+            if (intList.S7.Count != 0 && mininumInt <= 7)
+                output += "\n《震度6弱》" + string.Join(" ", intList.S7);
+            if (intList.S6.Count != 0 && mininumInt <= 6)
+                output += "\n《震度5強》" + string.Join(" ", intList.S6);
+            if (intList.S5.Count != 0 && mininumInt <= 5)
+                output += "\n《震度5弱》" + string.Join(" ", intList.S5);
+            if (intList.S4.Count != 0 && mininumInt <= 4)
+                output += "\n《震度4》" + string.Join(" ", intList.S4);
+            if (intList.S3.Count != 0 && mininumInt <= 3)
+                output += "\n《震度3》" + string.Join(" ", intList.S3);
+            if (intList.S2.Count != 0 && mininumInt <= 2)
+                output += "\n《震度2》" + string.Join(" ", intList.S2);
+            if (intList.S1.Count != 0 && mininumInt <= 1)
+                output += "\n《震度1》" + string.Join(" ", intList.S1);
+            return output.Replace("\n\n", "");
         }
 
         /// <summary>
@@ -289,7 +251,7 @@ namespace QuakeMapFast
                 LatSta -= correction;
                 LatEnd += correction;
             }
-            else if (LonEnd - LonSta < LatEnd - LatSta)
+            else// if (LonEnd - LonSta < LatEnd - LatSta)
             {
                 double correction = ((LatEnd - LatSta) - (LonEnd - LonSta)) / 2d;
                 LonSta -= correction;
