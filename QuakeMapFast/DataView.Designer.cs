@@ -73,6 +73,7 @@
             this.ContextMenuStrip = this.CMS;
             this.Name = "DataView";
             this.Text = "QuakeMapFast";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.DataView_FormClosing);
             this.BackgroundImageChanged += new System.EventHandler(this.Form1_BackgroundImageChanged);
             this.CMS.ResumeLayout(false);
             this.ResumeLayout(false);

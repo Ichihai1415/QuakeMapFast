@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="GroupBox_Bouyomi_Text.Text" xml:space="preserve">
-    <value>有効:
+    <value>有効:                                                    ※テストは保存してから行ってください。
 
 声質:                    0:画面上の設定  1:女性1  2:女性2  3:男性1  4:男性2
                              5:中性  6:ロボット  7:機械1  8:機械2  10001～:SAPI5

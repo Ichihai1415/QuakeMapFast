@@ -5,10 +5,18 @@ using System.Windows.Forms;
 
 namespace QuakeMapFast
 {
+    /// <summary>
+    /// 画像表示画面
+    /// </summary>
     public partial class DataView : Form
     {
-
+        /// <summary>
+        /// 最新の情報のテキスト
+        /// </summary>
         string lastText = "";
+        /// <summary>
+        /// 最新の情報の画像
+        /// </summary>
         Bitmap lastBitmap = new Bitmap(1920, 1080);
 
         public DataView()
@@ -16,6 +24,9 @@ namespace QuakeMapFast
             InitializeComponent();
         }
 
+        /// <summary>
+        /// サイズ・位置設定を反映します。
+        /// </summary>
         public void SettingReload()
         {
             ClientSize = Settings.Default.Window_Size;
@@ -61,6 +72,14 @@ namespace QuakeMapFast
             BackgroundImage = newImage;
             lastBitmap = (Bitmap)newImage.Clone();
             lastText = newText;
+        }
+
+        private void DataView_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (MessageBox.Show("終了してもよろしいですか？", "確認", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) == DialogResult.OK)
+                Environment.Exit(0);//こうじゃないと1回では閉じないっぽい
+            else
+                e.Cancel = true;
         }
     }
 }

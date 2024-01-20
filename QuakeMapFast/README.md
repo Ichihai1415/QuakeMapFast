@@ -2,10 +2,12 @@
 このソフトは現在ベータ版です。以下の**進捗**や**予定**を確認してください。
 
 <div display="flex">
-  <img src="https://github.com/Ichihai1415/QuakeMapFast/blob/release/image/v0.1.0-1.png" width="24%" />
-  <img src="https://github.com/Ichihai1415/QuakeMapFast/blob/release/image/v0.1.0-2.png" width="24%" />
-  <img src="https://github.com/Ichihai1415/QuakeMapFast/blob/release/image/v0.1.0-3.png" width="24%" />
-  <img src="https://github.com/Ichihai1415/QuakeMapFast/blob/release/image/v0.1.0-4.png" width="24%" />
+  <img src="https://raw.githubusercontent.com/Ichihai1415/QuakeMapFast/release/image/v0.1.0-1.png" width="24%" />
+  <img src="https://raw.githubusercontent.com/Ichihai1415/QuakeMapFast/release/image/v0.1.0-2.png" width="24%" />
+  <img src="https://raw.githubusercontent.com/Ichihai1415/QuakeMapFast/release/image/v0.1.0-3.png" width="24%" />
+  <img src="https://raw.githubusercontent.com/Ichihai1415/QuakeMapFast/release/image/v0.1.0-4.png" width="24%" />
+  <img src="https://raw.githubusercontent.com/Ichihai1415/QuakeMapFast/release/image/v0.2.0-1.png" width="24%" />
+  <img src="https://raw.githubusercontent.com/Ichihai1415/QuakeMapFast/release/image/v0.2.0-2.png" width="24%" />
 </div>
 
 # 仕様
@@ -46,7 +48,7 @@ jsonデータ・画像を保存できます。画像を公開する場合著作�
 > - [ ] 遠地地震に関する情報
 - [ ] 津波予報(552)
 - [ ] 津波予報(5520)
-- [ ] 緊急地震速報(警報)(556)
+- [x] 緊急地震速報(警報)(556)
 
 # 予定
 - アイコン
@@ -55,6 +57,11 @@ jsonデータ・画像を保存できます。画像を公開する場合著作�
 - テキストを自由に決めれるように
 
 # 履歴
+
+## v0.2.0
+2024/01/20
+- 処理の大幅な改修(不具合が起きる可能性があります)
+- 緊急地震速報(警報)の追加
 
 ## v0.1.4
 2023/12/03

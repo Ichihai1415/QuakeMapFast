@@ -42,6 +42,7 @@ namespace QuakeMapFast
         public static void ConWrite(string text, ConsoleColor color, bool withLine = true)
         {
             Console.ForegroundColor = color;
+            Console.Write(DateTime.Now.ToString("HH:mm:ss.ffff "));
             if (withLine)
                 Console.WriteLine(text);
             else
@@ -105,6 +106,5 @@ namespace QuakeMapFast
             }
             ConWrite("[Telop]テロップ送信終了");
         }
-
     }
 }

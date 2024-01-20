@@ -66,7 +66,6 @@ namespace QuakeMapFast
             {
                 File.Copy("UserSetting.xml", config.FilePath, true);
                 ConWrite($"[CtrlForm_Load]以前の設定を復元しました。");
-                SettingReload();
             }
             File.WriteAllText("AppDataPath.txt", config.FilePath);
             ConWrite($"[CtrlForm_Load]\"AppDataPath.txt\"に設定ファイルのパスを保存しました");
@@ -93,7 +92,8 @@ namespace QuakeMapFast
 
             view_all.Show();
 
-            Debug(); return;//デバッグ時ここをつける(ここ以降行かせない)
+            SettingReload();
+            //Debug(); return;//デバッグ時ここをつける(ここ以降行かせない)
 
             await Get();
         }
@@ -111,7 +111,7 @@ namespace QuakeMapFast
                     {
                     connect:
                         await client.ConnectAsync(new Uri("wss://api.p2pquake.net/v2/ws"), CancellationToken.None);
-                        ConWrite("[Main]接続しました");
+                        ConWrite("[Get]接続しました");
                         while (client.State == WebSocketState.Open)
                         {
                             byte[] buffer = new byte[256 * 1024];//分割されるからこんなに要らないかも
@@ -159,9 +159,21 @@ namespace QuakeMapFast
                                 latestID = id;
                                 if (ignoreCode.Contains(code))
                                     continue;
-                                ConWrite(jsonText, ConsoleColor.Green);
-                                if (type == "ScalePrompt")
-                                    ScalePrompt(json);
+                                ConWrite($"[Get]{jsonText}", ConsoleColor.Green);
+                                switch (code)
+                                {
+                                    case 551:
+                                        switch (type)
+                                        {
+                                            case "ScalePrompt":
+                                                ScalePrompt(json);
+                                                break;
+                                        }
+                                        break;
+                                    case 556:
+                                        EEW(json);
+                                        break;
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -204,7 +216,8 @@ namespace QuakeMapFast
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\scale-ogasawara-only.json")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\scale-tokyo23-only.json")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2018oosakahokubu-scale-last.json")));
-            ScalePrompt(JObject.Parse(File.ReadAllText("C:\\Ichihai1415\\source\\vs\\QuakeMapFast\\QuakeMapFast\\bin\\x64\\Debug\\Log\\202401\\01\\16\\20240101161457.8494.txt")));
+            //ScalePrompt(JObject.Parse(File.ReadAllText("C:\\Ichihai1415\\source\\vs\\QuakeMapFast\\QuakeMapFast\\bin\\x64\\Debug\\Log\\202401\\01\\16\\20240101161457.8494.txt")));
+            EEW(JObject.Parse(File.ReadAllText("C:\\Ichihai1415\\source\\vs\\QuakeMapFast\\QuakeMapFast\\bin\\x64\\Debug\\Log\\202401\\01\\16\\20240101161107.3056.txt")));
         }
 
         private void SettingReload()
@@ -227,6 +240,8 @@ namespace QuakeMapFast
             Bouyomi_Tone.Value = Settings.Default.Bouyomi_Tone;
 
             Telop_Enable.Checked = Settings.Default.Telop_Enable;
+
+            view_all.SettingReload();
             ConWrite("[SettingReload]設定読み込み完了");
         }
 
@@ -251,6 +266,7 @@ namespace QuakeMapFast
             File.Copy(config.FilePath, "UserSetting.xml", true);
             File.WriteAllText("AppDataPath.txt", config.FilePath);
             ConWrite("[Setting]設定保存終了");
+            SettingReload();
         }
 
         private void SettingReset_Click(object sender, EventArgs e)
@@ -284,10 +300,45 @@ namespace QuakeMapFast
             ConWrite("[TelopTest_Click]テロップ送信テスト完了");
         }
 
-        private void JSONreadCk_CheckedChanged(object sender, EventArgs e)
+        private void JSONread_Click(object sender, EventArgs e)
         {
-            readJSON = JSONreadCk.Checked;
-        }
+            readJSON = true;
+            try
+            {
+                ConWrite("[JSONread_Click]ファイルのパスを入力してください。");
+                string jsonText = File.ReadAllText(Console.ReadLine().Replace("\"", ""));
+                var json = JObject.Parse(jsonText);
 
+                int code = (int)json["code"];
+                string id = (string)json["_id"];
+                string type = (string)json["issue"]["type"];
+                string codeInfo = P2PInfoCodeName.Keys.Contains(code) ? P2PInfoCodeName[code] : "-";
+                string issueInfo = P2PInfoTypeName.Keys.Contains(type ?? "") ? P2PInfoTypeName[type ?? ""] : "-";
+                ConWrite($"[JSONreadCk]読み込み code:{code}{codeInfo} type:{type}{issueInfo} id:{id}");
+                latestID = id;
+                ConWrite(jsonText, ConsoleColor.Green);
+                switch (code)
+                {
+                    case 551:
+                        switch (type)
+                        {
+                            case "ScalePrompt":
+                                ScalePrompt(json);
+                                break;
+                        }
+                        break;
+                    case 556:
+                        EEW(json);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                ConWrite("[JSONreadCk]", ex);
+                Directory.CreateDirectory($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}");
+                File.WriteAllText($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.txt", $"{ex}");
+            }
+            readJSON = false;
+        }
     }
 }

@@ -54,7 +54,7 @@
             this.TextEnd = new System.Windows.Forms.Label();
             this.SettingSave = new System.Windows.Forms.Button();
             this.SettingReset = new System.Windows.Forms.Button();
-            this.JSONreadCk = new System.Windows.Forms.CheckBox();
+            this.JSONread = new System.Windows.Forms.Button();
             this.GroupBox_Display.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.BackGreenTime)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.WindowLocation_Y)).BeginInit();
@@ -329,7 +329,7 @@
             this.GroupBox_Bouyomi_Text.AutoSize = true;
             this.GroupBox_Bouyomi_Text.Location = new System.Drawing.Point(6, 19);
             this.GroupBox_Bouyomi_Text.Name = "GroupBox_Bouyomi_Text";
-            this.GroupBox_Bouyomi_Text.Size = new System.Drawing.Size(353, 90);
+            this.GroupBox_Bouyomi_Text.Size = new System.Drawing.Size(369, 90);
             this.GroupBox_Bouyomi_Text.TabIndex = 0;
             this.GroupBox_Bouyomi_Text.Text = resources.GetString("GroupBox_Bouyomi_Text.Text");
             // 
@@ -402,23 +402,22 @@
             this.SettingReset.UseVisualStyleBackColor = true;
             this.SettingReset.Click += new System.EventHandler(this.SettingReset_Click);
             // 
-            // JSONreadCk
+            // JSONread
             // 
-            this.JSONreadCk.AutoSize = true;
-            this.JSONreadCk.Location = new System.Drawing.Point(328, 426);
-            this.JSONreadCk.Name = "JSONreadCk";
-            this.JSONreadCk.Size = new System.Drawing.Size(125, 19);
-            this.JSONreadCk.TabIndex = 6;
-            this.JSONreadCk.Text = "JSON読み込みモード";
-            this.JSONreadCk.UseVisualStyleBackColor = true;
-            this.JSONreadCk.CheckedChanged += new System.EventHandler(this.JSONreadCk_CheckedChanged);
+            this.JSONread.Location = new System.Drawing.Point(276, 415);
+            this.JSONread.Name = "JSONread";
+            this.JSONread.Size = new System.Drawing.Size(261, 23);
+            this.JSONread.TabIndex = 6;
+            this.JSONread.Text = "JSON読み込み(コンソールにパスを入力してください)";
+            this.JSONread.UseVisualStyleBackColor = true;
+            this.JSONread.Click += new System.EventHandler(this.JSONread_Click);
             // 
             // CtrlForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.JSONreadCk);
+            this.Controls.Add(this.JSONread);
             this.Controls.Add(this.SettingReset);
             this.Controls.Add(this.SettingSave);
             this.Controls.Add(this.TextEnd);
@@ -479,6 +478,6 @@
         private System.Windows.Forms.Button SettingSave;
         private System.Windows.Forms.Button SettingReset;
         private System.Windows.Forms.CheckBox AutoCopy;
-        private System.Windows.Forms.CheckBox JSONreadCk;
+        private System.Windows.Forms.Button JSONread;
     }
 }
