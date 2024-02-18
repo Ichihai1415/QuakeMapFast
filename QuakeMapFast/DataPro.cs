@@ -214,17 +214,17 @@ namespace QuakeMapFast
             var hypocenter = earthquake["hypocenter"];
 
             DateTime time = DateTime.Parse((string)earthquake["originTime"]);
-            List<string> areaWarn = json["areas"].Select(n => (string)n["name"]).ToList();
+            Dictionary<string, SolidBrush> areaColor = json["areas"].ToDictionary(area => (string)area["name"], area => P2PScale2isOver6((int)area["scaleFrom"], (int)area["scaleTo"]) ? new SolidBrush(Color.FromArgb(180, 0, 0)) : new SolidBrush(Color.FromArgb(180, 180, 0)));
+            List<string> areaWarn = areaColor.Keys.ToList();
             List<string> prefWarn = json["areas"].Select(n => (string)n["pref"]).Distinct().ToList();
 
             double hLat = (double)hypocenter["latitude"];
             double hLon = (double)hypocenter["longitude"];
             ConWrite("[EEW]画像描画開始");
-            var warnColor = new SolidBrush(Color.FromArgb(180, 180, 0));
-            Bitmap bitmap = DrawMap(areaWarn.ToDictionary(x => x, x => warnColor), hLat, hLon);
+
+            Bitmap bitmap = DrawMap(areaColor, hLat, hLon);
 
             string hypoName = (string)hypocenter["reduceName"];
-
 
             string warnAreaInfo1 = "";
             string warnAreaInfo2 = "";
@@ -233,8 +233,10 @@ namespace QuakeMapFast
                 string minInt = P2PScale2IntS((int)area["scaleFrom"]);
                 string maxInt = P2PScale2IntS((int)area["scaleTo"]);
                 warnAreaInfo1 += $"{area["name"]}\n";
-                if (maxInt == "-" || minInt == maxInt)
+                if (maxInt == "-")
                     warnAreaInfo2 += $"震度{minInt}程度以上\n";
+                else if(minInt == maxInt)
+                    warnAreaInfo2 += $"震度{minInt}程度\n";
                 else
                     warnAreaInfo2 += $"震度{minInt}～{maxInt}程度\n";
             }
