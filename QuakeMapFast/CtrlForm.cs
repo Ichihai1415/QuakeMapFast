@@ -94,8 +94,9 @@ namespace QuakeMapFast
             view_all.Show();
 
             SettingReload();
-            Debug(); return;//デバッグ時ここをつける(ここ以降行かせない)
+            //Debug(); return;//デバッグ時ここをつける(ここ以降行かせない)
 
+            XPost("test from QuakeMapFast", "C:\\Users\\proje\\Pictures\\_posttest.png");
             await Get();
         }
 

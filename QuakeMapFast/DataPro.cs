@@ -7,6 +7,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using static QuakeMapFast.Conv;
 using static QuakeMapFast.CtrlForm;
@@ -108,7 +109,6 @@ namespace QuakeMapFast
         /// 震度速報
         /// </summary>
         /// <param name="json">描画するデータ</param>
-        /// <returns>震度速報の画像</returns>
         public static void ScalePrompt(JObject json)
         {
             DateTime time = DateTime.Parse((string)json["earthquake"]["time"]);
@@ -150,9 +150,9 @@ namespace QuakeMapFast
                     }
             }
             ConWrite("[ScalePrompt]画像描画完了");
+            DateTime saveTime = DateTime.Now;
             if (Settings.Default.Save_Image)
             {
-                DateTime saveTime = DateTime.Now;
                 Directory.CreateDirectory($"output\\{saveTime:yyyyMM}\\{saveTime:dd}");
                 bitmap.Save($"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png", ImageFormat.Png);
                 ConWrite($"[Draw]output\\{saveTime:yyyyMM}\\{saveTime:dd}に保存しました");
@@ -166,12 +166,16 @@ namespace QuakeMapFast
             Telop($"0,震度速報【最大震度{maxIntS}】,{intsArea.Replace("\n", "")},{Int2TelopColor(maxIntN)},False,60,1000");
             if (debug || readJSON)
                 Telop($"0,《現在の情報ではありません》震度速報【最大震度{maxIntS}】,{intsArea.Replace("\n", "")},{Int2TelopColor(maxIntN)},False,10,1000");
+            view_all.ImageChange(bitmap, text);
             if (Settings.Default.AutoCopy)
             {
-                Clipboard.SetImage(bitmap);
                 Clipboard.SetText(text);
+                Task.Delay(100).ConfigureAwait(false);//片方がクリップボードに保存されないから仮
+                Clipboard.SetImage(bitmap);
             }
-            view_all.ImageChange(bitmap, text);
+            if (File.Exists("XPosterV2Host - Enable"))
+                if (!debug && !readJSON)
+                    XPost(text, $"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png");
         }
 
 
@@ -235,7 +239,7 @@ namespace QuakeMapFast
                 warnAreaInfo1 += $"{area["name"]}\n";
                 if (maxInt == "-")
                     warnAreaInfo2 += $"震度{minInt}程度以上\n";
-                else if(minInt == maxInt)
+                else if (minInt == maxInt)
                     warnAreaInfo2 += $"震度{minInt}程度\n";
                 else
                     warnAreaInfo2 += $"震度{minInt}～{maxInt}程度\n";
@@ -262,9 +266,9 @@ namespace QuakeMapFast
                     }
             }
             ConWrite("[EEW]画像描画完了");
+            DateTime saveTime = DateTime.Now;
             if (Settings.Default.Save_Image)
             {
-                DateTime saveTime = DateTime.Now;
                 Directory.CreateDirectory($"output\\{saveTime:yyyyMM}\\{saveTime:dd}");
                 bitmap.Save($"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png", ImageFormat.Png);
                 ConWrite($"[Draw]output\\{saveTime:yyyyMM}\\{saveTime:dd}に保存しました");
@@ -276,12 +280,16 @@ namespace QuakeMapFast
             Telop($"0,緊急地震速報,強い揺れに警戒 {string.Join(" ", prefWarn)},200,0,0,White,255,0,0,White,False,60,1000");
             if (debug || readJSON)
                 Telop($"0,《現在の情報ではありません》緊急地震速報,強い揺れに警戒 {string.Join(" ", prefWarn)},200,0,0,White,255,0,0,White,False,10,1000");
+            view_all.ImageChange(bitmap, text);
             if (Settings.Default.AutoCopy)
             {
-                Clipboard.SetImage(bitmap);
                 Clipboard.SetText(text);
+                Task.Delay(100).ConfigureAwait(false);//片方がクリップボードに保存されないから仮
+                Clipboard.SetImage(bitmap);
             }
-            view_all.ImageChange(bitmap, text);
+            if (File.Exists("XPosterV2Host - Enable"))
+                if (!debug && !readJSON)
+                    XPost(text, $"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png");
         }
     }
 }

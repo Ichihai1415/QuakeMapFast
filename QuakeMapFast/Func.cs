@@ -8,9 +8,17 @@ namespace QuakeMapFast
 {
     public class Func
     {
+
+
+
+
+
+
         /// <summary>
         /// コンソールのデフォルトの色
         /// </summary>
+
+
         public static readonly ConsoleColor defaultColor = Console.ForegroundColor;
 
         /// <summary>
@@ -85,17 +93,17 @@ namespace QuakeMapFast
         /// <summary>
         /// TelopにSocket送信します
         /// </summary>
-        /// <param name="Text">Telopに送信するテキスト(Telop方式)</param>
-        public static void Telop(string Text)
+        /// <param name="text">Telopに送信するテキスト(Telop方式)</param>
+        public static void Telop(string text)
         {
             if (!Settings.Default.Telop_Enable)
                 return;
             ConWrite("[Telop]テロップ送信開始");
-            ConWrite("[Telop]Text:" + Text);
+            ConWrite("[Telop]Text:" + text);
             try
             {
                 byte[] message = new byte[4096];
-                message = Encoding.UTF8.GetBytes(Text);
+                message = Encoding.UTF8.GetBytes(text);
                 using (TcpClient tcpClient = new TcpClient("127.0.0.1", 31401))
                 using (NetworkStream networkStream = tcpClient.GetStream())
                     networkStream.Write(message, 0, message.Length);
@@ -105,6 +113,36 @@ namespace QuakeMapFast
                 ConWrite("[Telop]", ex);
             }
             ConWrite("[Telop]テロップ送信終了");
+        }
+
+        /// <summary>
+        /// XPosterV2Hostに送信します。
+        /// </summary>
+        /// <remarks><c>if (!debug && !readJSON) </c>をしておくこと</remarks>
+        /// <param name="text"></param>
+        /// <param name="path"></param>
+        public static void XPost(string text, string path)
+        {
+            if (File.Exists("XPosterV2Host - Enable"))//念のため
+                try
+                {
+                    ConWrite("[XPost]X送信開始");
+                    string sendText = $"{{ \"text\" : \"{text}\", \"images\" : [ \"{Path.GetFullPath(path)}\" ] }}";
+                    ConWrite("[XPost]Text:" + sendText);
+                    byte[] message = new byte[16 * 1024];
+                    message = Encoding.UTF8.GetBytes(sendText);
+                    using (TcpClient tcpClient = new TcpClient("127.0.0.1", 31403))
+                    using (NetworkStream networkStream = tcpClient.GetStream())
+                        networkStream.Write(message, 0, message.Length);
+                }
+                catch (Exception ex)
+                {
+                    ConWrite("[XPost]", ex);
+                }
+                finally
+                {
+                    ConWrite("[XPost]X送信終了");
+                }
         }
     }
 }
