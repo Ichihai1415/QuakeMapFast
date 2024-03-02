@@ -8,17 +8,9 @@ namespace QuakeMapFast
 {
     public class Func
     {
-
-
-
-
-
-
         /// <summary>
         /// コンソールのデフォルトの色
         /// </summary>
-
-
         public static readonly ConsoleColor defaultColor = Console.ForegroundColor;
 
         /// <summary>
@@ -127,7 +119,7 @@ namespace QuakeMapFast
                 try
                 {
                     ConWrite("[XPost]X送信開始");
-                    string sendText = $"{{ \"text\" : \"{text}\", \"images\" : [ \"{Path.GetFullPath(path).Replace("\\","\\\\")}\" ] }}";
+                    string sendText = $"{{ \"text\" : \"{text}\", \"images\" : \"{Path.GetFullPath(path).Replace("\\","\\\\")}\" }}";
                     ConWrite("[XPost]Text:" + sendText);
                     byte[] message = new byte[16 * 1024];
                     message = Encoding.UTF8.GetBytes(sendText);
