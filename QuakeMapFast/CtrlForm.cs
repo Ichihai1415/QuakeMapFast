@@ -34,7 +34,7 @@ namespace QuakeMapFast
          README.md
          (JSON-sample.zip(...\json\P2Pquake)更新時にResourceのCommentにバージョンを書いておく
          */
-        public static readonly string version = "0.2.1";
+        public static readonly string version = "0.2.2";
         readonly int[] ignoreCode = { 554, 555, 561, 9611 };//表示しない
         public static readonly Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
         string latestID = "";
@@ -96,6 +96,7 @@ namespace QuakeMapFast
             SettingReload();
             //Debug(); return;//デバッグ時ここをつける(ここ以降行かせない)
 
+            //XPost("test from QuakeMapFast (2)", "D:\\Ichihai1415\\image\\icon\\new - bot.png");
             await Get();
         }
 
@@ -154,7 +155,7 @@ namespace QuakeMapFast
                                 string type = (string)json.SelectToken("issue.type");//ないときあるからこれで
                                 string codeInfo = P2PInfoCodeName.Keys.Contains(code) ? P2PInfoCodeName[code] : "-";
                                 string issueInfo = P2PInfoTypeName.Keys.Contains(type ?? "") ? P2PInfoTypeName[type ?? ""] : "-";
-                                ConWrite($"[Get]受信 code:{code}{codeInfo} type:{type}{issueInfo} id:{id}");
+                                ConWrite($"[Get]受信 id:{id} code:{code}{codeInfo} type:{type}{issueInfo}");
                                 if (latestID == id)
                                     continue;
                                 latestID = id;

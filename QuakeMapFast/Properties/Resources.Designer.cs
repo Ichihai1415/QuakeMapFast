@@ -61,16 +61,6 @@ namespace QuakeMapFast.Properties {
         }
         
         /// <summary>
-        ///   {&quot;type&quot;:&quot;FeatureCollection&quot;, &quot;features&quot;: [
-        ///{&quot;type&quot;:&quot;Feature&quot;,&quot;geometry&quot;:{&quot;type&quot;:&quot;Polygon&quot;,&quot;coordinates&quot;:[[[141.49062527873366,43.68444110807076],[141.46871167290544,43.70077944061876],[141.4173361086746,43.711196946182156],[141.4049841631886,43.73778610844221],[141.37127333259832,43.72762055874182],[141.3374300003943,43.73749444121552],[141.33107277558815,43.70759666685274],[141.34945888511947,43.66745444076986],[141.35221555090698,43.64120250539139],[141.3655327756171,43.617426667107054],[141.382799052934 [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        internal static string _20190125_AreaForecastLocalE_GIS_name_0_1 {
-            get {
-                return ResourceManager.GetString("_20190125_AreaForecastLocalE_GIS_name_0_1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   ※このファイルは更新確認にも使用しています。
         ///
         ///
@@ -85,6 +75,16 @@ namespace QuakeMapFast.Properties {
         internal static string AppData_README {
             get {
                 return ResourceManager.GetString("AppData_README", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   {&quot;type&quot;:&quot;FeatureCollection&quot;, &quot;features&quot;: [
+        ///{&quot;type&quot;:&quot;Feature&quot;,&quot;geometry&quot;:{&quot;type&quot;:&quot;Polygon&quot;,&quot;coordinates&quot;:[[[141.49062527873366,43.68444110807076],[141.4874752791609,43.684895558883],[141.47999917002574,43.68797444096771],[141.4750211149326,43.69271777480549],[141.46871167290544,43.70077944061876],[141.4645963941084,43.702354170608544],[141.46262306120536,43.701337225332736],[141.45309416316513,43.700900838303085],[141.44319972758547,43.703379720597695],[141.43883167274362,43.70382972066511],[141.439117223681 [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string AreaForecastLocalE_GIS_20190125_1 {
+            get {
+                return ResourceManager.GetString("AreaForecastLocalE_GIS_20190125_1", resourceCulture);
             }
         }
         
@@ -138,6 +138,16 @@ namespace QuakeMapFast.Properties {
             get {
                 object obj = ResourceManager.GetObject("Koruri_Regular", resourceCulture);
                 return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   {&quot;type&quot;:&quot;FeatureCollection&quot;, &quot;features&quot;: [
+        ///{&quot;type&quot;:&quot;Feature&quot;,&quot;geometry&quot;:{&quot;type&quot;:&quot;Polygon&quot;,&quot;coordinates&quot;:[[[179.99921875,-16.168554687500006],[180,-16.152929687500006],[179.5517578125,-16.24990234375001],[179.35917968750005,-16.3798828125],[179.09140625000003,-16.4375],[178.86572265625,-16.5400390625],[178.80507812500002,-16.631445312500006],[178.58359375000003,-16.621875],[178.6037109375,-16.800585937500003],[178.70664062500003,-16.976171875],[178.88369140625002,-16.886035156250003],[179.0068359375,-16.9001 [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Map_world {
+            get {
+                return ResourceManager.GetString("Map_world", resourceCulture);
             }
         }
     }

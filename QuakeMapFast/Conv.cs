@@ -55,11 +55,11 @@ namespace QuakeMapFast
         /// <summary>
         /// P2Pjsonの震度をint形式(0,1,..,8,9)に変換します。
         /// </summary>
-        /// <param name="Scale">P2Pjsonの震度</param>
+        /// <param name="scale">P2Pjsonの震度</param>
         /// <returns>int形式の震度</returns>
-        public static int P2PScale2IntN(int Scale)
+        public static int P2PScale2IntN(int scale)
         {
-            switch (Scale)
+            switch (scale)
             {
                 case 10:
                     return 1;
@@ -87,11 +87,11 @@ namespace QuakeMapFast
         /// <summary>
         /// P2Pjsonの震度をstring形式(-,1,..,6強,7)に変換します。
         /// </summary>
-        /// <param name="Scale">P2Pjsonの震度</param>
+        /// <param name="scale">P2Pjsonの震度</param>
         /// <returns>int形式の震度</returns>
-        public static string P2PScale2IntS(int Scale)
+        public static string P2PScale2IntS(int scale)
         {
-            switch (Scale)
+            switch (scale)
             {
                 case 10:
                     return "1";
@@ -111,9 +111,22 @@ namespace QuakeMapFast
                     return "6強";
                 case 70:
                     return "7";
-                default:
+                default://-1,99
                     return "-";
             }
+        }
+
+        /// <summary>
+        /// P2Pjsonの震度が6弱以上か判定します。1つの場合(下限上限なし)同じものを指定してください。
+        /// </summary>
+        /// <param name="scaleFrom">震度の下限</param>
+        /// <param name="scaleTo">震度の上限</param>
+        /// <returns>6弱以上の場合true</returns>
+        public static bool P2PScale2isOver6(int scaleFrom, int scaleTo)
+        {
+            return scaleTo <= 70 ?
+                scaleTo >= 55 :
+                scaleFrom <= 70 && scaleFrom >= 55;//55<=scaleTo<=70 
         }
 
         /// <summary>

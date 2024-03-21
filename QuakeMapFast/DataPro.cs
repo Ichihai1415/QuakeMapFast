@@ -7,6 +7,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using static QuakeMapFast.Conv;
 using static QuakeMapFast.CtrlForm;
@@ -16,6 +17,8 @@ namespace QuakeMapFast
 {
     internal class DataPro
     {
+        public static JObject mapjson = JObject.Parse(Resources.AreaForecastLocalE_GIS_20190125_1);
+
         /// <summary>
         /// マップを描画します。塗りつぶしも実行します。
         /// </summary>
@@ -26,7 +29,6 @@ namespace QuakeMapFast
         public static Bitmap DrawMap(Dictionary<string, SolidBrush> areaColor, double hypoLat = -200, double hypoLon = -200)
         {
             ConWrite("[DrawMap]座標計算開始");
-            var mapjson = JObject.Parse(Resources._20190125_AreaForecastLocalE_GIS_name_0_1);
             double latSta = 999;
             double latEnd = -999;
             double lonSta = 999;
@@ -108,7 +110,6 @@ namespace QuakeMapFast
         /// 震度速報
         /// </summary>
         /// <param name="json">描画するデータ</param>
-        /// <returns>震度速報の画像</returns>
         public static void ScalePrompt(JObject json)
         {
             DateTime time = DateTime.Parse((string)json["earthquake"]["time"]);
@@ -139,7 +140,7 @@ namespace QuakeMapFast
                 g.DrawString(maxIntAreas, new Font(font, 40), Brushes.White, 1100, 360);
 
                 g.FillRectangle(Brushes.Black, 1080, 900, 840, 180);
-                g.DrawString("日本地図データ:気象庁\n世界地図データ:National Earth\nそれぞれ加工して使用\nデータ:気象庁", new Font(font, 20), Brushes.White, 1090, 910);
+                g.DrawString("日本地図データ:気象庁\n世界地図データ:Natural Earth\nそれぞれ加工して使用\nデータ:気象庁", new Font(font, 20), Brushes.White, 1090, 910);
                 g.DrawImage(Resources.IntLegend, 1500, 906, 410, 164);
                 if (debug || readJSON)
                     using (var textGP = new GraphicsPath())
@@ -150,9 +151,9 @@ namespace QuakeMapFast
                     }
             }
             ConWrite("[ScalePrompt]画像描画完了");
+            DateTime saveTime = DateTime.Now;
             if (Settings.Default.Save_Image)
             {
-                DateTime saveTime = DateTime.Now;
                 Directory.CreateDirectory($"output\\{saveTime:yyyyMM}\\{saveTime:dd}");
                 bitmap.Save($"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png", ImageFormat.Png);
                 ConWrite($"[Draw]output\\{saveTime:yyyyMM}\\{saveTime:dd}に保存しました");
@@ -166,12 +167,16 @@ namespace QuakeMapFast
             Telop($"0,震度速報【最大震度{maxIntS}】,{intsArea.Replace("\n", "")},{Int2TelopColor(maxIntN)},False,60,1000");
             if (debug || readJSON)
                 Telop($"0,《現在の情報ではありません》震度速報【最大震度{maxIntS}】,{intsArea.Replace("\n", "")},{Int2TelopColor(maxIntN)},False,10,1000");
+            view_all.ImageChange(bitmap, text);
             if (Settings.Default.AutoCopy)
             {
-                Clipboard.SetImage(bitmap);
                 Clipboard.SetText(text);
+                Task.Delay(100).ConfigureAwait(false);//片方がクリップボードに保存されないから仮
+                Clipboard.SetImage(bitmap);
             }
-            view_all.ImageChange(bitmap, text);
+            if (File.Exists("XPosterV2Host - Enable"))
+                if (!debug && !readJSON)
+                    XPost(text, $"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png");
         }
 
 
@@ -214,17 +219,17 @@ namespace QuakeMapFast
             var hypocenter = earthquake["hypocenter"];
 
             DateTime time = DateTime.Parse((string)earthquake["originTime"]);
-            List<string> areaWarn = json["areas"].Select(n => (string)n["name"]).ToList();
+            Dictionary<string, SolidBrush> areaColor = json["areas"].ToDictionary(area => (string)area["name"], area => P2PScale2isOver6((int)area["scaleFrom"], (int)area["scaleTo"]) ? new SolidBrush(Color.FromArgb(180, 0, 0)) : new SolidBrush(Color.FromArgb(180, 180, 0)));
+            List<string> areaWarn = areaColor.Keys.ToList();
             List<string> prefWarn = json["areas"].Select(n => (string)n["pref"]).Distinct().ToList();
 
             double hLat = (double)hypocenter["latitude"];
             double hLon = (double)hypocenter["longitude"];
             ConWrite("[EEW]画像描画開始");
-            var warnColor = new SolidBrush(Color.FromArgb(180, 180, 0));
-            Bitmap bitmap = DrawMap(areaWarn.ToDictionary(x => x, x => warnColor), hLat, hLon);
+
+            Bitmap bitmap = DrawMap(areaColor, hLat, hLon);
 
             string hypoName = (string)hypocenter["reduceName"];
-
 
             string warnAreaInfo1 = "";
             string warnAreaInfo2 = "";
@@ -233,8 +238,10 @@ namespace QuakeMapFast
                 string minInt = P2PScale2IntS((int)area["scaleFrom"]);
                 string maxInt = P2PScale2IntS((int)area["scaleTo"]);
                 warnAreaInfo1 += $"{area["name"]}\n";
-                if (maxInt == "-" || minInt == maxInt)
+                if (maxInt == "-")
                     warnAreaInfo2 += $"震度{minInt}程度以上\n";
+                else if (minInt == maxInt)
+                    warnAreaInfo2 += $"震度{minInt}程度\n";
                 else
                     warnAreaInfo2 += $"震度{minInt}～{maxInt}程度\n";
             }
@@ -249,7 +256,7 @@ namespace QuakeMapFast
                 g.DrawString(warnAreaInfo2, new Font(font, 30), Brushes.White, 1540, 240);
 
                 g.FillRectangle(Brushes.Black, 1080, 900, 840, 180);
-                g.DrawString("日本地図データ:気象庁\n世界地図データ:National Earth\nそれぞれ加工して使用\nデータ:気象庁", new Font(font, 20), Brushes.White, 1090, 910);
+                g.DrawString("日本地図データ:気象庁\n世界地図データ:Natural Earth\nそれぞれ加工して使用\nデータ:気象庁", new Font(font, 20), Brushes.White, 1090, 910);
                 //消す場合コメントアウト
                 if (debug || readJSON)
                     using (var textGP = new GraphicsPath())
@@ -260,9 +267,9 @@ namespace QuakeMapFast
                     }
             }
             ConWrite("[EEW]画像描画完了");
+            DateTime saveTime = DateTime.Now;
             if (Settings.Default.Save_Image)
             {
-                DateTime saveTime = DateTime.Now;
                 Directory.CreateDirectory($"output\\{saveTime:yyyyMM}\\{saveTime:dd}");
                 bitmap.Save($"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png", ImageFormat.Png);
                 ConWrite($"[Draw]output\\{saveTime:yyyyMM}\\{saveTime:dd}に保存しました");
@@ -274,12 +281,16 @@ namespace QuakeMapFast
             Telop($"0,緊急地震速報,強い揺れに警戒 {string.Join(" ", prefWarn)},200,0,0,White,255,0,0,White,False,60,1000");
             if (debug || readJSON)
                 Telop($"0,《現在の情報ではありません》緊急地震速報,強い揺れに警戒 {string.Join(" ", prefWarn)},200,0,0,White,255,0,0,White,False,10,1000");
+            view_all.ImageChange(bitmap, text);
             if (Settings.Default.AutoCopy)
             {
-                Clipboard.SetImage(bitmap);
                 Clipboard.SetText(text);
+                Task.Delay(100).ConfigureAwait(false);//片方がクリップボードに保存されないから仮
+                Clipboard.SetImage(bitmap);
             }
-            view_all.ImageChange(bitmap, text);
+            if (File.Exists("XPosterV2Host - Enable"))
+                if (!debug && !readJSON)
+                    XPost(text, $"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png");
         }
     }
 }
