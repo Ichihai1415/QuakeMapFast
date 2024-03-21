@@ -124,16 +124,17 @@
     <None Include="README.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\20190125_AreaForecastLocalE_GIS-name-0.1.geojson" />
     <Content Include="Resources\AppData_README.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\AreaForecastLocalE_GIS_20190125_1.geojson" />
     <None Include="Resources\JSON-sample.zip" />
     <None Include="Resources\Koruri-LICENSE" />
     <None Include="Resources\Koruri-Regular.ttf" />
+    <None Include="Resources\map-world.geojson" />
     <None Include="Resources\QuakeMapFast - legend.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
