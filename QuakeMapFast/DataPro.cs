@@ -17,6 +17,8 @@ namespace QuakeMapFast
 {
     internal class DataPro
     {
+        public static JObject mapjson = JObject.Parse(Resources.AreaForecastLocalE_GIS_20190125_1);
+
         /// <summary>
         /// マップを描画します。塗りつぶしも実行します。
         /// </summary>
@@ -27,7 +29,6 @@ namespace QuakeMapFast
         public static Bitmap DrawMap(Dictionary<string, SolidBrush> areaColor, double hypoLat = -200, double hypoLon = -200)
         {
             ConWrite("[DrawMap]座標計算開始");
-            var mapjson = JObject.Parse(Resources._20190125_AreaForecastLocalE_GIS_name_0_1);
             double latSta = 999;
             double latEnd = -999;
             double lonSta = 999;
@@ -139,7 +140,7 @@ namespace QuakeMapFast
                 g.DrawString(maxIntAreas, new Font(font, 40), Brushes.White, 1100, 360);
 
                 g.FillRectangle(Brushes.Black, 1080, 900, 840, 180);
-                g.DrawString("日本地図データ:気象庁\n世界地図データ:National Earth\nそれぞれ加工して使用\nデータ:気象庁", new Font(font, 20), Brushes.White, 1090, 910);
+                g.DrawString("日本地図データ:気象庁\n世界地図データ:Natural Earth\nそれぞれ加工して使用\nデータ:気象庁", new Font(font, 20), Brushes.White, 1090, 910);
                 g.DrawImage(Resources.IntLegend, 1500, 906, 410, 164);
                 if (debug || readJSON)
                     using (var textGP = new GraphicsPath())
@@ -255,7 +256,7 @@ namespace QuakeMapFast
                 g.DrawString(warnAreaInfo2, new Font(font, 30), Brushes.White, 1540, 240);
 
                 g.FillRectangle(Brushes.Black, 1080, 900, 840, 180);
-                g.DrawString("日本地図データ:気象庁\n世界地図データ:National Earth\nそれぞれ加工して使用\nデータ:気象庁", new Font(font, 20), Brushes.White, 1090, 910);
+                g.DrawString("日本地図データ:気象庁\n世界地図データ:Natural Earth\nそれぞれ加工して使用\nデータ:気象庁", new Font(font, 20), Brushes.White, 1090, 910);
                 //消す場合コメントアウト
                 if (debug || readJSON)
                     using (var textGP = new GraphicsPath())

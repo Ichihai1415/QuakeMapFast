@@ -7,7 +7,7 @@
   <img src="https://raw.githubusercontent.com/Ichihai1415/QuakeMapFast/release/image/v0.1.0-3.png" width="24%" />
   <img src="https://raw.githubusercontent.com/Ichihai1415/QuakeMapFast/release/image/v0.1.0-4.png" width="24%" />
   <img src="https://raw.githubusercontent.com/Ichihai1415/QuakeMapFast/release/image/v0.2.0-1.png" width="24%" />
-  <img src="https://raw.githubusercontent.com/Ichihai1415/QuakeMapFast/release/image/v0.2.0-2.png" width="24%" />
+  <img src="https://raw.githubusercontent.com/Ichihai1415/QuakeMapFast/release/image/v0.2.2-1.png" width="24%" />
 </div>
 
 # 仕様
@@ -56,7 +56,13 @@ jsonデータ・画像を保存できます。画像を公開する場合著作�
 - 配色の自由な指定
 - テキストを自由に決めれるように
 
-# 履歴
+# 更新履歴
+## v0.2.2
+2024/03/21
+- 日本地図データを更新(少し詳しく)　世界地図データを追加(描画はなし)　(そもそもなかったが)世界地図データ表示が間違ってたので修正
+- 受信時表示を調整
+- READMEの緊急地震速報のサンプル画像を更新
+
 ## v0.2.1
 2024/01/20
 - json保存時、解析時エラーとなる問題を修正
