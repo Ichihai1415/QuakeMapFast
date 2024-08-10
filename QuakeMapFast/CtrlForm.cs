@@ -34,7 +34,7 @@ namespace QuakeMapFast
          README.md
          (JSON-sample.zip(...\json\P2Pquake)更新時にResourceのCommentにバージョンを書いておく
          */
-        public static readonly string version = "0.2.2";
+        public static readonly string version = "0.2.3";
         readonly int[] ignoreCode = { 554, 555, 561, 9611 };//表示しない
         public static readonly Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
         string latestID = "";
