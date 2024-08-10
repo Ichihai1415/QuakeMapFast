@@ -17,7 +17,7 @@ namespace QuakeMapFast
 {
     internal class DataPro
     {
-        public static JObject mapjson = JObject.Parse(Resources.AreaForecastLocalE_GIS_20190125_1);
+        public static JObject mapjson = new JObject();
 
         /// <summary>
         /// マップを描画します。塗りつぶしも実行します。
@@ -63,7 +63,7 @@ namespace QuakeMapFast
             var bitmap = new Bitmap(1920, 1080);
             using (var g = Graphics.FromImage(bitmap))
             {
-                g.Clear(Color.FromArgb(30, 60, 90));
+                g.Clear(Color.FromArgb(20, 40, 60));
                 var gPath = new GraphicsPath();
                 foreach (var features in mapjson["features"])
                 {
@@ -90,8 +90,8 @@ namespace QuakeMapFast
                     if (areaColor.ContainsKey((string)features["properties"]["name"]))
                         g.FillPath(areaColor[(string)features["properties"]["name"]], gPath);
                     else
-                        g.FillPath(new SolidBrush(Color.FromArgb(60, 90, 120)), gPath);
-                    g.DrawPath(new Pen(Color.FromArgb(200, 255, 255, 255), 2), gPath);
+                        g.FillPath(new SolidBrush(Color.FromArgb(100, 100, 150)), gPath);
+                    g.DrawPath(new Pen(Color.FromArgb(255, 200, 200, 200), 2), gPath);//zoom > 200 ? 2 : 1
 
                 }
                 gPath.Dispose();
@@ -163,10 +163,14 @@ namespace QuakeMapFast
             string intsArea_Max3 = Point2String(json, "addr", maxIntN - 2);//最大震度から3階級(Max6->6,5,4)
             string text = $"震度速報【最大震度{maxIntS}】{time:yyyy/MM/dd HH:mm}\n{intsArea}";
             ConWrite(text, ConsoleColor.Cyan);
-            Bouyomichan($"震度速報、{intsArea_Max3.Replace("\n", "").Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
-            Telop($"0,震度速報【最大震度{maxIntS}】,{intsArea.Replace("\n", "")},{Int2TelopColor(maxIntN)},False,60,1000");
+            if (debug || readJSON)
+                Bouyomichan($"QuakeMapFastの読み上げです。デバッグあるいはJSON読み込みモードのため無効です。");
+            else
+                Bouyomichan($"震度速報、{intsArea_Max3.Replace("\n", "").Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
             if (debug || readJSON)
                 Telop($"0,《現在の情報ではありません》震度速報【最大震度{maxIntS}】,{intsArea.Replace("\n", "")},{Int2TelopColor(maxIntN)},False,10,1000");
+            else
+                Telop($"0,震度速報【最大震度{maxIntS}】,{intsArea.Replace("\n", "")},{Int2TelopColor(maxIntN)},False,60,1000");
             view_all.ImageChange(bitmap, text);
             if (Settings.Default.AutoCopy)
             {
@@ -219,7 +223,8 @@ namespace QuakeMapFast
             var hypocenter = earthquake["hypocenter"];
 
             DateTime time = DateTime.Parse((string)earthquake["originTime"]);
-            Dictionary<string, SolidBrush> areaColor = json["areas"].ToDictionary(area => (string)area["name"], area => P2PScale2isOver6((int)area["scaleFrom"], (int)area["scaleTo"]) ? new SolidBrush(Color.FromArgb(180, 0, 0)) : new SolidBrush(Color.FromArgb(180, 180, 0)));
+            Dictionary<string, SolidBrush> areaColor = json["areas"].ToDictionary(area => (string)area["name"], area => P2PScale2isOver6((int)area["scaleFrom"], (int)area["scaleTo"])
+            ? new SolidBrush(Color.FromArgb(180, 0, 0)) : new SolidBrush(Color.FromArgb(180, 180, 0)));
             List<string> areaWarn = areaColor.Keys.ToList();
             List<string> prefWarn = json["areas"].Select(n => (string)n["pref"]).Distinct().ToList();
 
