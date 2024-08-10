@@ -91,10 +91,21 @@ namespace QuakeMapFast
             font = pfc.Families[0];
             ConWrite($"[CtrlForm_Load]フォント確認完了");
 
+
+            if (!File.Exists("AreaForecastLocalE_GIS_20240520_1.geojson"))
+            {
+                File.WriteAllText("AreaForecastLocalE_GIS_20240520_1.geojson", Resources.AreaForecastLocalE_GIS_20240520_1);
+                ConWrite($"[CtrlForm_Load]マップファイル(AreaForecastLocalE_GIS_20240520_1.geojson)をコピーしました");
+            }
+
+            ConWrite($"[CtrlForm_Load]マップファイル確認完了");
+            mapjson = JObject.Parse(File.ReadAllText("AreaForecastLocalE_GIS_20240520_1.geojson"));
+            ConWrite($"[CtrlForm_Load]マップファイル読み込み完了");
+
             view_all.Show();
 
             SettingReload();
-            //Debug(); return;//デバッグ時ここをつける(ここ以降行かせない)
+            Debug(); return;//デバッグ時ここをつける(ここ以降行かせない)
 
             //XPost("test from QuakeMapFast (2)", "D:\\Ichihai1415\\image\\icon\\new - bot.png");
             await Get();
@@ -219,7 +230,9 @@ namespace QuakeMapFast
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\scale-tokyo23-only.json")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2018oosakahokubu-scale-last.json")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("C:\\Ichihai1415\\source\\vs\\QuakeMapFast\\QuakeMapFast\\bin\\x64\\Debug\\Log\\202401\\01\\16\\20240101161457.8494.txt")));
-            EEW(JObject.Parse(File.ReadAllText("C:\\Ichihai1415\\source\\vs\\QuakeMapFast\\QuakeMapFast\\bin\\x64\\Debug\\Log\\202401\\01\\16\\20240101161107.3056.txt")));
+            //ScalePrompt(JObject.Parse(File.ReadAllText("D:\\Ichihai1415\\data\\json\\P2Pquake\\sc-2023kushiro.json")));
+            ScalePrompt(JObject.Parse(File.ReadAllText("D:\\Ichihai1415\\data\\json\\P2Pquake\\sc-2023kushiro-edit.json")));
+            //EEW(JObject.Parse(File.ReadAllText("C:\\Ichihai1415\\source\\vs\\QuakeMapFast\\QuakeMapFast\\bin\\x64\\Debug\\Log\\202401\\01\\16\\20240101161107.3056.txt")));
         }
 
         private void SettingReload()

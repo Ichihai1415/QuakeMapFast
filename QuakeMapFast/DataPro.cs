@@ -17,7 +17,7 @@ namespace QuakeMapFast
 {
     internal class DataPro
     {
-        public static JObject mapjson = JObject.Parse(Resources.AreaForecastLocalE_GIS_20190125_1);
+        public static JObject mapjson = new JObject();
 
         /// <summary>
         /// マップを描画します。塗りつぶしも実行します。
@@ -163,10 +163,14 @@ namespace QuakeMapFast
             string intsArea_Max3 = Point2String(json, "addr", maxIntN - 2);//最大震度から3階級(Max6->6,5,4)
             string text = $"震度速報【最大震度{maxIntS}】{time:yyyy/MM/dd HH:mm}\n{intsArea}";
             ConWrite(text, ConsoleColor.Cyan);
-            Bouyomichan($"震度速報、{intsArea_Max3.Replace("\n", "").Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
-            Telop($"0,震度速報【最大震度{maxIntS}】,{intsArea.Replace("\n", "")},{Int2TelopColor(maxIntN)},False,60,1000");
+            if (debug || readJSON)
+                Bouyomichan($"QuakeMapFastの読み上げです。デバッグあるいはJSON読み込みモードのため無効です。");
+            else
+                Bouyomichan($"震度速報、{intsArea_Max3.Replace("\n", "").Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
             if (debug || readJSON)
                 Telop($"0,《現在の情報ではありません》震度速報【最大震度{maxIntS}】,{intsArea.Replace("\n", "")},{Int2TelopColor(maxIntN)},False,10,1000");
+            else
+                Telop($"0,震度速報【最大震度{maxIntS}】,{intsArea.Replace("\n", "")},{Int2TelopColor(maxIntN)},False,60,1000");
             view_all.ImageChange(bitmap, text);
             if (Settings.Default.AutoCopy)
             {

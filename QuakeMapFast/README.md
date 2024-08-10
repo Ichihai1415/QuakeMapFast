@@ -1,6 +1,8 @@
 ﻿# 注意
 このソフトは現在ベータ版です。以下の**進捗**や**予定**を確認してください。
 
+
+画像例(旧版含む)
 <div display="flex">
   <img src="https://raw.githubusercontent.com/Ichihai1415/QuakeMapFast/release/image/v0.1.0-1.png" width="24%" />
   <img src="https://raw.githubusercontent.com/Ichihai1415/QuakeMapFast/release/image/v0.1.0-2.png" width="24%" />
@@ -20,7 +22,7 @@
 1920x1080の画像を描画します。フォントは[Koruri Regular](https://koruri.github.io/)を使用しています。震度配色は[Kiwi Monitor カラースキーム 第2版](https://kiwimonitor.amebaownd.com/posts/8214427)を改変したものです。
 
 ### 保存
-jsonデータ・画像を保存できます。画像を公開する場合著作権表示を消さないようにしてください。
+JSONデータ・画像を保存できます。画像を公開する場合著作権表示を消さないようにしてください。
 
 ### 読み上げ送信
 棒読みちゃんにSocket通信で読み上げ指令を送信できます。震度速報では最大震度から3階級まで読み上げします。
@@ -67,7 +69,7 @@ jsonデータ・画像を保存できます。画像を公開する場合著作�
 
 ## v0.2.1
 2024/01/20
-- json保存時、解析時エラーとなる問題を修正
+- JSON保存時、解析時エラーとなる問題を修正
 - JSONサンプル追加、自動コピー復活
 
 ## v0.2.0
