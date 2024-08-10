@@ -63,7 +63,7 @@ namespace QuakeMapFast
             var bitmap = new Bitmap(1920, 1080);
             using (var g = Graphics.FromImage(bitmap))
             {
-                g.Clear(Color.FromArgb(30, 60, 90));
+                g.Clear(Color.FromArgb(20, 40, 60));
                 var gPath = new GraphicsPath();
                 foreach (var features in mapjson["features"])
                 {
@@ -90,8 +90,8 @@ namespace QuakeMapFast
                     if (areaColor.ContainsKey((string)features["properties"]["name"]))
                         g.FillPath(areaColor[(string)features["properties"]["name"]], gPath);
                     else
-                        g.FillPath(new SolidBrush(Color.FromArgb(60, 90, 120)), gPath);
-                    g.DrawPath(new Pen(Color.FromArgb(200, 255, 255, 255), 2), gPath);
+                        g.FillPath(new SolidBrush(Color.FromArgb(100, 100, 150)), gPath);
+                    g.DrawPath(new Pen(Color.FromArgb(255, 200, 200, 200), 2), gPath);//zoom > 200 ? 2 : 1
 
                 }
                 gPath.Dispose();
@@ -223,7 +223,8 @@ namespace QuakeMapFast
             var hypocenter = earthquake["hypocenter"];
 
             DateTime time = DateTime.Parse((string)earthquake["originTime"]);
-            Dictionary<string, SolidBrush> areaColor = json["areas"].ToDictionary(area => (string)area["name"], area => P2PScale2isOver6((int)area["scaleFrom"], (int)area["scaleTo"]) ? new SolidBrush(Color.FromArgb(180, 0, 0)) : new SolidBrush(Color.FromArgb(180, 180, 0)));
+            Dictionary<string, SolidBrush> areaColor = json["areas"].ToDictionary(area => (string)area["name"], area => P2PScale2isOver6((int)area["scaleFrom"], (int)area["scaleTo"])
+            ? new SolidBrush(Color.FromArgb(180, 0, 0)) : new SolidBrush(Color.FromArgb(180, 180, 0)));
             List<string> areaWarn = areaColor.Keys.ToList();
             List<string> prefWarn = json["areas"].Select(n => (string)n["pref"]).Distinct().ToList();
 
