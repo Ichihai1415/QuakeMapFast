@@ -164,13 +164,15 @@ namespace QuakeMapFast
             string text = $"震度速報【最大震度{maxIntS}】{time:yyyy/MM/dd HH:mm}\n{intsArea}";
             ConWrite(text, ConsoleColor.Cyan);
             if (debug || readJSON)
-                Bouyomichan($"QuakeMapFastの読み上げです。デバッグあるいはJSON読み込みモードのため無効です。");
-            else
-                Bouyomichan($"震度速報、{intsArea_Max3.Replace("\n", "").Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
-            if (debug || readJSON)
+            {
                 Telop($"0,《現在の情報ではありません》震度速報【最大震度{maxIntS}】,{intsArea.Replace("\n", "")},{Int2TelopColor(maxIntN)},False,10,1000");
+                Bouyomichan($"QuakeMapFastの読み上げです。デバッグあるいはJSON読み込みモードのため無効です。");
+            }
             else
+            {
                 Telop($"0,震度速報【最大震度{maxIntS}】,{intsArea.Replace("\n", "")},{Int2TelopColor(maxIntN)},False,60,1000");
+                Bouyomichan($"震度速報、{intsArea_Max3.Replace("\n", "").Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
+            }
             view_all.ImageChange(bitmap, text);
             if (Settings.Default.AutoCopy)
             {
@@ -282,10 +284,16 @@ namespace QuakeMapFast
 
             string text = $"■■緊急地震速報 強い揺れに警戒■■ {time:yyyy/MM/dd HH:mm}\n{string.Join(" ", prefWarn)}";
             ConWrite(text, ConsoleColor.Cyan);
-            //Bouyomichan($"緊急地震速報です、次の地域では強い揺れに警戒してください。{string.Join("、", prefWarn)}");
-            Telop($"0,緊急地震速報,強い揺れに警戒 {string.Join(" ", prefWarn)},200,0,0,White,255,0,0,White,False,60,1000");
             if (debug || readJSON)
+            {
                 Telop($"0,《現在の情報ではありません》緊急地震速報,強い揺れに警戒 {string.Join(" ", prefWarn)},200,0,0,White,255,0,0,White,False,10,1000");
+                Bouyomichan($"QuakeMapFastの読み上げです。デバッグあるいはJSON読み込みモードのため無効です。");
+            }
+            else
+            {
+                Telop($"0,緊急地震速報,強い揺れに警戒 {string.Join(" ", prefWarn)},200,0,0,White,255,0,0,White,False,60,1000");
+                Bouyomichan($"緊急地震速報です、次の地域では強い揺れに警戒してください。{string.Join("、", prefWarn)}");
+            }
             view_all.ImageChange(bitmap, text);
             if (Settings.Default.AutoCopy)
             {

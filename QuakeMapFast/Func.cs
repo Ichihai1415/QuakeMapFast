@@ -1,6 +1,7 @@
 ﻿using QuakeMapFast.Properties;
 using System;
 using System.IO;
+using System.Media;
 using System.Net.Sockets;
 using System.Text;
 
@@ -56,9 +57,11 @@ namespace QuakeMapFast
         /// <param name="text">読み上げさせる文</param>
         public static void Bouyomichan(string text)
         {
+            if (!Settings.Default.Bouyomi_Enable)
+                return;
             try
             {
-                Console.WriteLine("棒読みちゃん処理開始");
+                ConWrite("[Bouyomichan]棒読みちゃん処理開始");
                 byte[] message = Encoding.UTF8.GetBytes(text);
                 ConWrite($"[Bouyomichan]棒読みちゃん送信中...");
                 using (TcpClient tcpClient = new TcpClient("127.0.0.1", 50001))
@@ -119,7 +122,7 @@ namespace QuakeMapFast
                 try
                 {
                     ConWrite("[XPost]X送信開始");
-                    string sendText = $"{{ \"text\" : \"{text.Replace("\n", "\\\\n")}\", \"images\" : \"{Path.GetFullPath(path).Replace("\\","\\\\")}\" }}";
+                    string sendText = $"{{ \"text\" : \"{text.Replace("\n", "\\\\n")}\", \"images\" : \"{Path.GetFullPath(path).Replace("\\", "\\\\")}\" }}";
                     ConWrite("[XPost]Text:" + sendText);
                     byte[] message = new byte[16 * 1024];
                     message = Encoding.UTF8.GetBytes(sendText);
@@ -135,6 +138,34 @@ namespace QuakeMapFast
                 {
                     ConWrite("[XPost]X送信終了");
                 }
+        }
+
+        //共通プレイヤー
+        public static SoundPlayer player;
+
+        /// <summary>
+        /// 音声を再生します。
+        /// </summary>
+        /// <remarks>音声ファイルがなければ無効です。</remarks>
+        /// <param name="fileName">再生するファイル名(sound\\)</param>
+        public static void PlaySound(string fileName)
+        {
+            if (!fileName.StartsWith("sounds\\"))
+                fileName = "sounds\\" + fileName;
+            if (!File.Exists(fileName))
+            {
+                ConWrite("[PlaySound]音声ファイルがないため再生しません。");
+                return;
+            }
+            ConWrite($"[PlaySound]音声再生開始(\"{fileName}\")");
+            if (player != null)
+            {
+                player.Stop();
+                player.Dispose();
+                player = null;
+            }
+            player = new SoundPlayer(fileName);
+            player.Play();
         }
     }
 }

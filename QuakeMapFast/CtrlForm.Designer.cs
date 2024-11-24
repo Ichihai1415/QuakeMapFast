@@ -55,6 +55,7 @@
             this.SettingSave = new System.Windows.Forms.Button();
             this.SettingReset = new System.Windows.Forms.Button();
             this.JSONread = new System.Windows.Forms.Button();
+            this.SE_Info = new System.Windows.Forms.Label();
             this.GroupBox_Display.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.BackGreenTime)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.WindowLocation_Y)).BeginInit();
@@ -412,11 +413,21 @@
             this.JSONread.UseVisualStyleBackColor = true;
             this.JSONread.Click += new System.EventHandler(this.JSONread_Click);
             // 
+            // SE_Info
+            // 
+            this.SE_Info.AutoSize = true;
+            this.SE_Info.Location = new System.Drawing.Point(410, 203);
+            this.SE_Info.Name = "SE_Info";
+            this.SE_Info.Size = new System.Drawing.Size(330, 15);
+            this.SE_Info.TabIndex = 7;
+            this.SE_Info.Text = "SE再生はファイルがあれば有効です。README等を参照してください。";
+            // 
             // CtrlForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.SE_Info);
             this.Controls.Add(this.JSONread);
             this.Controls.Add(this.SettingReset);
             this.Controls.Add(this.SettingSave);
@@ -479,5 +490,6 @@
         private System.Windows.Forms.Button SettingReset;
         private System.Windows.Forms.CheckBox AutoCopy;
         private System.Windows.Forms.Button JSONread;
+        private System.Windows.Forms.Label SE_Info;
     }
 }
