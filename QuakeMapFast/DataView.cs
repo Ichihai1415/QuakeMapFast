@@ -43,21 +43,9 @@ namespace QuakeMapFast
             Clipboard.SetImage(lastBitmap);
         }
 
-        private void Form1_BackgroundImageChanged(object sender, EventArgs e)
-        {
-            if (Settings.Default.BackGreenTime == 0)
-                return;
-            if (BackgroundImage != null)
-            {
-                GBTimer.Enabled = false;//切り替わり前に再更新した場合タイマーのリセット
-                GBTimer.Interval = Settings.Default.BackGreenTime * 1000;
-                GBTimer.Enabled = true;
-            }
-        }
-
         private void GBTimer_Tick(object sender, EventArgs e)
         {
-            BackgroundImage = null;
+            PB.Image = null;
             GBTimer.Enabled = false;
         }
 
@@ -68,10 +56,19 @@ namespace QuakeMapFast
         /// <param name="newText">コピー用テキスト</param>
         public void ImageChange(Bitmap newImage, string newText)
         {
-            BackgroundImage = null;
-            BackgroundImage = newImage;
+            PB.Image = null;
+            PB.Image = newImage;
             lastBitmap = (Bitmap)newImage.Clone();
             lastText = newText;
+
+            if (Settings.Default.BackGreenTime == 0)
+                return;
+            if (PB.Image != null)
+            {
+                GBTimer.Enabled = false;//切り替わり前に再更新した場合タイマーのリセット
+                GBTimer.Interval = Settings.Default.BackGreenTime * 1000;
+                GBTimer.Enabled = true;
+            }
         }
 
         private void DataView_FormClosing(object sender, FormClosingEventArgs e)
