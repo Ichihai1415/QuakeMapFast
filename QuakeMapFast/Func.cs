@@ -150,8 +150,8 @@ namespace QuakeMapFast
         /// <param name="fileName">再生するファイル名(sound\\)</param>
         public static void PlaySound(string fileName)
         {
-            if (!fileName.StartsWith("sounds\\"))
-                fileName = "sounds\\" + fileName;
+            if (!fileName.StartsWith("Sound\\"))
+                fileName = "Sound\\" + fileName;
             if (!File.Exists(fileName))
             {
                 ConWrite("[PlaySound]音声ファイルがないため再生しません。");

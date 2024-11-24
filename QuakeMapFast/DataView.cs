@@ -69,6 +69,7 @@ namespace QuakeMapFast
                 GBTimer.Interval = Settings.Default.BackGreenTime * 1000;
                 GBTimer.Enabled = true;
             }
+            GC.Collect();
         }
 
         private void DataView_FormClosing(object sender, FormClosingEventArgs e)
