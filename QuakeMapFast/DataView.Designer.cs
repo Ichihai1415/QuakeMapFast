@@ -33,7 +33,9 @@
             this.TSMI_TextCopy = new System.Windows.Forms.ToolStripMenuItem();
             this.TSMI_ImageCopy = new System.Windows.Forms.ToolStripMenuItem();
             this.GBTimer = new System.Windows.Forms.Timer(this.components);
+            this.PB = new System.Windows.Forms.PictureBox();
             this.CMS.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.PB)).BeginInit();
             this.SuspendLayout();
             // 
             // CMS
@@ -64,6 +66,16 @@
             this.GBTimer.Interval = 30000;
             this.GBTimer.Tick += new System.EventHandler(this.GBTimer_Tick);
             // 
+            // PB
+            // 
+            this.PB.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.PB.Location = new System.Drawing.Point(0, 0);
+            this.PB.Name = "PB";
+            this.PB.Size = new System.Drawing.Size(640, 360);
+            this.PB.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.PB.TabIndex = 1;
+            this.PB.TabStop = false;
+            // 
             // DataView
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -71,11 +83,12 @@
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(640, 360);
             this.ContextMenuStrip = this.CMS;
+            this.Controls.Add(this.PB);
             this.Name = "DataView";
             this.Text = "QuakeMapFast";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.DataView_FormClosing);
-            this.BackgroundImageChanged += new System.EventHandler(this.Form1_BackgroundImageChanged);
             this.CMS.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.PB)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -86,6 +99,7 @@
         private System.Windows.Forms.ToolStripMenuItem TSMI_TextCopy;
         private System.Windows.Forms.ToolStripMenuItem TSMI_ImageCopy;
         private System.Windows.Forms.Timer GBTimer;
+        private System.Windows.Forms.PictureBox PB;
     }
 }
 

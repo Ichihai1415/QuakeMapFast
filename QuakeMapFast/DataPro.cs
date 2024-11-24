@@ -164,13 +164,15 @@ namespace QuakeMapFast
             string text = $"震度速報【最大震度{maxIntS}】{time:yyyy/MM/dd HH:mm}\n{intsArea}";
             ConWrite(text, ConsoleColor.Cyan);
             if (debug || readJSON)
-                Bouyomichan($"QuakeMapFastの読み上げです。デバッグあるいはJSON読み込みモードのため無効です。");
-            else
-                Bouyomichan($"震度速報、{intsArea_Max3.Replace("\n", "").Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
-            if (debug || readJSON)
+            {
                 Telop($"0,《現在の情報ではありません》震度速報【最大震度{maxIntS}】,{intsArea.Replace("\n", "")},{Int2TelopColor(maxIntN)},False,10,1000");
+                Bouyomichan($"QuakeMapFastの読み上げです。デバッグあるいはJSON読み込みモードのため無効です。");
+            }
             else
+            {
                 Telop($"0,震度速報【最大震度{maxIntS}】,{intsArea.Replace("\n", "")},{Int2TelopColor(maxIntN)},False,60,1000");
+                Bouyomichan($"震度速報、{intsArea_Max3.Replace("\n", "").Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
+            }
             view_all.ImageChange(bitmap, text);
             if (Settings.Default.AutoCopy)
             {
@@ -178,6 +180,46 @@ namespace QuakeMapFast
                 Task.Delay(100).ConfigureAwait(false);//片方がクリップボードに保存されないから仮
                 Clipboard.SetImage(bitmap);
             }
+
+            string soundFile;
+            switch (maxIntN)
+            {
+                case 0:
+                    soundFile = "scale\\0.wav";
+                    break;
+                case 1:
+                    soundFile = "scale\\1.wav";
+                    break;
+                case 2:
+                    soundFile = "scale\\2.wav";
+                    break;
+                case 3:
+                    soundFile = "scale\\3.wav";
+                    break;
+                case 4:
+                    soundFile = "scale\\4.wav";
+                    break;
+                case 5:
+                    soundFile = "scale\\5-.wav";
+                    break;
+                case 6:
+                    soundFile = "scale\\5+.wav";
+                    break;
+                case 7:
+                    soundFile = "scale\\6-.wav";
+                    break;
+                case 8:
+                    soundFile = "scale\\6+.wav";
+                    break;
+                case 9:
+                    soundFile = "scale\\7.wav";
+                    break;
+                default:
+                    soundFile = string.Empty;
+                    break;
+            }
+            PlaySound(soundFile);
+
             if (File.Exists("XPosterV2Host - Enable"))
                 if (!debug && !readJSON)
                     XPost(text, $"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png");
@@ -250,10 +292,11 @@ namespace QuakeMapFast
                 else
                     warnAreaInfo2 += $"震度{minInt}～{maxInt}程度\n";
             }
+            var isMajorWarn = warnAreaInfo2.Contains("6") || warnAreaInfo2.Contains("7");
             using (Graphics g = Graphics.FromImage(bitmap))
             {
                 g.FillRectangle(Brushes.Black, 1080, 0, 840, 1080);
-                Brush warnTextColor = warnAreaInfo2.Contains("6") ? Brushes.Red : Brushes.Yellow;
+                Brush warnTextColor = isMajorWarn ? Brushes.Red : Brushes.Yellow;
                 g.DrawString("■■■緊急地震速報■■■", new Font(font, 50), warnTextColor, 1085, 5);
                 g.DrawString($"{time:yyyy/MM/dd HH:mm:ss} 警報第{json["issue"]["serial"]}報\n{hypoName} 深さ{hypocenter["depth"]}km  M{hypocenter["magnitude"]}", new Font(font, 30), warnTextColor, 1095, 90);
 
@@ -282,10 +325,16 @@ namespace QuakeMapFast
 
             string text = $"■■緊急地震速報 強い揺れに警戒■■ {time:yyyy/MM/dd HH:mm}\n{string.Join(" ", prefWarn)}";
             ConWrite(text, ConsoleColor.Cyan);
-            //Bouyomichan($"緊急地震速報です、次の地域では強い揺れに警戒してください。{string.Join("、", prefWarn)}");
-            Telop($"0,緊急地震速報,強い揺れに警戒 {string.Join(" ", prefWarn)},200,0,0,White,255,0,0,White,False,60,1000");
             if (debug || readJSON)
+            {
                 Telop($"0,《現在の情報ではありません》緊急地震速報,強い揺れに警戒 {string.Join(" ", prefWarn)},200,0,0,White,255,0,0,White,False,10,1000");
+                Bouyomichan($"QuakeMapFastの読み上げです。デバッグあるいはJSON読み込みモードのため無効です。");
+            }
+            else
+            {
+                Telop($"0,緊急地震速報,強い揺れに警戒 {string.Join(" ", prefWarn)},200,0,0,White,255,0,0,White,False,60,1000");
+                Bouyomichan($"緊急地震速報です、次の地域では強い揺れに警戒してください。{string.Join("、", prefWarn)}");
+            }
             view_all.ImageChange(bitmap, text);
             if (Settings.Default.AutoCopy)
             {
@@ -293,6 +342,9 @@ namespace QuakeMapFast
                 Task.Delay(100).ConfigureAwait(false);//片方がクリップボードに保存されないから仮
                 Clipboard.SetImage(bitmap);
             }
+
+            PlaySound(isMajorWarn ? "eew\\warn2.wav" : "eew\\warn1.wav");
+
             if (File.Exists("XPosterV2Host - Enable"))
                 if (!debug && !readJSON)
                     XPost(text, $"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png");

@@ -34,7 +34,7 @@ namespace QuakeMapFast
          README.md
          (JSON-sample.zip(...\json\P2Pquake)更新時にResourceのCommentにバージョンを書いておく
          */
-        public static readonly string version = "0.2.3";
+        public static readonly string version = "0.2.4";
         readonly int[] ignoreCode = { 554, 555, 561, 9611 };//表示しない
         public static readonly Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
         string latestID = "";
@@ -101,6 +101,8 @@ namespace QuakeMapFast
             ConWrite($"[CtrlForm_Load]マップファイル確認完了");
             mapjson = JObject.Parse(File.ReadAllText("AreaForecastLocalE_GIS_20240520_1.geojson"));
             ConWrite($"[CtrlForm_Load]マップファイル読み込み完了");
+
+            ConWrite($"[CtrlForm_Load]<お知らせ> 音声再生方法はREADMEを確認してください。");
 
             view_all.Show();
 
