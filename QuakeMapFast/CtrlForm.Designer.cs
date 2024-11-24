@@ -418,9 +418,9 @@
             this.SE_Info.AutoSize = true;
             this.SE_Info.Location = new System.Drawing.Point(410, 203);
             this.SE_Info.Name = "SE_Info";
-            this.SE_Info.Size = new System.Drawing.Size(330, 15);
+            this.SE_Info.Size = new System.Drawing.Size(318, 15);
             this.SE_Info.TabIndex = 7;
-            this.SE_Info.Text = "SE再生はファイルがあれば有効です。README等を参照してください。";
+            this.SE_Info.Text = "SE再生はファイルがあれば有効です。READMEを参照してください。";
             // 
             // CtrlForm
             // 
