@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using QuakeMapFast.Properties;
+﻿using QuakeMapFast.Properties;
 using System;
 using System.Configuration;
 using System.Diagnostics;
@@ -9,7 +8,9 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.WebSockets;
+using System.Runtime.Versioning;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -19,6 +20,7 @@ using static QuakeMapFast.Func;
 
 namespace QuakeMapFast
 {
+    [SupportedOSPlatform("windows7.0")]
     public partial class CtrlForm : Form
     {
         public CtrlForm()
@@ -34,7 +36,7 @@ namespace QuakeMapFast
          README.md
          (JSON-sample.zip(...\json\P2Pquake)更新時にResourceのCommentにバージョンを書いておく
          */
-        public static readonly string version = "0.2.4";
+        public static readonly string version = "0.3.0-dev";
         readonly int[] ignoreCode = { 554, 555, 561, 9611 };//表示しない
         public static readonly Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
         string latestID = "";
@@ -86,7 +88,7 @@ namespace QuakeMapFast
                 File.WriteAllText("Font\\LICENSE", Resources.Koruri_LICENSE);
                 ConWrite($"[CtrlForm_Load]フォントライセンスファイル(\"Font\\LICENSE\")をコピーしました");
             }
-            PrivateFontCollection pfc = new PrivateFontCollection();
+            var pfc = new PrivateFontCollection();
             pfc.AddFontFile("Font\\Koruri-Regular.ttf");
             font = pfc.Families[0];
             ConWrite($"[CtrlForm_Load]フォント確認完了");
@@ -99,7 +101,7 @@ namespace QuakeMapFast
             }
 
             ConWrite($"[CtrlForm_Load]マップファイル確認完了");
-            mapjson = JObject.Parse(File.ReadAllText("AreaForecastLocalE_GIS_20240520_1.geojson"));
+            mapjson = JsonNode.Parse(File.ReadAllText("AreaForecastLocalE_GIS_20240520_1.geojson"));
             ConWrite($"[CtrlForm_Load]マップファイル読み込み完了");
 
             if (!Directory.Exists("Sound"))
@@ -159,14 +161,14 @@ namespace QuakeMapFast
                                 Directory.CreateDirectory($"output\\json\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}");
                                 File.WriteAllText($"output\\json\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.json", jsonText);
                             }
-                            JObject json;
+                            JsonNode json;
                             try
                             {
-                                json = JObject.Parse(jsonText);
+                                json = JsonNode.Parse(jsonText);
 
                                 int code = (int)json["code"];
                                 string id = (string)json["_id"];
-                                string type = (string)json.SelectToken("issue.type");//ないときあるからこれで
+                                string? type = (string)json["issue"]["type"];//ないときあるからこれで
                                 string codeInfo = P2PInfoCodeName.Keys.Contains(code) ? P2PInfoCodeName[code] : "-";
                                 string issueInfo = P2PInfoTypeName.Keys.Contains(type ?? "") ? P2PInfoTypeName[type ?? ""] : "-";
                                 ConWrite($"[Get]受信 id:{id} code:{code}{codeInfo} type:{type}{issueInfo}");
@@ -335,7 +337,7 @@ namespace QuakeMapFast
 
                 ConWrite("[JSONread_Click]ファイルのパスを入力してください。");
                 string jsonText = File.ReadAllText(Console.ReadLine().Replace("\"", ""));
-                var json = JObject.Parse(jsonText);
+                var json = JsonNode.Parse(jsonText);
 
                 int code = (int)json["code"];
                 string id = (string)json["_id"];

@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using QuakeMapFast.Properties;
+﻿using QuakeMapFast.Properties;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -7,6 +6,8 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static QuakeMapFast.Conv;
@@ -15,9 +16,10 @@ using static QuakeMapFast.Func;
 
 namespace QuakeMapFast
 {
+    [SupportedOSPlatform("windows7.0")]
     internal class DataPro
     {
-        public static JObject mapjson = new JObject();
+        public static JsonNode mapjson;
 
         /// <summary>
         /// マップを描画します。塗りつぶしも実行します。
@@ -33,11 +35,11 @@ namespace QuakeMapFast
             double latEnd = -999;
             double lonSta = 999;
             double lonEnd = -999;
-            foreach (var features in mapjson["features"].Where(features => areaColor.ContainsKey((string)features["properties"]["name"])))
+            foreach (var features in mapjson["features"].AsArray().Where(features => areaColor.ContainsKey((string)features["properties"]["name"])))
             {
                 if ((string)features["geometry"]["type"] == "Polygon")
                 {
-                    foreach (var coordinate in features["geometry"]["coordinates"][0])
+                    foreach (var coordinate in features["geometry"]["coordinates"][0].AsArray())
                     {
                         latSta = Math.Min(latSta, (double)coordinate[1]);
                         latEnd = Math.Max(latEnd, (double)coordinate[1]);
@@ -47,7 +49,7 @@ namespace QuakeMapFast
                 }
                 else
                 {
-                    foreach (var coordinate in features["geometry"]["coordinates"].SelectMany(coordinate => coordinate[0]))
+                    foreach (var coordinate in features["geometry"]["coordinates"].AsArray().SelectMany((JsonNode coordinate) => coordinate.AsArray()))
                     {
                         latSta = Math.Min(latSta, (double)coordinate[1]);
                         latEnd = Math.Max(latEnd, (double)coordinate[1]);
@@ -65,24 +67,24 @@ namespace QuakeMapFast
             {
                 g.Clear(Color.FromArgb(20, 40, 60));
                 var gPath = new GraphicsPath();
-                foreach (var features in mapjson["features"])
+                foreach (var features in mapjson["features"].AsArray())
                 {
                     gPath.Reset();
                     gPath.StartFigure();
                     //if (features["geometry"]["coordinates"] == null)
-                    if (features["geometry"].Count() == 0)
+                    if (features["geometry"].AsArray().Count() == 0)
                         continue;
                     if ((string)features["geometry"]["type"] == "Polygon")
                     {
-                        var points = features["geometry"]["coordinates"][0].Select(coordinate => new Point((int)(((double)coordinate[0] - lonSta) * zoom), (int)((latEnd - (double)coordinate[1]) * zoom)));
+                        var points = features["geometry"]["coordinates"][0].AsArray().Select(coordinate => new Point((int)(((double)coordinate[0] - lonSta) * zoom), (int)((latEnd - (double)coordinate[1]) * zoom)));
                         if (points.Count() > 2)
                             gPath.AddPolygon(points.ToArray());
                     }
                     else
                     {
-                        foreach (var coordinates in features["geometry"]["coordinates"])
+                        foreach (var coordinates in features["geometry"]["coordinates"].AsArray())
                         {
-                            var points = coordinates[0].Select(coordinate => new Point((int)(((double)coordinate[0] - lonSta) * zoom), (int)((latEnd - (double)coordinate[1]) * zoom)));
+                            var points = coordinates[0].AsArray().Select(coordinate => new Point((int)(((double)coordinate[0] - lonSta) * zoom), (int)((latEnd - (double)coordinate[1]) * zoom)));
                             if (points.Count() > 2)
                                 gPath.AddPolygon(points.ToArray());
                         }
@@ -110,7 +112,7 @@ namespace QuakeMapFast
         /// 震度速報
         /// </summary>
         /// <param name="json">描画するデータ</param>
-        public static void ScalePrompt(JObject json)
+        public static void ScalePrompt(JsonNode json)
         {
             DateTime time = DateTime.Parse((string)json["earthquake"]["time"]);
             int maxIntN = P2PScale2IntN((int)json["earthquake"]["maxScale"]);
@@ -226,37 +228,37 @@ namespace QuakeMapFast
         }
 
 
-        public static void Destination(JObject json)
+        public static void Destination(JsonNode json)
         {
 
         }
 
-        public static void ScaleAndDestination(JObject json)
+        public static void ScaleAndDestination(JsonNode json)
         {
 
         }
 
-        public static void DetailScale(JObject json)
+        public static void DetailScale(JsonNode json)
         {
 
         }
 
-        public static void Foreign(JObject json)
+        public static void Foreign(JsonNode json)
         {
 
         }
 
-        public static void Other(JObject json)
+        public static void Other(JsonNode json)
         {
 
         }
 
-        public static void Tsunami(JObject json)
+        public static void Tsunami(JsonNode json)
         {
 
         }
 
-        public static void EEW(JObject json)
+        public static void EEW(JsonNode json)
         {
             if ((bool)json["cancelled"])
                 return;
@@ -265,10 +267,10 @@ namespace QuakeMapFast
             var hypocenter = earthquake["hypocenter"];
 
             DateTime time = DateTime.Parse((string)earthquake["originTime"]);
-            Dictionary<string, SolidBrush> areaColor = json["areas"].ToDictionary(area => (string)area["name"], area => P2PScale2isOver6((int)area["scaleFrom"], (int)area["scaleTo"])
+            Dictionary<string, SolidBrush> areaColor = json["areas"].AsArray().ToDictionary(area => (string)area["name"], area => P2PScale2isOver6((int)area["scaleFrom"], (int)area["scaleTo"])
             ? new SolidBrush(Color.FromArgb(180, 0, 0)) : new SolidBrush(Color.FromArgb(180, 180, 0)));
             List<string> areaWarn = areaColor.Keys.ToList();
-            List<string> prefWarn = json["areas"].Select(n => (string)n["pref"]).Distinct().ToList();
+            List<string> prefWarn = json["areas"].AsArray().Select(n => (string)n["pref"]).Distinct().ToList();
 
             double hLat = (double)hypocenter["latitude"];
             double hLon = (double)hypocenter["longitude"];
@@ -280,7 +282,7 @@ namespace QuakeMapFast
 
             string warnAreaInfo1 = "";
             string warnAreaInfo2 = "";
-            foreach (var area in json["areas"])
+            foreach (var area in json["areas"].AsArray())
             {
                 string minInt = P2PScale2IntS((int)area["scaleFrom"]);
                 string maxInt = P2PScale2IntS((int)area["scaleTo"]);

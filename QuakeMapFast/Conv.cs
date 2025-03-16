@@ -1,10 +1,12 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.Versioning;
+using System.Text.Json.Nodes;
 
 namespace QuakeMapFast
 {
+    [SupportedOSPlatform("windows7.0")]
     public static class Conv
     {
         /// <summary>
@@ -135,9 +137,9 @@ namespace QuakeMapFast
         /// <param name="points">jsonのpoints</param>
         /// <param name="token">addr(地点・区分)/pref(県)</param>
         /// <returns>Dictionary<地区, int形式の震度></returns>
-        public static Dictionary<string, int> Points2Dic(JToken points, string token)
+        public static Dictionary<string, int> Points2Dic(JsonNode points, string token)
         {
-            return points.ToDictionary(pt => (string)pt[token], pt => P2PScale2IntN((int)pt["scale"]));
+            return points.AsArray().ToDictionary(pt => (string)pt[token], pt => P2PScale2IntN((int)pt["scale"]));
         }
 
         /// <summary>
@@ -146,21 +148,21 @@ namespace QuakeMapFast
         /// <param name="json">json</param>
         /// <param name="token">addr(地点・区分)/pref(県)</param>
         /// <returns>IntList</returns>
-        public static IntList Point2IntList(JObject json, string token)
+        public static IntList Point2IntList(JsonNode json, string token)
         {
             IntList intList = new IntList
             {
-                S1 = new List<string>(),
-                S2 = new List<string>(),
-                S3 = new List<string>(),
-                S4 = new List<string>(),
-                S5 = new List<string>(),
-                S6 = new List<string>(),
-                S7 = new List<string>(),
-                S8 = new List<string>(),
-                S9 = new List<string>()
+                S1 = [],
+                S2 = [],
+                S3 = [],
+                S4 = [],
+                S5 = [],
+                S6 = [],
+                S7 = [],
+                S8 = [],
+                S9 = []
             };
-            foreach (JToken json_ in json["points"])
+            foreach (JsonNode json_ in json["points"].AsArray())
             {
                 switch ((int)json_["scale"])
                 {
@@ -234,7 +236,7 @@ namespace QuakeMapFast
         /// <param name="Token">addr(地点・区分)/pref(県)</param>
         /// <param name="MininumInt">文字列にする最小のint形式の震度</param>
         /// <returns></returns>
-        public static string Point2String(JObject json, string Token, int LowestInt = 0)
+        public static string Point2String(JsonNode json, string Token, int LowestInt = 0)
         {
             return IntList2String(Point2IntList(json, Token), LowestInt);
         }
@@ -248,10 +250,10 @@ namespace QuakeMapFast
         /// <param name="LonEnd">経度の終点</param>
         public static void PointCorrect(ref double LatSta, ref double LatEnd, ref double LonSta, ref double LonEnd)
         {
-            LatSta -= (LatEnd - LatSta) / 20;//差の1/20余白追加
-            LatEnd += (LatEnd - LatSta) / 20;
-            LonSta -= (LonEnd - LonSta) / 20;
-            LonEnd += (LonEnd - LonSta) / 20;
+            LatSta -= (LatEnd - LatSta) / 20d;//差の1/20余白追加
+            LatEnd += (LatEnd - LatSta) / 20d;
+            LonSta -= (LonEnd - LonSta) / 20d;
+            LonEnd += (LonEnd - LonSta) / 20d;
             if (LatEnd - LatSta < 3)//緯度差を最小3に
             {
                 double correction = (3 - (LatEnd - LatSta)) / 2d;

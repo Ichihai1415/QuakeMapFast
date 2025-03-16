@@ -3,10 +3,12 @@ using System;
 using System.IO;
 using System.Media;
 using System.Net.Sockets;
+using System.Runtime.Versioning;
 using System.Text;
 
 namespace QuakeMapFast
 {
+    [SupportedOSPlatform("windows7.0")]
     public class Func
     {
         /// <summary>
