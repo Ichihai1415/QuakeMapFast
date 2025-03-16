@@ -102,7 +102,8 @@ namespace QuakeMapFast
             mapjson = JObject.Parse(File.ReadAllText("AreaForecastLocalE_GIS_20240520_1.geojson"));
             ConWrite($"[CtrlForm_Load]マップファイル読み込み完了");
 
-            ConWrite($"[CtrlForm_Load]<お知らせ> 音声再生方法はREADMEを確認してください。");
+            if (!Directory.Exists("Sound"))
+                ConWrite($"[CtrlForm_Load]<お知らせ> 音声再生方法はREADMEを確認してください。");
 
             view_all.Show();
 
