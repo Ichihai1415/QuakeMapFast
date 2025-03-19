@@ -1,8 +1,8 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using System.Runtime.Versioning;
 
 namespace QuakeMapFast
 {
+    [SupportedOSPlatform("windows7.0")]
     internal static class Program
     {
         /// <summary>

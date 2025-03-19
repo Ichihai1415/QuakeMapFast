@@ -1,13 +1,12 @@
 ﻿using QuakeMapFast.Properties;
-using System;
-using System.Drawing;
-using System.Windows.Forms;
+using System.Runtime.Versioning;
 
 namespace QuakeMapFast
 {
     /// <summary>
     /// 画像表示画面
     /// </summary>
+    [SupportedOSPlatform("windows7.0")]
     public partial class DataView : Form
     {
         /// <summary>
