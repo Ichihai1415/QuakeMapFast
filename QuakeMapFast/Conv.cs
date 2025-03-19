@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.Versioning;
+﻿using System.Runtime.Versioning;
 using System.Text.Json.Nodes;
 
 namespace QuakeMapFast
@@ -12,7 +9,7 @@ namespace QuakeMapFast
         /// <summary>
         /// P2Pのcodeと説明
         /// </summary>
-        public static Dictionary<int, string> P2PInfoCodeName = new Dictionary<int, string>
+        public static readonly Dictionary<int, string> P2PInfoCodeName = new()
         {
             { 551, "(地震情報)" },
             { 552, "(津波予報)" },
@@ -27,7 +24,7 @@ namespace QuakeMapFast
         /// <summary>
         /// P2Pの地震情報のtypeと説明
         /// </summary>
-        public static Dictionary<string, string> P2PInfoTypeName = new Dictionary<string, string>
+        public static readonly Dictionary<string, string> P2PInfoTypeName = new()
         {
             { "", "-" },
             { "ScalePrompt", "(震度速報)" },
@@ -43,15 +40,15 @@ namespace QuakeMapFast
         /// </summary>
         public class IntList
         {
-            public List<string> S1 { get; set; }
-            public List<string> S2 { get; set; }
-            public List<string> S3 { get; set; }
-            public List<string> S4 { get; set; }
-            public List<string> S5 { get; set; }
-            public List<string> S6 { get; set; }
-            public List<string> S7 { get; set; }
-            public List<string> S8 { get; set; }
-            public List<string> S9 { get; set; }
+            public List<string> S1 { get; set; } = [];
+            public List<string> S2 { get; set; } = [];
+            public List<string> S3 { get; set; } = [];
+            public List<string> S4 { get; set; } = [];
+            public List<string> S5 { get; set; } = [];
+            public List<string> S6 { get; set; } = [];
+            public List<string> S7 { get; set; } = [];
+            public List<string> S8 { get; set; } = [];
+            public List<string> S9 { get; set; } = [];
         }
 
         /// <summary>
@@ -150,18 +147,7 @@ namespace QuakeMapFast
         /// <returns>IntList</returns>
         public static IntList Point2IntList(JsonNode json, string token)
         {
-            IntList intList = new IntList
-            {
-                S1 = [],
-                S2 = [],
-                S3 = [],
-                S4 = [],
-                S5 = [],
-                S6 = [],
-                S7 = [],
-                S8 = [],
-                S9 = []
-            };
+            var intList = new IntList();
             foreach (JsonNode json_ in json["points"].AsArray())
             {
                 switch ((int)json_["scale"])
@@ -356,6 +342,283 @@ namespace QuakeMapFast
                     return "15,30,45,White,30,60,90,White";
             }
         }
+
+        /// <summary>
+        /// P2P地震情報 JSON API v2 - JMAQuake - 発表種類
+        /// </summary>
+        ///<remarks>[ ScalePrompt(震度速報), Destination(震源に関する情報), ScaleAndDestination(震度・震源に関する情報), DetailScale(各地の震度に関する情報), Foreign(遠地地震に関する情報), Other(その他の情報) ]</remarks>
+        public enum P2PQ_JMAQuake_type
+        {
+            /// <summary>
+            /// (未実装)
+            /// </summary>
+            NotImplemented = -9,
+            /// <summary>
+            /// ScalePrompt(震度速報)
+            /// </summary>
+            ScalePrompt = 1,
+            /// <summary>
+            /// Destination(震源に関する情報)
+            /// </summary>
+            Destination = 2,
+            /// <summary>
+            /// ScaleAndDestination(震度・震源に関する情報)
+            /// </summary>
+            ScaleAndDestination = 3,
+            /// <summary>
+            /// DetailScale(各地の震度に関する情報)
+            /// </summary>
+            DetailScale = 4,
+            /// <summary>
+            /// Foreign(遠地地震に関する情報)
+            /// </summary>
+            Foreign = 5,
+            /// <summary>
+            /// Other(その他の情報)
+            /// </summary>
+            Other = 6
+        }
+
+        /// <summary>
+        /// JMAQuake - 発表種類 - String2Enum
+        /// </summary>
+        /// <param name="str">変換する文字列</param>
+        /// <returns>対応する<see cref="P2PQ_JMAQuake_type"/></returns>
+        public static P2PQ_JMAQuake_type P2PQ_JMAQuake_type_String2Enum(string str)
+        {
+            return str switch
+            {
+                "ScalePrompt" => P2PQ_JMAQuake_type.ScalePrompt,
+                "Destination" => P2PQ_JMAQuake_type.Destination,
+                "ScaleAndDestination" => P2PQ_JMAQuake_type.ScaleAndDestination,
+                "DetailScale" => P2PQ_JMAQuake_type.DetailScale,
+                "Foreign" => P2PQ_JMAQuake_type.Foreign,
+                "Other" => P2PQ_JMAQuake_type.Other,
+                _ => P2PQ_JMAQuake_type.NotImplemented
+            };
+        }
+
+        /// <summary>
+        /// P2P地震情報 JSON API v2 - JMAQuake - 訂正の有無
+        /// </summary>
+        ///<remarks>[ None(なし), Unknown(不明), ScaleOnly(震度), DestinationOnly(震源), ScaleAndDestination(震度・震源) ]</remarks>
+        public enum P2PQ_JMAQuake_correct
+        {
+            /// <summary>
+            /// (未実装)
+            /// </summary>
+            NotImplemented = -9,
+            /// <summary>
+            /// None(なし)
+            /// </summary>
+            None = 0,
+            /// <summary>
+            /// Unknown(不明)
+            /// </summary>
+            Unknown = 1,
+            /// <summary>
+            /// ScaleOnly(震度)
+            /// </summary>
+            ScaleOnly = 2,
+            /// <summary>
+            /// DestinationOnly(震源)
+            /// </summary>
+            DestinationOnly = 3,
+            /// <summary>
+            /// ScaleAndDestination(震度・震源)
+            /// </summary>
+            ScaleAndDestination = 4
+        }
+
+        /// <summary>
+        /// JMAQuake - 訂正の有無 - String2Enum
+        /// </summary>
+        /// <param name="str">変換する文字列</param>
+        /// <returns>対応する<see cref="P2PQ_JMAQuake_correct"/></returns>
+        public static P2PQ_JMAQuake_correct P2PQ_JMAQuake_correct_String2Enum(string str)
+        {
+            return str switch
+            {
+                "None" => P2PQ_JMAQuake_correct.None,
+                "Unknown" => P2PQ_JMAQuake_correct.Unknown,
+                "ScaleOnly" => P2PQ_JMAQuake_correct.ScaleOnly,
+                "DestinationOnly" => P2PQ_JMAQuake_correct.DestinationOnly,
+                "ScaleAndDestination" => P2PQ_JMAQuake_correct.ScaleAndDestination,
+                _ => P2PQ_JMAQuake_correct.NotImplemented
+            };
+        }
+
+        /// <summary>
+        /// P2P地震情報 JSON API v2 - 国内への津波の有無
+        /// </summary>
+        /// <remarks>[ None(なし), Unknown(不明), Checking(調査中), NonEffective(若干の海面変動が予想されるが、被害の心配なし), Watch(津波注意報), Warning(津波予報(種類不明)) ]</remarks>
+        public enum P2PQ_domesticTsunami
+        {
+            /// <summary>
+            /// (未実装)
+            /// </summary>
+            NotImplemented = -9,
+            /// <summary>
+            /// None(なし), この地震による津波の心配はありません。
+            /// </summary>
+            /// <remarks>AdditionalCommentEarthquake code: 215</remarks>
+            None = 0,
+            /// <summary>
+            /// Unknown(不明), (不明)
+            /// </summary>
+            Unknown = 1,
+            /// <summary>
+            /// Checking(調査中), 今後の情報に注意してください。
+            /// </summary>
+            /// <remarks>AdditionalCommentEarthquake code: 217</remarks>
+            Checking = 2,
+            /// <summary>
+            /// NonEffective(若干の海面変動が予想されるが、被害の心配なし), この地震により、日本の沿岸では若干の海面変動があるかもしれませんが、被害の心配はありません。
+            /// </summary>
+            /// <remarks>AdditionalCommentEarthquake code: 212</remarks>
+            NonEffective = 3,
+            /// <summary>
+            /// Watch(津波注意報), (津波注意報)
+            /// </summary>
+            Watch = 4,
+            /// <summary>
+            /// Warning(津波予報(種類不明)), 津波警報等（大津波警報・津波警報あるいは津波注意報）を発表中です。
+            /// </summary>
+            /// <remarks>AdditionalCommentEarthquake code: 211</remarks>
+            Warning = 5
+        }
+
+        /// <summary>
+        /// 国内への津波の有無 - String2Enum
+        /// </summary>
+        public static P2PQ_domesticTsunami P2PQ_domesticTsunami_String2Enum(string str)
+        {
+            return str switch
+            {
+                "None" => P2PQ_domesticTsunami.None,
+                "Unknown" => P2PQ_domesticTsunami.Unknown,
+                "Checking" => P2PQ_domesticTsunami.Checking,
+                "NonEffective" => P2PQ_domesticTsunami.NonEffective,
+                "Watch" => P2PQ_domesticTsunami.Watch,
+                "Warning" => P2PQ_domesticTsunami.Warning,
+                _ => P2PQ_domesticTsunami.NotImplemented
+            };
+        }
+
+        /// <summary>
+        /// 国内への津波の有無 - Enum2String
+        /// </summary>
+        public static readonly Dictionary<P2PQ_domesticTsunami, string> P2PQ_domesticTsunami_Dict = new()
+        {
+            { P2PQ_domesticTsunami.NonEffective, "(未実装データです)" },
+            { P2PQ_domesticTsunami.None, "この地震による津波の心配はありません。" },
+            { P2PQ_domesticTsunami.Unknown, "(不明)" },
+            { P2PQ_domesticTsunami.Checking, "今後の情報に注意してください。" },
+            { P2PQ_domesticTsunami.NonEffective, "この地震により、日本の沿岸では若干の海面変動があるかもしれませんが、被害の心配はありません。" },
+            { P2PQ_domesticTsunami.Watch, "(津波注意報)" },
+            { P2PQ_domesticTsunami.Warning, "津波警報等（大津波警報・津波警報あるいは津波注意報）を発表中です。" }
+        };
+
+        /// <summary>
+        /// P2P地震情報 JSON API v2 - 海外での津波の有無
+        /// </summary>
+        /// <remarks>[ None(なし), Unknown(不明), Checking(調査中), NonEffectiveNearby(震源の近傍で小さな津波の可能性があるが、被害の心配なし), WarningNearby(震源の近傍で津波の可能性がある), WarningPacific(太平洋で津波の可能性がある), WarningPacificWide(太平洋の広域で津波の可能性がある), WarningIndian(インド洋で津波の可能性がある), WarningIndianWide(インド洋の広域で津波の可能性がある), Potential(一般にこの規模では津波の可能性がある) ]</remarks>
+        public enum P2PQ_foreignTsunami
+        {
+            /// <summary>
+            /// (未実装)
+            /// </summary>
+            NotImplemented = -9,
+            /// <summary>
+            /// None(なし), この地震による津波の心配はありません。
+            /// </summary>
+            /// <remarks>AdditionalCommentEarthquake code: 215</remarks>
+            None = 0,
+            /// <summary>
+            /// Unknown(不明), (不明)
+            /// </summary>
+            Unknown = 1,
+            /// <summary>
+            /// Checking(調査中), 今後の情報に注意してください。
+            /// </summary>
+            /// <remarks>AdditionalCommentEarthquake code: 217</remarks>
+            Checking = 2,
+            /// <summary>
+            /// NonEffectiveNearby(震源の近傍で小さな津波の可能性があるが、被害の心配なし), 震源の近傍で小さな津波発生の可能性がありますが、被害をもたらす津波の心配はありません。
+            /// </summary>
+            /// <remarks>AdditionalCommentEarthquake code: 227</remarks>
+            NonEffectiveNearby = 3,
+            /// <summary>
+            /// WarningNearby(震源の近傍で津波の可能性がある), 震源の近傍で津波発生の可能性があります。
+            /// </summary>
+            /// <remarks>AdditionalCommentEarthquake code: 226</remarks>
+            WarningNearby = 4,
+            /// <summary>
+            /// WarningPacific(太平洋で津波の可能性がある), 太平洋で津波発生の可能性があります。
+            /// </summary>
+            /// <remarks>AdditionalCommentEarthquake code: 222</remarks>
+            WarningPacific = 5,
+            /// <summary>
+            /// WarningPacificWide(太平洋の広域で津波の可能性がある), 太平洋の広域に津波発生の可能性があります。
+            /// </summary>
+            /// <remarks>AdditionalCommentEarthquake code: 221</remarks>
+            WarningPacificWide = 6,
+            /// <summary>
+            /// WarningIndian(インド洋で津波の可能性がある), インド洋で津波発生の可能性があります。
+            /// </summary>
+            /// <remarks>AdditionalCommentEarthquake code: 225</remarks>
+            WarningIndian = 7,
+            /// <summary>
+            /// WarningIndianWide(インド洋の広域で津波の可能性がある), インド洋の広域に津波発生の可能性があります。
+            /// </summary>
+            /// <remarks>AdditionalCommentEarthquake code: 224</remarks>
+            WarningIndianWide = 8,
+            /// <summary>
+            /// Potential(一般にこの規模では津波の可能性がある), 一般的に、この規模の地震が海域の浅い領域で発生すると、津波が発生することがあります。
+            /// </summary>
+            /// <remarks>AdditionalCommentEarthquake code: 228</remarks>
+            Potential = 9
+        }
+
+        /// <summary>
+        /// 海外の津波の有無 - String2Enum
+        /// </summary>
+        /// <param name="str">変換する文字列</param>
+        /// <returns>対応する<see cref="P2PQ_foreignTsunami"/></returns>
+        public static P2PQ_foreignTsunami P2PQ_foreignTsunami_String2Enum(string str)
+        {
+            return str switch
+            {
+                "None" => P2PQ_foreignTsunami.None,
+                "Unknown" => P2PQ_foreignTsunami.Unknown,
+                "Checking" => P2PQ_foreignTsunami.Checking,
+                "NonEffectiveNearby" => P2PQ_foreignTsunami.NonEffectiveNearby,
+                "WarningNearby" => P2PQ_foreignTsunami.WarningNearby,
+                "WarningPacific" => P2PQ_foreignTsunami.WarningPacific,
+                "WarningPacificWide" => P2PQ_foreignTsunami.WarningPacificWide,
+                "WarningIndian" => P2PQ_foreignTsunami.WarningIndian,
+                "WarningIndianWide" => P2PQ_foreignTsunami.WarningIndianWide,
+                "Potential" => P2PQ_foreignTsunami.Potential,
+                _ => P2PQ_foreignTsunami.NotImplemented
+            };
+        }
+
+        /// <summary>
+        /// 海外の津波の有無 - Enum2String
+        /// </summary>
+        public static readonly Dictionary<P2PQ_foreignTsunami, string> P2PQ_foreignTsunami_Dict = new()
+        {
+            { P2PQ_foreignTsunami.None, "この地震による津波の心配はありません。" },
+            { P2PQ_foreignTsunami.Unknown, "(不明)" },
+            { P2PQ_foreignTsunami.Checking, "今後の情報に注意してください。" },
+            { P2PQ_foreignTsunami.NonEffectiveNearby, "震源の近傍で小さな津波発生の可能性がありますが、被害をもたらす津波の心配はありません。" },
+            { P2PQ_foreignTsunami.WarningNearby, "震源の近傍で津波発生の可能性があります。" },
+            { P2PQ_foreignTsunami.WarningPacific, "太平洋で津波発生の可能性があります。" },
+            { P2PQ_foreignTsunami.WarningPacificWide, "太平洋の広域に津波発生の可能性があります。" },
+            { P2PQ_foreignTsunami.WarningIndian, "インド洋で津波発生の可能性があります。" },
+            { P2PQ_foreignTsunami.WarningIndianWide, "インド洋の広域に津波発生の可能性があります。" },
+            { P2PQ_foreignTsunami.Potential, "一般的に、この規模の地震が海域の浅い領域で発生すると、津波が発生することがあります。" }
+        };
 
     }
 }
