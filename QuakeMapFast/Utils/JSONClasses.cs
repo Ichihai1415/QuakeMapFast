@@ -1,7 +1,6 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
-namespace QuakeMapFast
+namespace QuakeMapFast.Utils
 {
     /// <summary>
     /// JSONのクラス。
@@ -10,7 +9,7 @@ namespace QuakeMapFast
     /// P2P地震情報 JSON API v2(P2PQuake_...)のものはP2P地震情報 API仕様書(<see href="https://www.p2pquake.net/develop/json_api_v2/"/>)より作成しました。
     /// *表記のものは<c>required</c>、それ以外はnull許容値型(<c>T?</c>)です。
     /// </remarks>
-    public class JSONClasses
+    public static class JSONClasses
     {
         /// <summary>
         /// 独自観測点と座標対応データ用クラス
@@ -225,122 +224,6 @@ namespace QuakeMapFast
         }
 
         /// <summary>
-        /// Geometry独自クラスへの読み込みに必要です。書き込みは未実装です。
-        /// </summary>
-        public class OriginalGeometryConverter : JsonConverter<OriginalGeometry?>
-        {
-            public override OriginalGeometry? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-            {
-                using var jsonDoc = JsonDocument.ParseValue(ref reader);
-                var root = jsonDoc.RootElement;
-                if (root.TryGetProperty("type", out JsonElement type))
-                    if (root.TryGetProperty("coordinates", out JsonElement coordinates))//lineSt:[[ ]],multiLineSt,[[[ ]]],poly:[[[ ]]],multiPoly:[[[[ ]]]]
-                        switch (type.ToString())
-                        {
-                            case "Polygon":
-                                return PolygonList2OriginalGeometry([coordinates], "Polygon");
-                            case "MultiPolygon":
-                                return PolygonList2OriginalGeometry([.. coordinates.EnumerateArray()], "MultiPolygon");
-                            case "LineString":
-                                break;
-                            case "MultiLineString":
-                                break;
-                            default:
-                                throw new JsonException("JSONの解析に失敗しました。", new NotImplementedException("geometryのtypeが対応外です。値:" + type));
-                        }
-                    else
-                        throw new JsonException("JSONの解析に失敗しました。", new ArgumentException("geometryのcoordinatesの取得に失敗しました。"));
-                else
-                    throw new JsonException("JSONの解析に失敗しました。", new ArgumentException("geometryのtypeの取得に失敗しました。"));
-                return null;
-            }
-
-            /// <summary>
-            /// オブジェクトから各座標を取得します。
-            /// </summary>
-            /// <param name="singleObject">1つのオブジェクト(<c>[[x1,y1],[x2,y2,], ...]</c>)</param>
-            /// <returns>座標の配列</returns>
-            /// <exception cref="JsonException">変換に失敗したとき</exception>
-            private static OriginalGeometry.Point[] GetPoints(JsonElement singleObject)
-            {
-                var pointsList = new List<OriginalGeometry.Point>();
-                foreach (var point in singleObject.EnumerateArray())
-                {
-                    if (point.GetArrayLength() == 2)
-                    {
-                        var lon = point[0].GetDouble();
-                        var lat = point[1].GetDouble();
-                        pointsList.Add(new OriginalGeometry.Point { Lat = (float)lat, Lon = (float)lon });
-                    }
-                    else
-                        throw new JsonException("JSONの解析に失敗しました。", new Exception("構造が想定外です。"));
-                }
-                return [.. pointsList];
-            }
-
-            /// <summary>
-            /// Polygonの配列を<see cref="OriginalGeometry"/>に変換します。
-            /// </summary>
-            /// <param name="polygon">Polygon(type=Polygonのみ MultiPolygonは<c>(JsonElement[] polygons, string type)</c>を参照。)</param>
-            /// <param name="type">種類(<c>Polygon</c>) ※指定ミス防止のため参照の代入推奨</param>
-            /// <returns>変換された値</returns>
-            /// <exception cref="JsonException">変換に失敗したとき</exception>
-            private static OriginalGeometry PolygonList2OriginalGeometry(JsonElement polygon, string type)
-            {
-                if (type != "Polygon")
-                    throw new JsonException("JSONの解析に失敗しました。", new Exception("typeが不正です。"));
-                return PolygonList2OriginalGeometry([polygon], type);
-            }
-
-            /// <summary>
-            /// Polygonの配列を<see cref="OriginalGeometry"/>に変換します。
-            /// </summary>
-            /// <param name="polygons">Polygon配列(type=Polygon: <c>[coordinates]</c>、MultiPolygon: <c>[.. coordinates.EnumerateArray()]</c>)</param>
-            /// <param name="type">種類(<c>Polygon</c>または<c>MultiPolygon</c>) ※指定ミス防止のため参照の代入推奨</param>
-            /// <returns>変換された値</returns>
-            /// <exception cref="JsonException">変換に失敗したとき</exception>
-            private static OriginalGeometry PolygonList2OriginalGeometry(JsonElement[] polygons, string type)
-            {
-                if (type != "Polygon" && type != "MultiPolygon")
-                    throw new JsonException("JSONの解析に失敗しました。", new Exception("typeが不正です。"));
-                var polygonsPointsList = new List<List<OriginalGeometry.Point[]>>();
-                foreach (var singleObject in polygons)
-                {
-                    var polygonsPoints = new List<OriginalGeometry.Point[]>();//mainはpolygonsPoints[0]、subはあるときpolygonsPoints[1]として
-                    if (singleObject.ValueKind == JsonValueKind.Array)
-                        foreach (var element_pts in singleObject.EnumerateArray())
-                            if (element_pts.ValueKind == JsonValueKind.Array)
-                            {
-                                var points = GetPoints(element_pts);
-                                polygonsPoints.Add(points);
-                            }
-                            else
-                                throw new JsonException("JSONの解析に失敗しました。", new Exception("構造が想定外です。"));
-                    else
-                        throw new JsonException("JSONの解析に失敗しました。", new Exception("構造が想定外です。"));
-                    polygonsPointsList.Add(polygonsPoints);
-                }
-                return new OriginalGeometry
-                {
-                    Type = type,
-                    Coordinates = new OriginalGeometry.OriginalCoordinates
-                    {
-                        Objects = polygonsPointsList.Select(p => new OriginalGeometry.OriginalCoordinates.SingleObject
-                        {
-                            MainPoints = p[0],
-                            HolePoints = p.Count == 2 ? p[1] : null
-                        }).ToArray()
-                    }
-                };
-            }
-
-            public override void Write(Utf8JsonWriter writer, OriginalGeometry? value, JsonSerializerOptions options)
-            {
-                throw new NotImplementedException("書き込みは未実装です。");
-            }
-        }
-
-        /// <summary>
         /// P2P地震情報 JSON API v2 - 地震情報
         /// </summary>
         public class P2PQuake_JMAQuake
@@ -538,7 +421,5 @@ namespace QuakeMapFast
                 public required int Scale { get; set; }
             }
         }
-
-
     }
 }

@@ -1,9 +1,8 @@
 ﻿using QuakeMapFast.Properties;
 using System.Drawing.Drawing2D;
-using static QuakeMapFast.Conv;
 using static QuakeMapFast.CtrlForm;
-using static QuakeMapFast.Func;
-using static QuakeMapFast.JSONClasses;
+using static QuakeMapFast.Utils.Utils;
+using static QuakeMapFast.Utils.JSONClasses;
 
 namespace QuakeMapFast
 {
@@ -57,11 +56,13 @@ namespace QuakeMapFast
             using var g = Graphics.FromImage(bitmap);
 
             var size = Math.Min(36, Math.Max(10.8f, zoom / 10f));//size=>(範囲(単位:度))　36=>3 10.8=>10 3.6=>30
+            var penW = size / 10f;
             ConWrite($"zoom: {zoom}, size: {size}");
             foreach (var point in points)
             {
                 var brush = IntN2Brush(point.Scale);
                 g.FillRectangle(brush, (float)((point.Lon - lonSta) * zoom) - size / 2f, (float)((latEnd - point.Lat) * zoom) - size / 2f, size, size);
+                g.DrawRectangle(new Pen(Color.FromArgb(63, 0, 0, 0), penW), (float)((point.Lon - lonSta) * zoom) - size / 2f, (float)((latEnd - point.Lat) * zoom) - size / 2f, size, size);
             }
 
 
@@ -99,12 +100,5 @@ namespace QuakeMapFast
 
         }
 
-        public class PointData
-        {
-            public required string Name { get; set; }
-            public required float Lat { get; set; }
-            public required float Lon { get; set; }
-            public required int Scale { get; set; }
-        }
     }
 }

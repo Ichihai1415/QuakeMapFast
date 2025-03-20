@@ -1,13 +1,12 @@
 ﻿using QuakeMapFast.Properties;
+using System.ComponentModel;
 using System.Media;
 using System.Net.Sockets;
-using System.Runtime.Versioning;
 using System.Text;
 
-namespace QuakeMapFast
+namespace QuakeMapFast.Utils
 {
-    [SupportedOSPlatform("windows7.0")]
-    public class Func
+    public partial class Utils
     {
         /// <summary>
         /// コンソールのデフォルトの色
@@ -53,20 +52,18 @@ namespace QuakeMapFast
         /// <summary>
         /// 棒読みちゃんに読み上げ指令を送ります。
         /// </summary>
-        /// <remarks>事前に有効確認が必要です。</remarks>
         /// <param name="text">読み上げさせる文</param>
-        public static void Bouyomichan(string text)
+        internal static void BouyomiChan(string text)
         {
             if (!Settings.Default.Bouyomi_Enable)
                 return;
             try
             {
-                ConWrite("[Bouyomichan]棒読みちゃん処理開始");
-                byte[] message = Encoding.UTF8.GetBytes(text);
-                ConWrite($"[Bouyomichan]棒読みちゃん送信中...");
-                using (TcpClient tcpClient = new TcpClient("127.0.0.1", 50001))
-                using (NetworkStream networkStream = tcpClient.GetStream())
-                using (BinaryWriter binaryWriter = new BinaryWriter(networkStream))
+                ConWrite("[BouyomiChan]棒読みちゃん処理開始");
+                var message = Encoding.UTF8.GetBytes(text);
+                using var tcpClient = new TcpClient("127.0.0.1", 50001);
+                using var networkStream = tcpClient.GetStream();
+                using var binaryWriter = new BinaryWriter(networkStream);
                 {
                     binaryWriter.Write((short)1);
                     binaryWriter.Write(Settings.Default.Bouyomi_Speed);
@@ -77,11 +74,11 @@ namespace QuakeMapFast
                     binaryWriter.Write(message.Length);
                     binaryWriter.Write(message);
                 }
-                ConWrite($"[Bouyomichan]棒読みちゃん送信完了");
+                ConWrite($"[BouyomiChan]棒読みちゃん送信完了");
             }
             catch (Exception ex)
             {
-                ConWrite($"[Bouyomichan]", ex);
+                ConWrite($"[BouyomiChan]", ex);
             }
         }
 
@@ -89,7 +86,7 @@ namespace QuakeMapFast
         /// TelopにSocket送信します
         /// </summary>
         /// <param name="text">Telopに送信するテキスト(Telop方式)</param>
-        public static void Telop(string text)
+        internal static void Telop(string text)
         {
             if (!Settings.Default.Telop_Enable)
                 return;
@@ -99,9 +96,9 @@ namespace QuakeMapFast
             {
                 byte[] message = new byte[4096];
                 message = Encoding.UTF8.GetBytes(text);
-                using (TcpClient tcpClient = new TcpClient("127.0.0.1", 31401))
-                using (NetworkStream networkStream = tcpClient.GetStream())
-                    networkStream.Write(message, 0, message.Length);
+                using TcpClient tcpClient = new("127.0.0.1", 31401);
+                using NetworkStream networkStream = tcpClient.GetStream();
+                networkStream.Write(message, 0, message.Length);
             }
             catch (Exception ex)
             {
@@ -113,42 +110,44 @@ namespace QuakeMapFast
         /// <summary>
         /// XPosterV2Hostに送信します。
         /// </summary>
-        /// <remarks><c>if (!debug && !readJSON) </c>をしておくこと</remarks>
-        /// <param name="text"></param>
-        /// <param name="path"></param>
-        public static void XPost(string text, string path)
+        /// <param name="text">ポストするテキスト</param>
+        /// <param name="path">ポストする画像</param>
+        internal static void XPost(string text, string path)
         {
-            if (File.Exists("XPosterV2Host - Enable"))//念のため
-                try
-                {
-                    ConWrite("[XPost]X送信開始");
-                    string sendText = $"{{ \"text\" : \"{text.Replace("\n", "\\\\n")}\", \"images\" : \"{Path.GetFullPath(path).Replace("\\", "\\\\")}\" }}";
-                    ConWrite("[XPost]Text:" + sendText);
-                    byte[] message = new byte[16 * 1024];
-                    message = Encoding.UTF8.GetBytes(sendText);
-                    using (TcpClient tcpClient = new TcpClient("127.0.0.1", 31403))
-                    using (NetworkStream networkStream = tcpClient.GetStream())
+            if (!CtrlForm.debug && !CtrlForm.readJSON)
+                if (File.Exists("XPosterV2Host - Enable"))//念のため
+                    try
+                    {
+                        ConWrite("[XPost]X送信開始");
+                        var sendText = $"{{ \"text\" : \"{text.Replace("\n", "\\\\n")}\", \"images\" : \"{Path.GetFullPath(path).Replace("\\", "\\\\")}\" }}";
+                        ConWrite("[XPost]Text:" + sendText);
+                        var message = new byte[16 * 1024];
+                        message = Encoding.UTF8.GetBytes(sendText);
+                        using var tcpClient = new TcpClient("127.0.0.1", 31403);
+                        using var networkStream = tcpClient.GetStream();
                         networkStream.Write(message, 0, message.Length);
-                }
-                catch (Exception ex)
-                {
-                    ConWrite("[XPost]", ex);
-                }
-                finally
-                {
-                    ConWrite("[XPost]X送信終了");
-                }
+                    }
+                    catch (Exception ex)
+                    {
+                        ConWrite("[XPost]", ex);
+                    }
+                    finally
+                    {
+                        ConWrite("[XPost]X送信終了");
+                    }
         }
 
-        //共通プレイヤー
-        public static SoundPlayer player;
+        /// <summary>
+        /// 共通プレイヤー
+        /// </summary>
+        internal static SoundPlayer? player = null;
 
         /// <summary>
         /// 音声を再生します。
         /// </summary>
         /// <remarks>音声ファイルがなければ無効です。</remarks>
         /// <param name="fileName">再生するファイル名(sound\\)</param>
-        public static void PlaySound(string fileName)
+        internal static void PlaySound(string fileName)
         {
             if (!fileName.StartsWith("Sound\\"))
                 fileName = "Sound\\" + fileName;
@@ -166,6 +165,19 @@ namespace QuakeMapFast
             }
             player = new SoundPlayer(fileName);
             player.Play();
+        }
+
+        /// <summary>
+        /// enumのDescriptionを取得します。
+        /// </summary>
+        /// <param name="value">取得するenum</param>
+        /// <returns>description、なければ<c>value.ToString()</c></returns>
+        public static string GetEnumDescription(Enum value)
+        {
+            var fieldInfo = value.GetType().GetField(value.ToString());
+            if (fieldInfo == null) return value.ToString();
+            var attributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+            return attributes.Length > 0 ? attributes[0].Description : value.ToString();
         }
     }
 }

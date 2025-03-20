@@ -8,10 +8,9 @@ using System.Runtime.Versioning;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using static QuakeMapFast.Conv;
 using static QuakeMapFast.DataPro;
-using static QuakeMapFast.Func;
-using static QuakeMapFast.JSONClasses;
+using static QuakeMapFast.Utils.Utils;
+using static QuakeMapFast.Utils.JSONClasses;
 
 namespace QuakeMapFast
 {
@@ -249,9 +248,9 @@ namespace QuakeMapFast
             //ScalePrompt(JObject.Parse(File.ReadAllText("D:\\Ichihai1415\\data\\json\\P2Pquake\\2024-r6noto-last.json")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("D:\\Ichihai1415\\data\\json\\P2Pquake\\2024-r6noto-last-edit.json")));
             //EEW(JObject.Parse(File.ReadAllText("C:\\Ichihai1415\\source\\vs\\QuakeMapFast\\QuakeMapFast\\bin\\x64\\Debug\\Log\\202401\\01\\16\\20240101161107.3056.txt")));
-            DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake/659268caf0f6de00075648b1").Result));//noto
+            //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake/659268caf0f6de00075648b1").Result));//noto
             //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=0&quake_type=DetailScale").Result).First());
-            //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=4&quake_type=DetailScale").Result).First());
+            DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=4&quake_type=DetailScale").Result).First());
         }
 
         private void SettingReload()
@@ -322,7 +321,7 @@ namespace QuakeMapFast
         private void BouyomiTest_Click(object sender, EventArgs e)
         {
             ConWrite("[Setting]棒読みちゃん送信テスト開始");
-            Bouyomichan("QuakeMapFast棒読みちゃん読み上げテスト");
+            BouyomiChan("QuakeMapFast棒読みちゃん読み上げテスト");
             ConWrite("[Setting]棒読みちゃん送信テスト完了");
         }
 

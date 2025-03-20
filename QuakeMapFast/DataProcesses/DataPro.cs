@@ -1,18 +1,19 @@
 ﻿using System.Drawing.Drawing2D;
 using System.Runtime.Versioning;
-using static QuakeMapFast.Conv;
+using static QuakeMapFast.Utils.Utils;
+using static QuakeMapFast.Utils.JSONClasses;
 
 namespace QuakeMapFast
 {
     [SupportedOSPlatform("windows7.0")]
     internal partial class DataPro
     {
-        public DataPro(JSONClasses.GeoJSON_JMA_Map json)
+        public DataPro(GeoJSON_JMA_Map json)
         {
             json_map_AreaForecastLocalE = json;
         }
 
-        internal static JSONClasses.GeoJSON_JMA_Map? json_map_AreaForecastLocalE;
+        internal static GeoJSON_JMA_Map? json_map_AreaForecastLocalE;
 
         public static Bitmap DrawMap(float latSta, float latEnd, float lonSta, float lonEnd)
         {
@@ -53,8 +54,11 @@ namespace QuakeMapFast
                     }
                 }
             }
+            var lineWidth = Math.Max(1f, zoom / 216f);
+            if (CtrlForm.debug)
+                ConWrite($"<debug>[DrawMap]zoom: {zoom}, lineWidth: {lineWidth}");
             g.FillPath(new SolidBrush(Color.FromArgb(100, 100, 150)), gp);
-            g.DrawPath(new Pen(Color.FromArgb(255, 200, 200, 200), 1), gp);//zoom > 200 ? 2 : 1
+            g.DrawPath(new Pen(Color.FromArgb(255, 200, 200, 200), lineWidth) { LineJoin = LineJoin.Round }, gp);//zoom > 200 ? 2 : 1
             return bitmap;
         }
 

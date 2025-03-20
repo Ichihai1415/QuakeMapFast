@@ -2,9 +2,9 @@
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Text.Json.Nodes;
-using static QuakeMapFast.Conv;
 using static QuakeMapFast.CtrlForm;
-using static QuakeMapFast.Func;
+using static QuakeMapFast.Utils.Utils;
+using static QuakeMapFast.Utils.JSONClasses;
 
 namespace QuakeMapFast
 {/*
