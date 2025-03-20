@@ -104,8 +104,8 @@ namespace QuakeMapFast
             json_map_AreaForecastLocalE = JsonSerializer.Deserialize<GeoJSON_JMA_Map?>(File.ReadAllText("AreaForecastLocalE_GIS_20240520_1.geojson"), jsonOptions);
             ConWrite($"[CtrlForm_Load]マップファイル読み込み完了");
 
-            var json_obs_text = File.ReadAllText(@"C:\Users\proje\Downloads\PointSeismicIntensity.json");
-            var json_obs = JsonSerializer.Deserialize<ObsPoints>(json_obs_text);
+            var json_obs_text = File.ReadAllText(@"C:\Users\proje\Downloads\PointSeismicIntensity.json") ?? throw new Exception("観測点ファイルの読み込みに失敗しました。");
+            var json_obs = JsonSerializer.Deserialize<ObsPoints>(json_obs_text) ?? throw new Exception("観測点ファイルの読み込みに失敗しました。");
             foreach (var pref in json_obs.Pref)
                 foreach (var area in pref.Area)
                     foreach (var city in area.City)
@@ -230,7 +230,7 @@ namespace QuakeMapFast
         /// <summary>
         /// デバッグはここでやるように
         /// </summary>
-        /// <remarks>パスは開発者のものです。変える場合、APIの情報リストから<b><u>情報は一つ、最初と最後の[]は付けない</u></b>ようにして抜き出してください。</remarks>
+        /// <remarks>パスは開発者のものです。変える場合、APIの情報リストから<b>情報は一つ、最初と最後の[]は付けない</b>ようにして抜き出してください。</remarks>
         public static void Debug()
         {
             ConWrite("[Debug]デバッグモードです", ConsoleColor.Cyan);
@@ -249,7 +249,9 @@ namespace QuakeMapFast
             //ScalePrompt(JObject.Parse(File.ReadAllText("D:\\Ichihai1415\\data\\json\\P2Pquake\\2024-r6noto-last.json")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("D:\\Ichihai1415\\data\\json\\P2Pquake\\2024-r6noto-last-edit.json")));
             //EEW(JObject.Parse(File.ReadAllText("C:\\Ichihai1415\\source\\vs\\QuakeMapFast\\QuakeMapFast\\bin\\x64\\Debug\\Log\\202401\\01\\16\\20240101161107.3056.txt")));
-            DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake/659268caf0f6de00075648b1").Result));
+            DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake/659268caf0f6de00075648b1").Result));//noto
+            //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=0&quake_type=DetailScale").Result).First());
+            //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=4&quake_type=DetailScale").Result).First());
         }
 
         private void SettingReload()

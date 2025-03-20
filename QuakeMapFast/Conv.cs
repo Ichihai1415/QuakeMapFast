@@ -241,33 +241,56 @@ namespace QuakeMapFast
         /// <summary>
         /// 画像描画用に緯度・経度を補正します
         /// </summary>
-        /// <param name="LatSta">緯度の始点</param>
-        /// <param name="LatEnd">緯度の終点</param>
-        /// <param name="LonSta">経度の始点</param>
-        /// <param name="LonEnd">経度の終点</param>
-        public static void PointCorrect(ref double LatSta, ref double LatEnd, ref double LonSta, ref double LonEnd)
+        /// <param name="latSta">緯度の始点</param>
+        /// <param name="latEnd">緯度の終点</param>
+        /// <param name="lonSta">経度の始点</param>
+        /// <param name="lonEnd">経度の終点</param>
+        /// <param name="enableCorrectMax">最大値を補正するか</param>
+        public static void PointCorrect(ref float latSta, ref float latEnd, ref float lonSta, ref float lonEnd, bool enableCorrectMax = false)
         {
-            LatSta -= (LatEnd - LatSta) / 20d;//差の1/20余白追加
-            LatEnd += (LatEnd - LatSta) / 20d;
-            LonSta -= (LonEnd - LonSta) / 20d;
-            LonEnd += (LonEnd - LonSta) / 20d;
-            if (LatEnd - LatSta < 3)//緯度差を最小3に
+            latSta -= (latEnd - latSta) / 20f;//差の1/20余白追加
+            latEnd += (latEnd - latSta) / 20f;
+            lonSta -= (lonEnd - lonSta) / 20f;
+            lonEnd += (lonEnd - lonSta) / 20f;
+            if (latEnd - latSta < 3f)//緯度差を最小3に
             {
-                double correction = (3 - (LatEnd - LatSta)) / 2d;
-                LatSta -= correction;
-                LatEnd += correction;
+                var correction = (3f - (latEnd - latSta)) / 2f;
+                latSta -= correction;
+                latEnd += correction;
             }
-            if (LonEnd - LonSta > LatEnd - LatSta)//大きいほうに合わせる
+            if (latEnd - latSta < 3f)//経度差を最小3に
             {
-                double correction = ((LonEnd - LonSta) - (LatEnd - LatSta)) / 2d;
-                LatSta -= correction;
-                LatEnd += correction;
+                var correction = (3f - (lonEnd - lonSta)) / 2f;
+                lonSta -= correction;
+                lonEnd += correction;
+            }
+            if (enableCorrectMax)
+            {
+                if (latEnd - latSta > 10f) //緯度差を最大10に
+                {
+                    var correction = ((latEnd - latSta) - 10f) / 2f;
+                    latSta += correction;
+                    latEnd -= correction;
+                }
+                if (lonEnd - lonSta > 10f) //経度差を最大10に
+                {
+                    var correction = ((lonEnd - lonSta) - 10f) / 2f;
+                    lonSta += correction;
+                    lonEnd -= correction;
+                }
+            }
+
+            if (lonEnd - lonSta > latEnd - latSta)//大きいほうに合わせる
+            {
+                var correction = ((lonEnd - lonSta) - (latEnd - latSta)) / 2f;
+                latSta -= correction;
+                latEnd += correction;
             }
             else// if (LonEnd - LonSta < LatEnd - LatSta)
             {
-                double correction = ((LatEnd - LatSta) - (LonEnd - LonSta)) / 2d;
-                LonSta -= correction;
-                LonEnd += correction;
+                var correction = ((latEnd - latSta) - (lonEnd - lonSta)) / 2f;
+                lonSta -= correction;
+                lonEnd += correction;
             }
         }
 

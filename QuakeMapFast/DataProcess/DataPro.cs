@@ -14,12 +14,12 @@ namespace QuakeMapFast
 
         internal static JSONClasses.GeoJSON_JMA_Map? json_map_AreaForecastLocalE;
 
-        public static Bitmap DrawMap(double latSta, double latEnd, double lonSta, double lonEnd)
+        public static Bitmap DrawMap(float latSta, float latEnd, float lonSta, float lonEnd)
         {
             if (json_map_AreaForecastLocalE == null)
                 throw new Exception("地図データが読み込まれていません。");
-            PointCorrect(ref latSta, ref latEnd, ref lonSta, ref lonEnd);
-            var zoom = 1080d / (latEnd - latSta);
+
+            var zoom = 1080f / (latEnd - latSta);
 
             var bitmap = new Bitmap(1920, 1080);
             using var g = Graphics.FromImage(bitmap);
@@ -37,7 +37,7 @@ namespace QuakeMapFast
                 if (feature.Geometry.Type == "Polygon")
                 {
                     gp.StartFigure();
-                    var points = feature.Geometry.Coordinates.Objects[0].MainPoints.Select(coordinate => new PointF((float)((double.Parse(coordinate.Lon.ToString()) - lonSta) * zoom), (float)((latEnd - double.Parse(coordinate.Lat.ToString())) * zoom)));
+                    var points = feature.Geometry.Coordinates.Objects[0].MainPoints.Select(coordinate => new PointF((coordinate.Lon - lonSta) * zoom, (latEnd - coordinate.Lat) * zoom));
                     if (points.Count() > 2)
                         gp.AddPolygon(points.ToArray());
                 }
@@ -47,7 +47,7 @@ namespace QuakeMapFast
                     foreach (var singleObject in feature.Geometry.Coordinates.Objects)
                     {
                         gp.StartFigure();
-                        var points = singleObject.MainPoints.Select(coordinate => new PointF((float)((double.Parse(coordinate.Lon.ToString()) - lonSta) * zoom), (float)((latEnd - double.Parse(coordinate.Lat.ToString())) * zoom)));
+                        var points = singleObject.MainPoints.Select(coordinate => new PointF((coordinate.Lon - lonSta) * zoom, (latEnd - coordinate.Lat) * zoom));
                         if (points.Count() > 2)
                             gp.AddPolygon(points.ToArray());
                     }
