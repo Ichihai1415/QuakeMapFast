@@ -6,10 +6,12 @@ using System.IO.Compression;
 using System.Net.WebSockets;
 using System.Runtime.Versioning;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using static QuakeMapFast.Conv;
 using static QuakeMapFast.DataPro;
 using static QuakeMapFast.Func;
+using static QuakeMapFast.JSONClasses;
 
 namespace QuakeMapFast
 {
@@ -29,17 +31,21 @@ namespace QuakeMapFast
          README.md
          (JSON-sample.zip(...\json\P2Pquake)更新時にResourceのCommentにバージョンを書いておく
          */
-        public static readonly string version = "0.3.0-dev";
-        readonly int[] ignoreCode = { 554, 555, 561, 9611 };//表示しない
-        public static readonly Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
-        string latestID = "";
-        public static bool debug = false;
-        public static bool readJSON = false;
-        public static FontFamily font;
+        internal static readonly string version = "0.3.0-dev";
+        internal readonly int[] ignoreCode = { 554, 555, 561, 9611 };//表示しない
+        internal static readonly Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
+        internal string latestID = "";
+        internal static bool debug = false;
+        internal static bool readJSON = false;
+        internal static FontFamily? font;
 
-        public static DataView view_all = new DataView();
+        internal static DataView view_all = new();
 
+        internal static Dictionary<string, (float Lat, float Lon)> obsPt2LatLon = [];
 
+        internal static HttpClient client = new();
+
+        internal static readonly JsonSerializerOptions jsonOptions = new() { Converters = { new OriginalGeometryConverter() } };
         private async void CtrlForm_Load(object sender, EventArgs e)
         {
             //ConWrite($"");
@@ -94,8 +100,18 @@ namespace QuakeMapFast
             }
 
             ConWrite($"[CtrlForm_Load]マップファイル確認完了");
-            mapjson = JsonNode.Parse(File.ReadAllText("AreaForecastLocalE_GIS_20240520_1.geojson"));
+            //mapjson = JsonNode.Parse(File.ReadAllText("AreaForecastLocalE_GIS_20240520_1.geojson"));
+            json_map_AreaForecastLocalE = JsonSerializer.Deserialize<GeoJSON_JMA_Map?>(File.ReadAllText("AreaForecastLocalE_GIS_20240520_1.geojson"), jsonOptions);
             ConWrite($"[CtrlForm_Load]マップファイル読み込み完了");
+
+            var json_obs_text = File.ReadAllText(@"C:\Users\proje\Downloads\PointSeismicIntensity.json");
+            var json_obs = JsonSerializer.Deserialize<ObsPoints>(json_obs_text);
+            foreach (var pref in json_obs.Pref)
+                foreach (var area in pref.Area)
+                    foreach (var city in area.City)
+                        foreach (var pt in city.Point)
+                            obsPt2LatLon.Add(pt.Name, (pt.Lat, pt.Lon));
+            ConWrite($"[CtrlForm_Load]観測点データ読み込み完了");
 
             if (!Directory.Exists("Sound"))
                 ConWrite($"[CtrlForm_Load]<お知らせ> 音声再生方法はREADMEを確認してください。");
@@ -103,7 +119,7 @@ namespace QuakeMapFast
             view_all.Show();
 
             SettingReload();
-            //Debug(); return;//デバッグ時ここをつける(ここ以降行かせない)
+            Debug(); return;//デバッグ時ここをつける(ここ以降行かせない)
 
             //XPost("test from QuakeMapFast (2)", "D:\\Ichihai1415\\image\\icon\\new - bot.png");
             await Get();
@@ -118,7 +134,7 @@ namespace QuakeMapFast
             while (true)
                 try
                 {
-                    using (ClientWebSocket client = new ClientWebSocket())
+                    using (ClientWebSocket client = new())
                     {
                     connect:
                         await client.ConnectAsync(new Uri("wss://api.p2pquake.net/v2/ws"), CancellationToken.None);
@@ -129,7 +145,7 @@ namespace QuakeMapFast
                             int bytesRead = 0;
                             while (true)//受信
                             {
-                                ArraySegment<byte> segment = new ArraySegment<byte>(buffer, bytesRead, buffer.Length - bytesRead);
+                                ArraySegment<byte> segment = new(buffer, bytesRead, buffer.Length - bytesRead);
                                 WebSocketReceiveResult result = await client.ReceiveAsync(segment, CancellationToken.None);
                                 if (result.MessageType == WebSocketMessageType.Close)
                                 {
@@ -177,12 +193,12 @@ namespace QuakeMapFast
                                         switch (type)
                                         {
                                             case "ScalePrompt":
-                                                ScalePrompt(json);
+                                                //ScalePrompt(json);
                                                 break;
                                         }
                                         break;
                                     case 556:
-                                        EEW(json);
+                                        //EEW(json);
                                         break;
                                 }
                             }
@@ -215,7 +231,7 @@ namespace QuakeMapFast
         /// デバッグはここでやるように
         /// </summary>
         /// <remarks>パスは開発者のものです。変える場合、APIの情報リストから<b><u>情報は一つ、最初と最後の[]は付けない</u></b>ようにして抜き出してください。</remarks>
-        public void Debug()
+        public static void Debug()
         {
             ConWrite("[Debug]デバッグモードです", ConsoleColor.Cyan);
             debug = true;
@@ -233,6 +249,7 @@ namespace QuakeMapFast
             //ScalePrompt(JObject.Parse(File.ReadAllText("D:\\Ichihai1415\\data\\json\\P2Pquake\\2024-r6noto-last.json")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("D:\\Ichihai1415\\data\\json\\P2Pquake\\2024-r6noto-last-edit.json")));
             //EEW(JObject.Parse(File.ReadAllText("C:\\Ichihai1415\\source\\vs\\QuakeMapFast\\QuakeMapFast\\bin\\x64\\Debug\\Log\\202401\\01\\16\\20240101161107.3056.txt")));
+            DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake/659268caf0f6de00075648b1").Result));
         }
 
         private void SettingReload()
@@ -346,12 +363,15 @@ namespace QuakeMapFast
                         switch (type)
                         {
                             case "ScalePrompt":
-                                ScalePrompt(json);
+                                //ScalePrompt(json);
+                                break;
+                            case "DetailScale":
+                                DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(jsonText));
                                 break;
                         }
                         break;
                     case 556:
-                        EEW(json);
+                        //EEW(json);
                         break;
                 }
             }

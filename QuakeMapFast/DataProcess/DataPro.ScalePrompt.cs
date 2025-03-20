@@ -7,7 +7,7 @@ using static QuakeMapFast.CtrlForm;
 using static QuakeMapFast.Func;
 
 namespace QuakeMapFast
-{
+{/*
     internal partial class DataPro
     {
 
@@ -131,5 +131,5 @@ namespace QuakeMapFast
         }
 
 
-    }
+    }*/
 }

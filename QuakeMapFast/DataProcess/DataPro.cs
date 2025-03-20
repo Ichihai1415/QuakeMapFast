@@ -1,16 +1,65 @@
 ﻿using System.Drawing.Drawing2D;
 using System.Runtime.Versioning;
-using System.Text.Json.Nodes;
 using static QuakeMapFast.Conv;
-using static QuakeMapFast.Func;
 
 namespace QuakeMapFast
 {
     [SupportedOSPlatform("windows7.0")]
     internal partial class DataPro
     {
-        public static JsonNode mapjson;
+        public DataPro(JSONClasses.GeoJSON_JMA_Map json)
+        {
+            json_map_AreaForecastLocalE = json;
+        }
 
+        internal static JSONClasses.GeoJSON_JMA_Map? json_map_AreaForecastLocalE;
+
+        public static Bitmap DrawMap(double latSta, double latEnd, double lonSta, double lonEnd)
+        {
+            if (json_map_AreaForecastLocalE == null)
+                throw new Exception("地図データが読み込まれていません。");
+            PointCorrect(ref latSta, ref latEnd, ref lonSta, ref lonEnd);
+            var zoom = 1080d / (latEnd - latSta);
+
+            var bitmap = new Bitmap(1920, 1080);
+            using var g = Graphics.FromImage(bitmap);
+            g.Clear(Color.FromArgb(20, 40, 60));
+            using var gp = new GraphicsPath();
+
+
+
+
+
+            foreach (var feature in json_map_AreaForecastLocalE.Features)
+            {
+                if (feature.Geometry == null)
+                    continue;
+                if (feature.Geometry.Type == "Polygon")
+                {
+                    gp.StartFigure();
+                    var points = feature.Geometry.Coordinates.Objects[0].MainPoints.Select(coordinate => new PointF((float)((double.Parse(coordinate.Lon.ToString()) - lonSta) * zoom), (float)((latEnd - double.Parse(coordinate.Lat.ToString())) * zoom)));
+                    if (points.Count() > 2)
+                        gp.AddPolygon(points.ToArray());
+                }
+                else
+                {
+
+                    foreach (var singleObject in feature.Geometry.Coordinates.Objects)
+                    {
+                        gp.StartFigure();
+                        var points = singleObject.MainPoints.Select(coordinate => new PointF((float)((double.Parse(coordinate.Lon.ToString()) - lonSta) * zoom), (float)((latEnd - double.Parse(coordinate.Lat.ToString())) * zoom)));
+                        if (points.Count() > 2)
+                            gp.AddPolygon(points.ToArray());
+                    }
+                }
+            }
+            g.FillPath(new SolidBrush(Color.FromArgb(100, 100, 150)), gp);
+            g.DrawPath(new Pen(Color.FromArgb(255, 200, 200, 200), 1), gp);//zoom > 200 ? 2 : 1
+            return bitmap;
+        }
+
+
+        /*
         /// <summary>
         /// マップを描画します。塗りつぶしも実行します。
         /// </summary>
@@ -96,7 +145,7 @@ namespace QuakeMapFast
                 }
             }
             return bitmap;
-        }
+        }*/
 
     }
 }

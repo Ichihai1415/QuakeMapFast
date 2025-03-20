@@ -9,7 +9,7 @@ using static QuakeMapFast.Func;
 namespace QuakeMapFast
 {
     internal partial class DataPro
-    {
+    {/*
         public static void EEW(JsonNode json)
         {
             if ((bool)json["cancelled"])
@@ -19,7 +19,7 @@ namespace QuakeMapFast
             var hypocenter = earthquake["hypocenter"];
 
             DateTime time = DateTime.Parse((string)earthquake["originTime"]);
-            Dictionary<string, SolidBrush> areaColor = json["areas"].AsArray().ToDictionary(area => (string)area["name"], area => P2PScale2isOver6((int)area["scaleFrom"], (int)area["scaleTo"])
+            Dictionary<string, SolidBrush> areaColor = json["areas"].AsArray().ToDictionary(area => (string)area["name"], area => P2PQScale2isOver6((int)area["scaleFrom"], (int)area["scaleTo"])
             ? new SolidBrush(Color.FromArgb(180, 0, 0)) : new SolidBrush(Color.FromArgb(180, 180, 0)));
             List<string> areaWarn = areaColor.Keys.ToList();
             List<string> prefWarn = json["areas"].AsArray().Select(n => (string)n["pref"]).Distinct().ToList();
@@ -102,7 +102,7 @@ namespace QuakeMapFast
             if (File.Exists("XPosterV2Host - Enable"))
                 if (!debug && !readJSON)
                     XPost(text, $"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png");
-        }
+        }*/
 
     }
 }

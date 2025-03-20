@@ -116,12 +116,23 @@ namespace QuakeMapFast
         }
 
         /// <summary>
-        /// P2Pjsonの震度が6弱以上か判定します。1つの場合(下限上限なし)同じものを指定してください。
+        /// P2P地震情報 JSON API v2 の震度が6弱以上か判定します。
         /// </summary>
         /// <param name="scaleFrom">震度の下限</param>
         /// <param name="scaleTo">震度の上限</param>
-        /// <returns>6弱以上の場合true</returns>
-        public static bool P2PScale2isOver6(int scaleFrom, int scaleTo)
+        /// <returns>6弱以上の場合<c>true</c></returns>
+        public static bool P2PQScale2isOver6(int scale)
+        {
+            return scale <= 70 && scale >= 55;//55<=scale<=70 
+        }
+
+        /// <summary>
+        /// P2P地震情報 JSON API v2 の震度が6弱以上か判定します。
+        /// </summary>
+        /// <param name="scaleFrom">震度の下限</param>
+        /// <param name="scaleTo">震度の上限</param>
+        /// <returns>6弱以上の場合<c>true</c></returns>
+        public static bool P2PQScale2isOver6(int scaleFrom, int scaleTo)
         {
             return scaleTo <= 70 ?
                 scaleTo >= 55 :
@@ -136,7 +147,7 @@ namespace QuakeMapFast
         /// <returns>Dictionary<地区, int形式の震度></returns>
         public static Dictionary<string, int> Points2Dic(JsonNode points, string token)
         {
-            return points.AsArray().ToDictionary(pt => (string)pt[token], pt => P2PScale2IntN((int)pt["scale"]));
+            return points.AsArray().ToDictionary(pt => (string)pt![token]!, pt => P2PScale2IntN((int)pt!["scale"]!));
         }
 
         /// <summary>
