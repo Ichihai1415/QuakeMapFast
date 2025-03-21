@@ -140,13 +140,15 @@ namespace QuakeMapFast.Utils
         }
 
         /// <summary>
-        /// jsonから指定した区分の地区ごとの震度のDictionaryを返します。
+        /// jsonから指定した区分の地区・地点ごとの震度のDictionaryを返します。
         /// </summary>
         /// <param name="points">jsonのpoints</param>
         /// <param name="token">addr(地点・区分)/pref(県)</param>
         /// <returns>Dictionary<地区, int形式の震度></returns>
-        public static Dictionary<string, int> Points2Dic(JsonNode points, string token)
+        public static Dictionary<string, int> P2PQPoints2Dic(JsonNode points, string token)
         {
+            if(token!= "addr" && token != "pref")
+                throw new InvalidEnumArgumentException("tokenはaddrかprefのみです。");
             return points.AsArray().ToDictionary(pt => (string)pt![token]!, pt => P2PScale2IntN((int)pt!["scale"]!));
         }
 
@@ -314,6 +316,8 @@ namespace QuakeMapFast.Utils
                     return new SolidBrush(Color.FromArgb(50, 175, 175));
                 case 4:
                     return new SolidBrush(Color.FromArgb(240, 240, 60));
+                case -5:
+                    return new SolidBrush(Color.FromArgb(250, 150, 0));
                 case 5:
                     return new SolidBrush(Color.FromArgb(250, 150, 0));
                 case 6:

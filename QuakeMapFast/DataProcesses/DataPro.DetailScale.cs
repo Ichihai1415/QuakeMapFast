@@ -1,8 +1,8 @@
 ﻿using QuakeMapFast.Properties;
 using System.Drawing.Drawing2D;
 using static QuakeMapFast.CtrlForm;
-using static QuakeMapFast.Utils.Utils;
 using static QuakeMapFast.Utils.JSONClasses;
+using static QuakeMapFast.Utils.Utils;
 
 namespace QuakeMapFast
 {
@@ -14,6 +14,8 @@ namespace QuakeMapFast
         /// <param name="json"></param>
         public static void DetailScale(P2PQuake_JMAQuake? json)
         {
+            if(font==null)
+                throw new Exception("フォントが読み込まれていません。");
             if (json == null)
             {
                 ConWrite("[DetailScale]データがありません。", ConsoleColor.Red);
@@ -57,7 +59,8 @@ namespace QuakeMapFast
 
             var size = Math.Min(36, Math.Max(10.8f, zoom / 10f));//size=>(範囲(単位:度))　36=>3 10.8=>10 3.6=>30
             var penW = size / 10f;
-            ConWrite($"zoom: {zoom}, size: {size}");
+            if (debug)
+                ConWrite($"zoom: {zoom}, size: {size}");
             foreach (var point in points)
             {
                 var brush = IntN2Brush(point.Scale);

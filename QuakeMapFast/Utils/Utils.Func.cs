@@ -167,17 +167,10 @@ namespace QuakeMapFast.Utils
             player.Play();
         }
 
-        /// <summary>
-        /// enumのDescriptionを取得します。
-        /// </summary>
-        /// <param name="value">取得するenum</param>
-        /// <returns>description、なければ<c>value.ToString()</c></returns>
-        public static string GetEnumDescription(Enum value)
+        public static void WriteLog(Exception ex)
         {
-            var fieldInfo = value.GetType().GetField(value.ToString());
-            if (fieldInfo == null) return value.ToString();
-            var attributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
-            return attributes.Length > 0 ? attributes[0].Description : value.ToString();
+            File.WriteAllText(@$"Log\Error\{DateTime.Now:now:yyyyMM\dd\yyyyMMddHHmmss.ffff}.txt", ex.ToString());
         }
+
     }
 }
