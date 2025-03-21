@@ -147,7 +147,7 @@ namespace QuakeMapFast.Utils
         /// <returns>Dictionary<地区, int形式の震度></returns>
         public static Dictionary<string, int> P2PQPoints2Dic(JsonNode points, string token)
         {
-            if(token!= "addr" && token != "pref")
+            if (token != "addr" && token != "pref")
                 throw new InvalidEnumArgumentException("tokenはaddrかprefのみです。");
             return points.AsArray().ToDictionary(pt => (string)pt![token]!, pt => P2PScale2IntN((int)pt!["scale"]!));
         }
@@ -316,8 +316,6 @@ namespace QuakeMapFast.Utils
                     return new SolidBrush(Color.FromArgb(50, 175, 175));
                 case 4:
                     return new SolidBrush(Color.FromArgb(240, 240, 60));
-                case -5:
-                    return new SolidBrush(Color.FromArgb(250, 150, 0));
                 case 5:
                     return new SolidBrush(Color.FromArgb(250, 150, 0));
                 case 6:
@@ -328,6 +326,8 @@ namespace QuakeMapFast.Utils
                     return new SolidBrush(Color.FromArgb(100, 0, 0));
                 case 9:
                     return new SolidBrush(Color.FromArgb(100, 0, 100));
+                case 10:
+                    return new SolidBrush(Color.FromArgb(250, 150, 0));
                 default:
                     return new SolidBrush(Color.FromArgb(30, 60, 90));
             }
@@ -370,6 +370,69 @@ namespace QuakeMapFast.Utils
             };
         }
 
+        public static int P2PQScale2Int(int? scale)
+        {
+            return scale switch
+            {
+                null => -1,
+                -1 => -1,
+                10 => 1,
+                20 => 2,
+                30 => 3,
+                40 => 4,
+                45 => 5,
+                46 => 10,
+                50 => 6,
+                55 => 7,
+                60 => 8,
+                70 => 9,
+                _ => -8,
+            };
+        }
+
+
+        public static int P2PQScaleEnum2Int(P2PQ_Scales scale)
+        {
+            return scale switch
+            {
+                P2PQ_Scales.None => -1,
+                P2PQ_Scales.NotImplemented => -8,
+                P2PQ_Scales.S0 => 0,
+                P2PQ_Scales.S1 => 1,
+                P2PQ_Scales.S2 => 2,
+                P2PQ_Scales.S3 => 3,
+                P2PQ_Scales.S4 => 4,
+                P2PQ_Scales.S5m => 5,
+                P2PQ_Scales.S5p => 6,
+                P2PQ_Scales.S6m => 7,
+                P2PQ_Scales.S6p => 8,
+                P2PQ_Scales.S7 => 9,
+                P2PQ_Scales.SUnknown => 10,
+                _ => -8
+            };
+        }
+
+
+        public static P2PQ_Scales P2PQScaleInt2Enum(int scale)
+        {
+            return scale switch
+            {
+                -1 => P2PQ_Scales.None,
+                -8 => P2PQ_Scales.NotImplemented,
+                0 => P2PQ_Scales.S0,
+                1 => P2PQ_Scales.S1,
+                2 => P2PQ_Scales.S2,
+                3 => P2PQ_Scales.S3,
+                4 => P2PQ_Scales.S4,
+                5 => P2PQ_Scales.S5m,
+                6 => P2PQ_Scales.S5p,
+                7 => P2PQ_Scales.S6m,
+                8 => P2PQ_Scales.S6p,
+                9 => P2PQ_Scales.S7,
+                10 => P2PQ_Scales.SUnknown,
+                _ => P2PQ_Scales.NotImplemented
+            };
+        }
 
     }
 }

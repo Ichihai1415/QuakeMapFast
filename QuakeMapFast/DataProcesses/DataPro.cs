@@ -40,7 +40,10 @@ namespace QuakeMapFast
                     gp.StartFigure();
                     var points = feature.Geometry.Coordinates.Objects[0].MainPoints.Select(coordinate => new PointF((coordinate.Lon - lonSta) * zoom, (latEnd - coordinate.Lat) * zoom));
                     if (points.Count() > 2)
+                    {
                         gp.AddPolygon(points.ToArray());
+                        g.FillPolygon(new SolidBrush(Color.FromArgb(100, 100, 150)), points.ToArray());
+                    }
                 }
                 else
                 {
@@ -50,14 +53,17 @@ namespace QuakeMapFast
                         gp.StartFigure();
                         var points = singleObject.MainPoints.Select(coordinate => new PointF((coordinate.Lon - lonSta) * zoom, (latEnd - coordinate.Lat) * zoom));
                         if (points.Count() > 2)
+                        {
                             gp.AddPolygon(points.ToArray());
+                            g.FillPolygon(new SolidBrush(Color.FromArgb(100, 100, 150)), points.ToArray());
+                        }
                     }
                 }
             }
             var lineWidth = Math.Max(1f, zoom / 216f);
             if (CtrlForm.debug)
                 ConWrite($"<debug>[DrawMap]zoom: {zoom}, lineWidth: {lineWidth}");
-            g.FillPath(new SolidBrush(Color.FromArgb(100, 100, 150)), gp);
+            //g.FillPath(new SolidBrush(Color.FromArgb(100, 100, 150)), gp);
             g.DrawPath(new Pen(Color.FromArgb(255, 200, 200, 200), lineWidth) { LineJoin = LineJoin.Round }, gp);//zoom > 200 ? 2 : 1
             return bitmap;
         }

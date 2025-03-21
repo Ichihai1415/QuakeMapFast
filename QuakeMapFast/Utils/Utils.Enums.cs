@@ -136,6 +136,11 @@ namespace QuakeMapFast.Utils
             [Description("震度情報なし")]
             None = -1,
             /// <summary>
+            /// 震度0
+            /// </summary>
+            [Description("震度0")]
+            S0 = 0,
+            /// <summary>
             /// 震度1
             /// </summary>
             [Description("震度1")]

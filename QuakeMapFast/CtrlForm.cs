@@ -253,13 +253,15 @@ namespace QuakeMapFast
             //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=0&quake_type=DetailScale").Result).First());
             //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=4&quake_type=DetailScale").Result).First());
             //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(File.ReadAllText(@"C:\Ichihai1415\source\vs\QuakeMapFast\QuakeMapFast\bin\x64\Debug\Log\202401\01\16\20240101161005.9033.txt").Replace("_id","id")));//noto
-
-            for (int s = 5; s <= 200; s += 5)
+            DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(File.ReadAllText(@"C:\Ichihai1415\source\vs\QuakeMapFast\QuakeMapFast\bin\x64\Debug\Log\202401\01\16\20240101161650.2868.txt").Replace("_id","id")));//noto
+            return;//以降いらない
+            for (int s = 5; s <= 200; s += 15)
             {
                 var icons = DrawScaleIcons(s);
-                for (int i = 0; i <= 9; i++)
+                for (int i = 1; i <= 10; i++)
                 {
-                    icons[i].Save($"debug-icon\\{s}-{i}.png", System.Drawing.Imaging.ImageFormat.Png);
+                    icons[i].Save($"debug-icon2\\{s}-{i}.png", System.Drawing.Imaging.ImageFormat.Png);
+                    ConWrite($"debug-icon2\\{s}-{i}.png");
                 }
             }
 

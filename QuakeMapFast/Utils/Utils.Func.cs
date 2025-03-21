@@ -169,7 +169,7 @@ namespace QuakeMapFast.Utils
 
         public static void WriteLog(Exception ex)
         {
-            File.WriteAllText(@$"Log\Error\{DateTime.Now:now:yyyyMM\dd\yyyyMMddHHmmss.ffff}.txt", ex.ToString());
+            File.WriteAllText(@$"Log\Error\{DateTime.Now:yyyyMM\dd\yyyyMMddHHmmss.ffff}.txt", ex.ToString());
         }
 
     }
