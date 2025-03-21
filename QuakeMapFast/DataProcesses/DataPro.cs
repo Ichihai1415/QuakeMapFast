@@ -1,19 +1,19 @@
-﻿using System.Drawing.Drawing2D;
+﻿using Ichihai1415.GeoJSON;
+using System.Drawing.Drawing2D;
 using System.Runtime.Versioning;
 using static QuakeMapFast.Utils.Utils;
-using static QuakeMapFast.Utils.JSONClasses;
 
 namespace QuakeMapFast
 {
     [SupportedOSPlatform("windows7.0")]
     internal partial class DataPro
     {
-        public DataPro(GeoJSON_JMA_Map json)
+        public DataPro(GeoJSONScheme.GeoJSON_JMA_Map json)
         {
             json_map_AreaForecastLocalE = json;
         }
 
-        internal static GeoJSON_JMA_Map? json_map_AreaForecastLocalE;
+        internal static GeoJSONScheme.GeoJSON_JMA_Map? json_map_AreaForecastLocalE;
 
         public static Bitmap DrawMap(float latSta, float latEnd, float lonSta, float lonEnd)
         {

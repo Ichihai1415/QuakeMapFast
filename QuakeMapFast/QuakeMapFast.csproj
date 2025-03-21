@@ -36,4 +36,8 @@
 	<ItemGroup>
 		<Content Include="Resources\AppData_README.txt" />
 	</ItemGroup>
+	
+	<ItemGroup>
+	  <PackageReference Include="Ichihai1415.GeoJSON" Version="1.0.0" />
+	</ItemGroup>
 </Project>

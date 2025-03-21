@@ -1,4 +1,5 @@
-﻿using QuakeMapFast.Properties;
+﻿using Ichihai1415.GeoJSON;
+using QuakeMapFast.Properties;
 using System.Configuration;
 using System.Diagnostics;
 using System.Drawing.Text;
@@ -9,8 +10,8 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using static QuakeMapFast.DataPro;
-using static QuakeMapFast.Utils.Utils;
 using static QuakeMapFast.Utils.JSONClasses;
+using static QuakeMapFast.Utils.Utils;
 
 namespace QuakeMapFast
 {
@@ -44,7 +45,7 @@ namespace QuakeMapFast
 
         internal static HttpClient client = new();
 
-        internal static readonly JsonSerializerOptions jsonOptions = new() { Converters = { new OriginalGeometryConverter() } };
+        internal static readonly JsonSerializerOptions jsonOptions = GeoJSONHelper.ORIGINAL_GEOMETRY_SERIALIZER_OPTIONS_SAMPLE;
         private async void CtrlForm_Load(object sender, EventArgs e)
         {
             //ConWrite($"");
@@ -100,7 +101,7 @@ namespace QuakeMapFast
 
             ConWrite($"[CtrlForm_Load]マップファイル確認完了");
             //mapjson = JsonNode.Parse(File.ReadAllText("AreaForecastLocalE_GIS_20240520_1.geojson"));
-            json_map_AreaForecastLocalE = JsonSerializer.Deserialize<GeoJSON_JMA_Map?>(File.ReadAllText("AreaForecastLocalE_GIS_20240520_1.geojson"), jsonOptions);
+            json_map_AreaForecastLocalE = JsonSerializer.Deserialize<GeoJSONScheme.GeoJSON_JMA_Map?>(File.ReadAllText("AreaForecastLocalE_GIS_20240520_1.geojson"), jsonOptions);
             ConWrite($"[CtrlForm_Load]マップファイル読み込み完了");
 
             var json_obs_text = File.ReadAllText(@"C:\Users\proje\Downloads\PointSeismicIntensity.json") ?? throw new Exception("観測点ファイルの読み込みに失敗しました。");
