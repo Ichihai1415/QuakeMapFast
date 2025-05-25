@@ -2,6 +2,7 @@
 using QuakeMapFast.Properties;
 using System.Configuration;
 using System.Diagnostics;
+using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.IO.Compression;
 using System.Net.WebSockets;
@@ -46,6 +47,9 @@ namespace QuakeMapFast
         internal static HttpClient client = new();
 
         internal static readonly JsonSerializerOptions jsonOptions = GeoJSONHelper.ORIGINAL_GEOMETRY_SERIALIZER_OPTIONS_SAMPLE;
+
+        internal static ImageAttributes IA_ScaleIcon = new();
+
         private async void CtrlForm_Load(object sender, EventArgs e)
         {
             //ConWrite($"");
@@ -235,7 +239,18 @@ namespace QuakeMapFast
         {
             ConWrite("[Debug]デバッグモードです", ConsoleColor.Cyan);
             debug = true;
-            //""
+            var st = new Stopwatch();
+            st.Start();
+
+            //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=0&quake_type=DetailScale").Result).First());
+
+
+            //EqDB(JsonSerializer.Deserialize<JMA_EqDB>(client.GetStringAsync("https://www.data.jma.go.jp/eqdb/data/shindo/api/?mode=event&id=20240101161022").Result));//noto
+            //EqDB(JsonSerializer.Deserialize<JMA_EqDB>(client.GetStringAsync("https://www.data.jma.go.jp/eqdb/data/shindo/api/?mode=event&id=20110311144618").Result));//touhokutihou
+            //EqDB(JsonSerializer.Deserialize<JMA_EqDB>(client.GetStringAsync("https://www.data.jma.go.jp/eqdb/data/shindo/api/?mode=event&id=19330303023047").Result));//sanrikuoki
+            EqDB(JsonSerializer.Deserialize<JMA_EqDB>(client.GetStringAsync("https://www.data.jma.go.jp/eqdb/data/shindo/api/?mode=event&id=20150530202302").Result));//ogasawara
+
+
             //ScalePrompt(JObject.Parse(File.ReadAllText("C:\\Users\\proje\\source\\repos\\QuakeMapFast\\QuakeMapFast\\bin\\Debug\\Log\\202305\\26\\19\\20230526190603.3438.txt")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2023hukushima-scale-last.json")));
             //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2016kumamoto-scale-0414.json")));
@@ -253,7 +268,12 @@ namespace QuakeMapFast
             //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=0&quake_type=DetailScale").Result).First());
             //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=4&quake_type=DetailScale").Result).First());
             //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(File.ReadAllText(@"C:\Ichihai1415\source\vs\QuakeMapFast\QuakeMapFast\bin\x64\Debug\Log\202401\01\16\20240101161005.9033.txt").Replace("_id","id")));//noto
-            DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(File.ReadAllText(@"C:\Ichihai1415\source\vs\QuakeMapFast\QuakeMapFast\bin\x64\Debug\Log\202401\01\16\20240101161650.2868.txt").Replace("_id","id")));//noto
+
+            //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(File.ReadAllText(@"C:\Ichihai1415\source\vs\QuakeMapFast\QuakeMapFast\bin\x64\Debug\Log\202401\01\16\20240101161650.2868.txt").Replace("_id","id")));//noto
+
+            st.Stop();
+            ConWrite($"[Debug]終了({st.ElapsedMilliseconds}ms)", ConsoleColor.Cyan);
+
             return;//以降いらない
             for (int s = 5; s <= 200; s += 15)
             {

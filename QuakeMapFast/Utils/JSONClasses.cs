@@ -211,19 +211,19 @@ namespace QuakeMapFast.Utils
                 /// 緯度。震源情報が存在しない場合は-200となります。
                 /// </summary>
                 [JsonPropertyName("latitude")]
-                public double? Latitude { get; set; }
+                public float? Latitude { get; set; }
 
                 /// <summary>
                 /// 経度。震源情報が存在しない場合は-200となります。
                 /// </summary>
                 [JsonPropertyName("longitude")]
-                public double? Longitude { get; set; }
+                public float? Longitude { get; set; }
 
                 /// <summary>
                 /// マグニチュード。震源情報が存在しない場合は-1となります。
                 /// </summary>
                 [JsonPropertyName("magnitude")]
-                public double? Magnitude { get; set; }
+                public float? Magnitude { get; set; }
 
                 /// <summary>
                 /// 名称
@@ -273,6 +273,193 @@ namespace QuakeMapFast.Utils
                 /// <remarks>Enum: [10(震度1), 20(震度2), 30(震度3), 40(震度4), 45(震度5弱), 46(震度5弱以上と推定されるが震度情報を入手していない), 50(震度5強), 55(震度6弱), 60(震度6強), 70(震度7)]</remarks>
                 [JsonPropertyName("scale")]
                 public required int Scale { get; set; }
+            }
+        }
+
+        /// <summary>
+        /// 気象庁震度データベースAPI
+        /// </summary>
+        /// <remarks>https://www.data.jma.go.jp/eqdb/data/shindo/api/ mode=event id=20240101161022</remarks>
+        public class JMA_EqDB
+        {
+            /// <summary>
+            /// オブジェクトでのデータ？とりあえずこっちを使うように
+            /// </summary>
+            [JsonPropertyName("res")]
+            public required C_Res Res { get; set; }
+
+            /// <summary>
+            /// 配列でのデータ？ Resと同じ？
+            /// </summary>
+            [JsonPropertyName("str")]
+            public required C_Str[] Str { get; set; }
+
+            /// <summary>
+            /// オブジェクトでのデータ？
+            /// </summary>
+            public class C_Res
+            {
+                [JsonPropertyName("hyp")]
+                public required C_Hyp[] Hyp { get; set; }
+
+                [JsonPropertyName("int")]
+                public required C_Int[] Int { get; set; }
+            }
+
+            /// <summary>
+            /// 配列でのデータ？ Resと同じ？
+            /// </summary>
+            public class C_Str
+            {
+                /// <summary>
+                /// 震源情報の配列
+                /// </summary>
+                [JsonPropertyName("hyp")]
+                public required C_Hyp[] Hyp { get; set; }
+
+                /// <summary>
+                /// 震度情報の配列
+                /// </summary>
+                [JsonPropertyName("int")]
+                public required C_Int[] Int { get; set; }
+            }
+
+            /// <summary>
+            /// 震源情報
+            /// </summary>
+            public class C_Hyp
+            {
+                /// <summary>
+                /// 地震ID　例:20240101161022
+                /// </summary>
+                [JsonPropertyName("id")]
+                public required string Id { get; set; }
+
+                /// <summary>
+                /// 発生日時　例:2024/01/01 16:10:22.5
+                /// </summary>
+                [JsonPropertyName("ot")]
+                public required string Ot { get; set; }
+
+                /// <summary>
+                /// 震央名　例:石川県能登地方
+                /// </summary>
+                [JsonPropertyName("name")]
+                public required string Name { get; set; }
+
+                /// <summary>
+                /// 緯度(60進法)　例:37°29.7′N
+                /// </summary>
+                [JsonPropertyName("latS")]
+                public required string LatS { get; set; }
+
+                /// <summary>
+                /// 経度(60進法)　例:137°16.2′E
+                /// </summary>
+                [JsonPropertyName("lonS")]
+                public required string LonS { get; set; }
+
+                /// <summary>
+                /// 緯度(10進法)　例:37.4950
+                /// </summary>
+                [JsonPropertyName("lat")]
+                public required string Lat { get; set; }
+
+                /// <summary>
+                /// 経度(10進法)　例:137.2700
+                /// </summary>
+                [JsonPropertyName("lon")]
+                public required string Lon { get; set; }
+
+                /// <summary>
+                /// 深さ　例:16 km
+                /// </summary>
+                [JsonPropertyName("dep")]
+                public required string Dep { get; set; }
+
+                /// <summary>
+                /// マグニチュード　例:7.6
+                /// </summary>
+                [JsonPropertyName("mag")]
+                public required string Mag { get; set; }
+
+                /// <summary>
+                /// 最大震度(null可能性あり)　例:震度７
+                /// </summary>
+                [JsonPropertyName("maxI")]
+                public required string? MaxI { get; set; }
+
+                /// <summary>
+                /// [気象庁内部用]CSS等用？(null可能性あり)　例:bg-I7
+                /// </summary>
+                [JsonPropertyName("maxIcls")]
+                public required string? MaxIcls { get; set; }
+
+                /// <summary>
+                /// 不明(null固定？)
+                /// </summary>
+                [JsonPropertyName("maxS")]
+                public required object? MaxS { get; set; }
+
+                /// <summary>
+                /// 不明(null固定？)
+                /// </summary>
+                [JsonPropertyName("maxScls")]
+                public required object? MaxScls { get; set; }
+            }
+
+            /// <summary>
+            /// 震度情報
+            /// </summary>
+            public class C_Int
+            {
+                /// <summary>
+                /// 観測点名　例:輪島市門前町走出＊
+                /// </summary>
+                [JsonPropertyName("name")]
+                public required string Name { get; set; }
+
+                /// <summary>
+                /// 緯度　例:37.295
+                /// </summary>
+                [JsonPropertyName("lat")]
+                public required string Lat { get; set; }
+
+                /// <summary>
+                /// 経度　例:136.775
+                /// </summary>
+                [JsonPropertyName("lon")]
+                public required string Lon { get; set; }
+
+                /// <summary>
+                /// 観測点コード　例:3900131
+                /// </summary>
+                [JsonPropertyName("code")]
+                public required string Code { get; set; }
+
+                /// <summary>
+                /// 震度　例:震度７
+                /// </summary>
+                [JsonPropertyName("int")]
+                public required string Int { get; set; }
+
+                /// <summary>
+                /// 震度(簡略)　例:7　例:D
+                /// </summary>
+                [JsonPropertyName("char")]
+                public required string Char { get; set; }
+
+                /// <summary>
+                /// 震度("S"付きの簡略)　例:S7　例:SD
+                /// </summary>
+                [JsonPropertyName("mark")]
+                public required string Mark { get; set; }
+
+                /// <summary>
+                /// [気象庁内部用]表示順序(z-index)　例:11
+                /// </summary>
+                [JsonPropertyName("zidx")]
+                public required string Zidx { get; set; }
             }
         }
     }

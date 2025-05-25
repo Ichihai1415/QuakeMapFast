@@ -1,5 +1,6 @@
 ﻿using QuakeMapFast.Properties;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using static QuakeMapFast.CtrlForm;
 using static QuakeMapFast.Utils.JSONClasses;
 using static QuakeMapFast.Utils.Utils;
@@ -12,64 +13,57 @@ namespace QuakeMapFast
         /// 各地の震度に関する情報
         /// </summary>
         /// <param name="json"></param>
-        public static void DetailScale(P2PQuake_JMAQuake? json)
+        public static void EqDB(JMA_EqDB? json)
         {
             if (font == null)
                 throw new Exception("フォントが読み込まれていません。");
             if (json == null)
             {
-                ConWrite("[DetailScale]データがありません。", ConsoleColor.Red);
+                ConWrite("[EqDB]データがありません。", ConsoleColor.Red);
                 return;
             }
-            if (json.Points == null)//todo:つくる
+            ConWrite("[EqDB]データ処理開始");
+
+            //
+            var maxIntS = json.Res.Hyp[0].MaxI ?? json.Res.Hyp[1].MaxI ?? json.Res.Hyp[2].MaxI ?? json.Res.Hyp[3].MaxI ?? json.Res.Hyp[4].MaxI ?? json.Res.Hyp[5].MaxI;
+            if (maxIntS == null)
             {
-                ConWrite("[DetailScale]震度観測データがありません。", ConsoleColor.Red);
+                ConWrite("[EqDB]最大震度の取得に失敗しました。[開発者向け]コードを確認してください。", ConsoleColor.Red);
                 return;
             }
+            var maxIntN = JMAintSt2int(maxIntS);
 
-            ConWrite("[DetailScale]データ処理開始");
+            var latSta = float.Parse(json.Res.Hyp[0].Lat);
+            var latEnd = float.Parse(json.Res.Hyp[0].Lat);
+            var lonSta = float.Parse(json.Res.Hyp[0].Lon);
+            var lonEnd = float.Parse(json.Res.Hyp[0].Lon);
 
-            var maxIntN = P2PQScale2Int(json.Earthquake.MaxScale);
-            var maxIntS = GetEnumDescription((P2PQ_Scales)(json.Earthquake.MaxScale ?? -1));
-
-            float latSta = 200, latEnd = -200, lonSta = 200, lonEnd = -200;
-            if (json.Earthquake.Hypocenter != null)
-            {
-                latSta = json.Earthquake.Hypocenter.Latitude ?? 200f;
-                latEnd = json.Earthquake.Hypocenter.Latitude ?? -200f;
-                lonSta = json.Earthquake.Hypocenter.Longitude ?? 200f;
-                lonEnd = json.Earthquake.Hypocenter.Longitude ?? -200f;
-
-            }
 
             var points = new List<PointData>();
             var pointDict = new Dictionary<P2PQ_Scales, List<(float Lat, float Lon)>>();
 
 
             var startScale_map = Math.Max(1, maxIntN - 4);
-            foreach (var a in json.Points)
+            //startScale_map = 0;//debug
+            foreach (var a in json.Res.Int)
             {
-                if (obsPt2LatLon.TryGetValue(a.Addr, out var latLon))
+                var scaleE = JMAintSt2P2PQEnum(a.Int);
+                var lat = float.Parse(a.Lat);
+                var lon = float.Parse(a.Lon);
+                if (Math.Abs(JMAintSt2int(a.Int)) >= startScale_map)//absは未実装のp2p震度の旧震度用
                 {
-                    if (P2PQScale2Int(a.Scale) >= startScale_map)
-                    {
-                        latSta = Math.Min(latSta, latLon.Lat);
-                        latEnd = Math.Max(latEnd, latLon.Lat);
-                        lonSta = Math.Min(lonSta, latLon.Lon);
-                        lonEnd = Math.Max(lonEnd, latLon.Lon);
-                    }
-
-                    var scaleE = (P2PQ_Scales)a.Scale;
-
-                    points.Add(new PointData { Name = a.Addr, Lat = latLon.Lat, Lon = latLon.Lon, Scale = scaleE });
-
-                    if (pointDict.TryGetValue(scaleE, out var values))
-                        values.Add((latLon.Lat, latLon.Lon));
-                    else
-                        pointDict.Add(scaleE, [(latLon.Lat, latLon.Lon)]);
+                    latSta = Math.Min(latSta, lat);
+                    latEnd = Math.Max(latEnd, lat);
+                    lonSta = Math.Min(lonSta, lon);
+                    lonEnd = Math.Max(lonEnd, lon);
                 }
+
+                points.Add(new PointData { Name = a.Name.Replace("＊", ""), Lat = lat, Lon = lon, Scale = scaleE });
+
+                if (pointDict.TryGetValue(scaleE, out var values))
+                    values.Add((lat, lon));
                 else
-                    ConWrite($"座標不明: {a.Addr}");
+                    pointDict.Add(scaleE, [(lat, lon)]);
             }
 
             PointCorrect(ref latSta, ref latEnd, ref lonSta, ref lonEnd);
@@ -107,7 +101,7 @@ namespace QuakeMapFast
 
             g.FillRectangle(Brushes.Black, 1080, 0, 840, 1080);
             g.DrawString("震源・震度情報", new Font(font, 50), Brushes.White, 1090, 10);
-            g.DrawString(json.Earthquake.Time.Remove(16), new Font(font, 30), Brushes.White, 1095, 85);
+            g.DrawString(json.Res.Hyp[0].Ot, new Font(font, 30), Brushes.White, 1095, 85);
 
             var pen = new Pen(IntN2Brush(maxIntN), 51) { LineJoin = LineJoin.Round };
             g.DrawRectangle(pen, 1125, 175, 750, 150);

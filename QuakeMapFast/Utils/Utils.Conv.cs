@@ -434,5 +434,43 @@ namespace QuakeMapFast.Utils
             };
         }
 
+        public static int JMAintSt2int(string intSt)//todo:旧震度56
+        {
+            return intSt switch
+            {
+                "震度１" => 1,
+                "震度２" => 2,
+                "震度３" => 3,
+                "震度４" => 4,
+                "震度５" => -5,
+                "震度５弱" => 5,
+                "震度５強" => 6,
+                "震度６" => -7,
+                "震度６弱" => 7,
+                "震度６強" => 8,
+                "震度７" => 9,
+                _ => -8
+            };
+        }
+
+        public static P2PQ_Scales JMAintSt2P2PQEnum(string intSt)//todo:旧震度56
+        {
+            return intSt switch
+            {
+                "震度１" => P2PQ_Scales.S1,
+                "震度２" => P2PQ_Scales.S2,
+                "震度３" => P2PQ_Scales.S3,
+                "震度４" => P2PQ_Scales.S4,
+                "震度５" => P2PQ_Scales.S5m,
+                "震度５弱" => P2PQ_Scales.S5m,
+                "震度５強" => P2PQ_Scales.S5p,
+                "震度６" => P2PQ_Scales.S6m,
+                "震度６弱" => P2PQ_Scales.S6m,
+                "震度６強" => P2PQ_Scales.S6p,
+                "震度７" => P2PQ_Scales.S7,
+                _ => P2PQ_Scales.NotImplemented
+            };
+        }
+
     }
 }

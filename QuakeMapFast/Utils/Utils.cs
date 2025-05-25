@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Runtime.Versioning;
 
 namespace QuakeMapFast.Utils
@@ -123,13 +124,34 @@ namespace QuakeMapFast.Utils
                         g.DrawString("7", FontProvide(fontSize), Brushes.White, x, y);
                         break;
                     case 10:
-                        g.DrawString("未", FontProvide(fontSize_p), Brushes.Black, size * 0.0625f, size * 0.03125f);//1/16, 1/32
+                        g.DrawString("未", FontProvide(fontSize_p), Brushes.Black, size * 0.0625f, size * 0.03125f);//1/16+1/32
                         break;
                 }
                 iconList.Add(icon);
             }
             return [.. iconList];
         }
+
+        /// <summary>
+        /// 震度アイコン描画時の透明度を変更します。設定反映時等に呼び出してください。
+        /// </summary>
+        /// <param name="alpha">透明度(0~1)</param>
+        private static void ChangeAlpha(float alpha)
+        {
+            var colorMatrix = new ColorMatrix() { Matrix33 = alpha };
+            CtrlForm.IA_ScaleIcon = new ImageAttributes();
+            CtrlForm.IA_ScaleIcon.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+        }
+
+        /// <summary>
+        /// 震度アイコン描画時の透明度を変更します。設定反映時等に呼び出してください。
+        /// </summary>
+        /// <param name="alpha">透明度(0~255)</param>
+        private static void ChangeAlpha(int alpha)
+        {
+            ChangeAlpha(alpha / 255f);
+        }
+
 
 
         /// <summary>
