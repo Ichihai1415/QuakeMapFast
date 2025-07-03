@@ -100,7 +100,7 @@ namespace QuakeMapFast
             }
 
             g.FillRectangle(Brushes.Black, 1080, 0, 840, 1080);
-            g.DrawString("震源・震度情報", new Font(font, 50), Brushes.White, 1090, 10);
+            g.DrawString("震度データベース", new Font(font, 50), Brushes.White, 1090, 10);
             g.DrawString(json.Res.Hyp[0].Ot, new Font(font, 30), Brushes.White, 1095, 85);
 
             var pen = new Pen(IntN2Brush(maxIntN), 51) { LineJoin = LineJoin.Round };

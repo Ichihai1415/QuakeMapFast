@@ -1,5 +1,7 @@
 ﻿using QuakeMapFast.Properties;
+using System;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using static QuakeMapFast.CtrlForm;
 using static QuakeMapFast.Utils.JSONClasses;
 using static QuakeMapFast.Utils.Utils;
@@ -119,7 +121,7 @@ namespace QuakeMapFast
             else
                 g.DrawString(maxIntS, new Font(font, 90, FontStyle.Bold), IntN2TextBrush(maxIntN), 1600, 175);
 
-            var maxIntAreas = "テストテスト";//string.Join(Environment.NewLine, areaInt.Where(x => x.Value == maxIntN).Select(x => x.Key));
+            var maxIntAreas = string.Join(Environment.NewLine, json.Points.Where(x => x.Scale == json.Earthquake.MaxScale).Select(x => x.Addr));
             g.DrawString(maxIntAreas, new Font(font, 40), Brushes.White, 1100, 360);
 
             g.FillRectangle(Brushes.Black, 1080, 900, 840, 180);
@@ -135,7 +137,13 @@ namespace QuakeMapFast
 
             view_all.ImageChange(bitmap, "");
 
-
+            if (Settings.Default.Save_Image)
+            {
+                var saveTime = DateTime.Now;
+                Directory.CreateDirectory($"output\\{saveTime:yyyyMM}\\{saveTime:dd}");
+                bitmap.Save($"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png", ImageFormat.Png);
+                ConWrite($"[Draw]output\\{saveTime:yyyyMM}\\{saveTime:dd}に保存しました");
+            }
 
         }
 

@@ -242,13 +242,13 @@ namespace QuakeMapFast
             var st = new Stopwatch();
             st.Start();
 
-            //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=0&quake_type=DetailScale").Result).First());
+            DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=0&quake_type=DetailScale").Result).First());
 
 
             //EqDB(JsonSerializer.Deserialize<JMA_EqDB>(client.GetStringAsync("https://www.data.jma.go.jp/eqdb/data/shindo/api/?mode=event&id=20240101161022").Result));//noto
             //EqDB(JsonSerializer.Deserialize<JMA_EqDB>(client.GetStringAsync("https://www.data.jma.go.jp/eqdb/data/shindo/api/?mode=event&id=20110311144618").Result));//touhokutihou
             //EqDB(JsonSerializer.Deserialize<JMA_EqDB>(client.GetStringAsync("https://www.data.jma.go.jp/eqdb/data/shindo/api/?mode=event&id=19330303023047").Result));//sanrikuoki
-            EqDB(JsonSerializer.Deserialize<JMA_EqDB>(client.GetStringAsync("https://www.data.jma.go.jp/eqdb/data/shindo/api/?mode=event&id=20150530202302").Result));//ogasawara
+            //EqDB(JsonSerializer.Deserialize<JMA_EqDB>(client.GetStringAsync("https://www.data.jma.go.jp/eqdb/data/shindo/api/?mode=event&id=20150530202302").Result));//ogasawara
 
 
             //ScalePrompt(JObject.Parse(File.ReadAllText("C:\\Users\\proje\\source\\repos\\QuakeMapFast\\QuakeMapFast\\bin\\Debug\\Log\\202305\\26\\19\\20230526190603.3438.txt")));
