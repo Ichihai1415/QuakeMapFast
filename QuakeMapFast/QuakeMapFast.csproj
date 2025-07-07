@@ -38,6 +38,6 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-	  <PackageReference Include="Ichihai1415.GeoJSON" Version="1.0.0" />
+	  <PackageReference Include="Ichihai1415.GeoJSON" Version="1.0.3" />
 	</ItemGroup>
 </Project>

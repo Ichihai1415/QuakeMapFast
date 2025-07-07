@@ -47,7 +47,6 @@ namespace QuakeMapFast
             var points = new List<PointData>();
             var pointDict = new Dictionary<P2PQ_Scales, List<(float Lat, float Lon)>>();
 
-
             var startScale_map = Math.Max(1, maxIntN - 4);
             foreach (var a in json.Points)
             {
@@ -79,6 +78,7 @@ namespace QuakeMapFast
             var bitmap = DrawMap(latSta, latEnd, lonSta, lonEnd);
             using var g = Graphics.FromImage(bitmap);
 
+
             var size = Math.Min(108f, Math.Max(10f, zoom / 7.5f));//size=>(範囲(単位:度))
             if (debug)
                 ConWrite($"<debug>[]zoom: {zoom}, size: {size}");
@@ -107,27 +107,42 @@ namespace QuakeMapFast
                 }
             }
 
+            if (json.Earthquake.Hypocenter.Latitude != -200)
+            {
+                var center = new Point((int)((json.Earthquake.Hypocenter.Longitude - lonSta) * zoom), (int)((latEnd - json.Earthquake.Hypocenter.Latitude) * zoom));
+                g.DrawLine(new Pen(Color.FromArgb(127, 255, 0, 0), 11), center.X - 50, center.Y - 50, center.X + 50, center.Y + 50);
+                g.DrawLine(new Pen(Color.FromArgb(127, 255, 0, 0), 11), center.X + 50, center.Y - 50, center.X - 50, center.Y + 50);
+            }
+
             g.FillRectangle(Brushes.Black, 1080, 0, 840, 1080);
             g.DrawString("震源・震度情報", new Font(font, 50), Brushes.White, 1090, 10);
-            g.DrawString(json.Earthquake.Time.Remove(16), new Font(font, 30), Brushes.White, 1095, 85);
+            g.DrawString(json.Earthquake.Time.Remove(16), new Font(font, 30), Brushes.White, 1580, 45);
+            var dep = json.Earthquake.Hypocenter.Depth == -1 ? "不明" :
+                json.Earthquake.Hypocenter.Depth == 0 ? "ごく浅い" :
+                (json.Earthquake.Hypocenter.Depth + "km");
+            var mag = json.Earthquake.Hypocenter.Magnitude == -1 ?
+                "不明" : json.Earthquake.Hypocenter.Magnitude?.ToString("0.0") ?? "不明";
+            g.DrawString(json.Earthquake.Hypocenter.Name + " 深さ" + dep + "  M" + mag, new Font(font, 30), Brushes.White, 1095, 95);
+            //g.DrawString("山梨県東部・富士五湖 深さごく浅い  M不明", new Font(font, 30), Brushes.White, 1095, 95);
 
             var pen = new Pen(IntN2Brush(maxIntN), 51) { LineJoin = LineJoin.Round };
             g.DrawRectangle(pen, 1125, 175, 750, 150);
             g.FillRectangle(IntN2Brush(maxIntN), 1150, 200, 700, 100);
             g.DrawString("最大震度", new Font(font, 50), IntN2TextBrush(maxIntN), 1150, 240);
-            maxIntS = maxIntS.Replace("震度", "");//todo:不明等考慮を追加
+            maxIntS = maxIntS.Replace("震度", "").Replace("情報なし", "-");//todo:不明等考慮を追加
             if (maxIntS.Contains('弱') || maxIntS.Contains('強'))
                 g.DrawString(maxIntS, new Font(font, 90, FontStyle.Bold), IntN2TextBrush(maxIntN), 1550, 175);
             else
                 g.DrawString(maxIntS, new Font(font, 90, FontStyle.Bold), IntN2TextBrush(maxIntN), 1600, 175);
 
             var maxIntAreas = string.Join(Environment.NewLine, json.Points.Where(x => x.Scale == json.Earthquake.MaxScale).Select(x => x.Addr));
+            //maxIntAreas = "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12";
             g.DrawString(maxIntAreas, new Font(font, 40), Brushes.White, 1100, 360);
 
             g.FillRectangle(Brushes.Black, 1080, 900, 840, 180);
             g.DrawString("日本地図データ:気象庁\n世界地図データ:Natural Earth\nそれぞれ加工して使用\nデータ:気象庁", new Font(font, 20), Brushes.White, 1090, 910);
             g.DrawImage(Resources.IntLegend, 1500, 906, 410, 164);
-            if (debug || readJSON)
+            if ((debug || readJSON) && oldDataDraw)
                 using (var textGP = new GraphicsPath())
                 {
                     textGP.AddString("《現在の情報ではありません》", font, 0, 140, new Point(-70, 400), StringFormat.GenericDefault);

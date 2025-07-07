@@ -7,7 +7,7 @@ using static QuakeMapFast.Utils.Utils;
 using static QuakeMapFast.Utils.JSONClasses;
 
 namespace QuakeMapFast
-{/*
+{
     internal partial class DataPro
     {
 
@@ -20,9 +20,9 @@ namespace QuakeMapFast
             DateTime time = DateTime.Parse((string)json["earthquake"]["time"]);
             int maxIntN = P2PScale2IntN((int)json["earthquake"]["maxScale"]);
             string maxIntS = P2PScale2IntS((int)json["earthquake"]["maxScale"]);
-            Dictionary<string, int> areaInt = Points2Dic(json["points"], "addr");
+            Dictionary<string, int> areaInt = P2PQPoints2Dic(json["points"], "addr");
 
-            Bitmap bitmap = DrawMap(areaInt.ToDictionary(x => x.Key, x => IntN2Brush(x.Value)));
+            Bitmap bitmap = DrawMap_Old(areaInt.ToDictionary(x => x.Key, x => IntN2Brush(x.Value)));
             using (Graphics g = Graphics.FromImage(bitmap))
             {
                 g.FillRectangle(Brushes.Black, 1080, 0, 840, 1080);
@@ -71,12 +71,12 @@ namespace QuakeMapFast
             if (debug || readJSON)
             {
                 Telop($"0,《現在の情報ではありません》震度速報【最大震度{maxIntS}】,{intsArea.Replace("\n", "")},{Int2TelopColor(maxIntN)},False,10,1000");
-                Bouyomichan($"QuakeMapFastの読み上げです。デバッグあるいはJSON読み込みモードのため無効です。");
+                BouyomiChan($"QuakeMapFastの読み上げです。デバッグあるいはJSON読み込みモードのため無効です。");
             }
             else
             {
                 Telop($"0,震度速報【最大震度{maxIntS}】,{intsArea.Replace("\n", "")},{Int2TelopColor(maxIntN)},False,60,1000");
-                Bouyomichan($"震度速報、{intsArea_Max3.Replace("\n", "").Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
+                BouyomiChan($"震度速報、{intsArea_Max3.Replace("\n", "").Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
             }
             view_all.ImageChange(bitmap, text);
             if (Settings.Default.AutoCopy)
@@ -131,5 +131,5 @@ namespace QuakeMapFast
         }
 
 
-    }*/
+    }
 }

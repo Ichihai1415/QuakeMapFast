@@ -69,7 +69,7 @@ namespace QuakeMapFast
         }
 
 
-        /*
+
         /// <summary>
         /// マップを描画します。塗りつぶしも実行します。
         /// </summary>
@@ -77,69 +77,56 @@ namespace QuakeMapFast
         /// <param name="hypoLat">震源緯度</param>
         /// <param name="hypoLon">震源経度</param>
         /// <returns>マップの画像</returns>
-        public static Bitmap DrawMap(Dictionary<string, SolidBrush> areaColor, double hypoLat = -200, double hypoLon = -200)
+        public static Bitmap DrawMap_Old(Dictionary<string, SolidBrush> areaColor, double hypoLat = -200, double hypoLon = -200)
         {
             ConWrite("[DrawMap]座標計算開始");
-            double latSta = 999;
-            double latEnd = -999;
-            double lonSta = 999;
-            double lonEnd = -999;
-            foreach (var features in mapjson["features"].AsArray().Where(features => areaColor.ContainsKey((string)features["properties"]["name"])))
+            var latSta = 999f;
+            var latEnd = -999f;
+            var lonSta = 999f;
+            var lonEnd = -999f;
+            foreach (var features in json_map_AreaForecastLocalE.Features.Where(features => areaColor.ContainsKey(features.Properties.Name)))
             {
-                if ((string)features["geometry"]["type"] == "Polygon")
+                foreach (var coordinate in features.Geometry.Coordinates.Objects.SelectMany(x => x.MainPoints))
                 {
-                    foreach (var coordinate in features["geometry"]["coordinates"][0].AsArray())
-                    {
-                        latSta = Math.Min(latSta, (double)coordinate[1]);
-                        latEnd = Math.Max(latEnd, (double)coordinate[1]);
-                        lonSta = Math.Min(lonSta, (double)coordinate[0]);
-                        lonEnd = Math.Max(lonEnd, (double)coordinate[0]);
-                    }
-                }
-                else
-                {
-                    foreach (var coordinate in features["geometry"]["coordinates"].AsArray().SelectMany((JsonNode coordinate) => coordinate.AsArray()))
-                    {
-                        latSta = Math.Min(latSta, (double)coordinate[1]);
-                        latEnd = Math.Max(latEnd, (double)coordinate[1]);
-                        lonSta = Math.Min(lonSta, (double)coordinate[0]);
-                        lonEnd = Math.Max(lonEnd, (double)coordinate[0]);
-                    }
+                    latSta = Math.Min(latSta, coordinate.Lat);
+                    latEnd = Math.Max(latEnd, coordinate.Lat);
+                    lonSta = Math.Min(lonSta, coordinate.Lon);
+                    lonEnd = Math.Max(lonEnd, coordinate.Lon);
                 }
             }
 
             PointCorrect(ref latSta, ref latEnd, ref lonSta, ref lonEnd);
-            double zoom = 1080 / (latEnd - latSta);
+            var zoom = 1080f / (latEnd - latSta);
             ConWrite("[DrawMap]描画開始");
             var bitmap = new Bitmap(1920, 1080);
             using (var g = Graphics.FromImage(bitmap))
             {
                 g.Clear(Color.FromArgb(20, 40, 60));
                 var gPath = new GraphicsPath();
-                foreach (var features in mapjson["features"].AsArray())
+                foreach (var features in json_map_AreaForecastLocalE.Features)
                 {
                     gPath.Reset();
                     gPath.StartFigure();
                     //if (features["geometry"]["coordinates"] == null)
-                    if (features["geometry"].AsArray().Count() == 0)
+                    if (features.Geometry == null)
                         continue;
-                    if ((string)features["geometry"]["type"] == "Polygon")
+                    if (features.Geometry.Type == "Polygon")
                     {
-                        var points = features["geometry"]["coordinates"][0].AsArray().Select(coordinate => new Point((int)(((double)coordinate[0] - lonSta) * zoom), (int)((latEnd - (double)coordinate[1]) * zoom)));
+                        var points = features.Geometry.Coordinates.Objects[0].MainPoints.Select(coordinate => new PointF((coordinate.Lon - lonSta) * zoom, (latEnd - coordinate.Lat) * zoom));
                         if (points.Count() > 2)
                             gPath.AddPolygon(points.ToArray());
                     }
                     else
                     {
-                        foreach (var coordinates in features["geometry"]["coordinates"].AsArray())
+                        foreach (var objects in features.Geometry.Coordinates.Objects)
                         {
-                            var points = coordinates[0].AsArray().Select(coordinate => new Point((int)(((double)coordinate[0] - lonSta) * zoom), (int)((latEnd - (double)coordinate[1]) * zoom)));
+                            var points = objects.MainPoints.Select(coordinate => new PointF((coordinate.Lon - lonSta) * zoom, (latEnd - coordinate.Lat) * zoom));
                             if (points.Count() > 2)
                                 gPath.AddPolygon(points.ToArray());
                         }
                     }
-                    if (areaColor.ContainsKey((string)features["properties"]["name"]))
-                        g.FillPath(areaColor[(string)features["properties"]["name"]], gPath);
+                    if (areaColor.ContainsKey(features.Properties.Name))
+                        g.FillPath(areaColor[features.Properties.Name], gPath);
                     else
                         g.FillPath(new SolidBrush(Color.FromArgb(100, 100, 150)), gPath);
                     g.DrawPath(new Pen(Color.FromArgb(255, 200, 200, 200), 2), gPath);//zoom > 200 ? 2 : 1
@@ -155,7 +142,7 @@ namespace QuakeMapFast
                 }
             }
             return bitmap;
-        }*/
+        }
 
     }
 }

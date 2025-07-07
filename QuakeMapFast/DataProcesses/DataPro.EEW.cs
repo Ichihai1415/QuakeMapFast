@@ -9,7 +9,7 @@ using static QuakeMapFast.Utils.JSONClasses;
 namespace QuakeMapFast
 {
     internal partial class DataPro
-    {/*
+    {
         public static void EEW(JsonNode json)
         {
             if ((bool)json["cancelled"])
@@ -28,7 +28,7 @@ namespace QuakeMapFast
             double hLon = (double)hypocenter["longitude"];
             ConWrite("[EEW]画像描画開始");
 
-            Bitmap bitmap = DrawMap(areaColor, hLat, hLon);
+            Bitmap bitmap = DrawMap_Old(areaColor, hLat, hLon);
 
             string hypoName = (string)hypocenter["reduceName"];
 
@@ -46,7 +46,7 @@ namespace QuakeMapFast
                 else
                     warnAreaInfo2 += $"震度{minInt}～{maxInt}程度\n";
             }
-            var isMajorWarn = warnAreaInfo2.Contains("6") || warnAreaInfo2.Contains("7");
+            var isMajorWarn = warnAreaInfo2.Contains('6') || warnAreaInfo2.Contains('7');
             using (Graphics g = Graphics.FromImage(bitmap))
             {
                 g.FillRectangle(Brushes.Black, 1080, 0, 840, 1080);
@@ -82,12 +82,12 @@ namespace QuakeMapFast
             if (debug || readJSON)
             {
                 Telop($"0,《現在の情報ではありません》緊急地震速報,強い揺れに警戒 {string.Join(" ", prefWarn)},200,0,0,White,255,0,0,White,False,10,1000");
-                Bouyomichan($"QuakeMapFastの読み上げです。デバッグあるいはJSON読み込みモードのため無効です。");
+                BouyomiChan($"QuakeMapFastの読み上げです。デバッグあるいはJSON読み込みモードのため無効です。");
             }
             else
             {
                 Telop($"0,緊急地震速報,強い揺れに警戒 {string.Join(" ", prefWarn)},200,0,0,White,255,0,0,White,False,60,1000");
-                Bouyomichan($"緊急地震速報です、次の地域では強い揺れに警戒してください。{string.Join("、", prefWarn)}");
+                BouyomiChan($"緊急地震速報です、次の地域では強い揺れに警戒してください。{string.Join("、", prefWarn)}");
             }
             view_all.ImageChange(bitmap, text);
             if (Settings.Default.AutoCopy)
@@ -102,7 +102,7 @@ namespace QuakeMapFast
             if (File.Exists("XPosterV2Host - Enable"))
                 if (!debug && !readJSON)
                     XPost(text, $"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png");
-        }*/
+        }
 
     }
 }

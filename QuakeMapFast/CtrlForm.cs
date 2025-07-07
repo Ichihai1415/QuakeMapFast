@@ -38,6 +38,8 @@ namespace QuakeMapFast
         internal string latestID = "";
         internal static bool debug = false;
         internal static bool readJSON = false;
+        internal static bool oldDataDraw = true;
+
         internal static FontFamily? font;
 
         internal static DataView view_all = new();
@@ -138,94 +140,102 @@ namespace QuakeMapFast
             while (true)
                 try
                 {
-                    using (ClientWebSocket client = new())
+                    var lastGC = DateTime.MinValue;
+                    using var client = new ClientWebSocket();
+                connect:
+                    await client.ConnectAsync(new Uri("wss://api.p2pquake.net/v2/ws"), CancellationToken.None);
+                    ConWrite("[Get]接続しました");
+                    while (client.State == WebSocketState.Open)
                     {
-                    connect:
-                        await client.ConnectAsync(new Uri("wss://api.p2pquake.net/v2/ws"), CancellationToken.None);
-                        ConWrite("[Get]接続しました");
-                        while (client.State == WebSocketState.Open)
+                        byte[] buffer = new byte[256 * 1024];//分割されるからこんなに要らないかも
+                        int bytesRead = 0;
+                        while (true)//受信
                         {
-                            byte[] buffer = new byte[256 * 1024];//分割されるからこんなに要らないかも
-                            int bytesRead = 0;
-                            while (true)//受信
+                            var segment = new ArraySegment<byte>(buffer, bytesRead, buffer.Length - bytesRead);
+                            var result = await client.ReceiveAsync(segment, CancellationToken.None);
+                            if (result.MessageType == WebSocketMessageType.Close)
                             {
-                                ArraySegment<byte> segment = new(buffer, bytesRead, buffer.Length - bytesRead);
-                                WebSocketReceiveResult result = await client.ReceiveAsync(segment, CancellationToken.None);
-                                if (result.MessageType == WebSocketMessageType.Close)
-                                {
-                                    await client.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
-                                    ConWrite("[Get]切断されました。再接続します。");
-                                    goto connect;
-                                }
-                                else if (result.MessageType != WebSocketMessageType.Text)//あとBinaryしかない
-                                {
-                                    ConWrite($"[Get]未対応のタイプです(WebSocketMessageType.{result.MessageType})", ConsoleColor.Red);
-                                    continue;
-                                }
-                                bytesRead += result.Count;
-                                if (result.EndOfMessage)
+                                await client.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
+                                ConWrite("[Get]切断されました。再接続します。");
+                                goto connect;
+                            }
+                            else if (result.MessageType != WebSocketMessageType.Text)//あとBinaryしかない
+                            {
+                                ConWrite($"[Get]未対応のタイプです(WebSocketMessageType.{result.MessageType})", ConsoleColor.Red);
+                                continue;
+                            }
+                            bytesRead += result.Count;
+                            if (result.EndOfMessage)
+                                break;
+                        }
+                        string jsonText = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                        if (jsonText == string.Empty)
+                            continue;
+                        if (Settings.Default.Save_JSON)
+                        {
+                            Directory.CreateDirectory($"output\\json\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}");
+                            File.WriteAllText($"output\\json\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.json", jsonText);
+                        }
+                        JsonNode json;
+                        try
+                        {
+                            json = JsonNode.Parse(jsonText);
+
+                            int code = (int)json["code"];
+                            string id = (string)json["_id"];
+                            string? type = (string)json["issue"]["type"];//ないときあるからこれで
+                            string codeInfo = P2PInfoCodeName.ContainsKey(code) ? P2PInfoCodeName[code] : "-";
+                            string issueInfo = P2PInfoTypeName.ContainsKey(type ?? "") ? P2PInfoTypeName[type ?? ""] : "-";
+                            ConWrite($"[Get]受信 id:{id} code:{code}{codeInfo} type:{type}{issueInfo}");
+                            if (latestID == id)
+                                continue;
+                            latestID = id;
+                            if (ignoreCode.Contains(code))
+                                continue;
+                            ConWrite($"[Get]{jsonText}", ConsoleColor.Green);
+                            switch (code)
+                            {
+                                case 551:
+                                    switch (type)
+                                    {
+                                        case "ScalePrompt":
+                                            ScalePrompt(json);
+                                            break;
+                                        case "DetailScale":
+                                            DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(jsonText));
+                                            break;
+                                    }
+                                    break;
+                                case 556:
+                                    EEW(json);
                                     break;
                             }
-                            string jsonText = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                            if (jsonText == string.Empty)
-                                continue;
-                            if (Settings.Default.Save_JSON)
-                            {
-                                Directory.CreateDirectory($"output\\json\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}");
-                                File.WriteAllText($"output\\json\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:HH}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.json", jsonText);
-                            }
-                            JsonNode json;
-                            try
-                            {
-                                json = JsonNode.Parse(jsonText);
-
-                                int code = (int)json["code"];
-                                string id = (string)json["_id"];
-                                string? type = (string)json["issue"]["type"];//ないときあるからこれで
-                                string codeInfo = P2PInfoCodeName.Keys.Contains(code) ? P2PInfoCodeName[code] : "-";
-                                string issueInfo = P2PInfoTypeName.Keys.Contains(type ?? "") ? P2PInfoTypeName[type ?? ""] : "-";
-                                ConWrite($"[Get]受信 id:{id} code:{code}{codeInfo} type:{type}{issueInfo}");
-                                if (latestID == id)
-                                    continue;
-                                latestID = id;
-                                if (ignoreCode.Contains(code))
-                                    continue;
-                                ConWrite($"[Get]{jsonText}", ConsoleColor.Green);
-                                switch (code)
-                                {
-                                    case 551:
-                                        switch (type)
-                                        {
-                                            case "ScalePrompt":
-                                                //ScalePrompt(json);
-                                                break;
-                                        }
-                                        break;
-                                    case 556:
-                                        //EEW(json);
-                                        break;
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                ConWrite($"[Get](JSON分析失敗)", ex);
-                                Directory.CreateDirectory($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}");
-                                File.WriteAllText($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.txt", $"{ex}");
-                                continue;
-                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            ConWrite($"[Get](JSON分析失敗)", ex);
+                            Directory.CreateDirectory($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}");
+                            File.WriteAllText($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.txt", $"{ex}");
+                            continue;
+                        }
+                        if (DateTime.Now - lastGC > TimeSpan.FromMinutes(1))
+                        {
+                            GC.Collect();
+                            ConWrite("[Get] メモリを解放しました。");
+                            lastGC = DateTime.Now;
                         }
                     }
                 }
                 catch (Exception ex)
                 {
                     ConWrite($"[Get]", ex);
-                    if (!(ex.Message.Contains("リモート サーバーに接続できません。") || ex.Message.Contains("内部 WebSocket エラーが発生しました。")))
+                    if (!(ex.Message.Contains("リモート サーバーに接続できません。") || ex.Message.Contains("内部 WebSocket エラーが発生しました。") || ex.Message.Contains("終了ハンドシェイク")))
                     {
                         Directory.CreateDirectory($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}");
                         File.WriteAllText($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.txt", $"{ex}");
                     }
+                    ConWrite("[Get]切断されました。1秒後再接続します。");
                     await Task.Delay(1000);
-                    ConWrite("[Get]切断されました。再接続します。");
                 }
         }
 
@@ -242,7 +252,9 @@ namespace QuakeMapFast
             var st = new Stopwatch();
             st.Start();
 
-            DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=0&quake_type=DetailScale").Result).First());
+            //oldDataDraw = false;//現在の情報ではありませんを描画しない場合コメントアウト解除
+
+            DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=0&min_scale=45&quake_type=DetailScale").Result).First());
 
 
             //EqDB(JsonSerializer.Deserialize<JMA_EqDB>(client.GetStringAsync("https://www.data.jma.go.jp/eqdb/data/shindo/api/?mode=event&id=20240101161022").Result));//noto
@@ -251,25 +263,28 @@ namespace QuakeMapFast
             //EqDB(JsonSerializer.Deserialize<JMA_EqDB>(client.GetStringAsync("https://www.data.jma.go.jp/eqdb/data/shindo/api/?mode=event&id=20150530202302").Result));//ogasawara
 
 
-            //ScalePrompt(JObject.Parse(File.ReadAllText("C:\\Users\\proje\\source\\repos\\QuakeMapFast\\QuakeMapFast\\bin\\Debug\\Log\\202305\\26\\19\\20230526190603.3438.txt")));
-            //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2023hukushima-scale-last.json")));
-            //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2016kumamoto-scale-0414.json")));
-            //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2015ogasawara-scale.json")));
-            //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\scale-ogasawara-only.json")));
-            //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\scale-tokyo23-only.json")));
-            //ScalePrompt(JObject.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2018oosakahokubu-scale-last.json")));
-            //ScalePrompt(JObject.Parse(File.ReadAllText("C:\\Ichihai1415\\source\\vs\\QuakeMapFast\\QuakeMapFast\\bin\\x64\\Debug\\Log\\202401\\01\\16\\20240101161457.8494.txt")));
-            //ScalePrompt(JObject.Parse(File.ReadAllText("D:\\Ichihai1415\\data\\json\\P2Pquake\\sc-2023kushiro.json")));
-            //ScalePrompt(JObject.Parse(File.ReadAllText("D:\\Ichihai1415\\data\\json\\P2Pquake\\sc-2023kushiro-edit.json")));
-            //ScalePrompt(JObject.Parse(File.ReadAllText("D:\\Ichihai1415\\data\\json\\P2Pquake\\2024-r6noto-last.json")));
-            //ScalePrompt(JObject.Parse(File.ReadAllText("D:\\Ichihai1415\\data\\json\\P2Pquake\\2024-r6noto-last-edit.json")));
-            //EEW(JObject.Parse(File.ReadAllText("C:\\Ichihai1415\\source\\vs\\QuakeMapFast\\QuakeMapFast\\bin\\x64\\Debug\\Log\\202401\\01\\16\\20240101161107.3056.txt")));
+            //ScalePrompt(JsonNode.Parse(File.ReadAllText("C:\\Ichihai1415\\source\\vs\\QuakeMapFast\\QuakeMapFast\\bin\\x64\\Debug\\JSON-sample\\scale\\2024-r6noto-last.json")));
+            //EEW(JsonNode.Parse(File.ReadAllText("C:\\Ichihai1415\\source\\vs\\QuakeMapFast\\QuakeMapFast\\bin\\x64\\Debug\\JSON-sample\\eew\\2024-r6noto-3.json")));
+
+            //ScalePrompt(JsonNode.Parse(File.ReadAllText("C:\\Users\\proje\\source\\repos\\QuakeMapFast\\QuakeMapFast\\bin\\Debug\\Log\\202305\\26\\19\\20230526190603.3438.txt")));
+            //ScalePrompt(JsonNode.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2023hukushima-scale-last.json")));
+            //ScalePrompt(JsonNode.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2016kumamoto-scale-0414.json")));
+            //ScalePrompt(JsonNode.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2015ogasawara-scale.json")));
+            //ScalePrompt(JsonNode.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\scale-ogasawara-only.json")));
+            //ScalePrompt(JsonNode.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\scale-tokyo23-only.json")));
+            //ScalePrompt(JsonNode.Parse(File.ReadAllText("F:\\色々\\json\\P2Pquake\\2018oosakahokubu-scale-last.json")));
+            //ScalePrompt(JsonNode.Parse(File.ReadAllText("C:\\Ichihai1415\\source\\vs\\QuakeMapFast\\QuakeMapFast\\bin\\x64\\Debug\\Log\\202401\\01\\16\\20240101161457.8494.txt")));
+            //ScalePrompt(JsonNode.Parse(File.ReadAllText("D:\\Ichihai1415\\data\\json\\P2Pquake\\sc-2023kushiro.json")));
+            //ScalePrompt(JsonNode.Parse(File.ReadAllText("D:\\Ichihai1415\\data\\json\\P2Pquake\\sc-2023kushiro-edit.json")));
+            //ScalePrompt(JsonNode.Parse(File.ReadAllText("D:\\Ichihai1415\\data\\json\\P2Pquake\\2024-r6noto-last.json")));
+            //ScalePrompt(JsonNode.Parse(File.ReadAllText("D:\\Ichihai1415\\data\\json\\P2Pquake\\2024-r6noto-last-edit.json")));
+            //EEW(JsonNode.Parse(File.ReadAllText("C:\\Ichihai1415\\source\\vs\\QuakeMapFast\\QuakeMapFast\\bin\\x64\\Debug\\Log\\202401\\01\\16\\20240101161107.3056.txt")));
             //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake/659268caf0f6de00075648b1").Result));//noto
             //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=0&quake_type=DetailScale").Result).First());
             //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=4&quake_type=DetailScale").Result).First());
-            //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(File.ReadAllText(@"C:\Ichihai1415\source\vs\QuakeMapFast\QuakeMapFast\bin\x64\Debug\Log\202401\01\16\20240101161005.9033.txt").Replace("_id","id")));//noto
+            //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(File.ReadAllText(@"C:\Ichihai1415\source\vs\QuakeMapFast\QuakeMapFast\bin\x64\Debug\Log\202401\01\16\20240101161005.9033.txt").Replace("_id", "id")));//noto
 
-            //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(File.ReadAllText(@"C:\Ichihai1415\source\vs\QuakeMapFast\QuakeMapFast\bin\x64\Debug\Log\202401\01\16\20240101161650.2868.txt").Replace("_id","id")));//noto
+            //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(File.ReadAllText(@"C:\Ichihai1415\source\vs\QuakeMapFast\QuakeMapFast\bin\x64\Debug\Log\202401\01\16\20240101161650.2868.txt").Replace("_id", "id")));//noto
 
             st.Stop();
             ConWrite($"[Debug]終了({st.ElapsedMilliseconds}ms)", ConsoleColor.Cyan);
