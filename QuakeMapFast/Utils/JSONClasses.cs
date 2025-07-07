@@ -86,7 +86,13 @@ namespace QuakeMapFast.Utils
             /// 情報を一意に識別するID
             /// </summary>
             [JsonPropertyName("id")]
-            public required string Id { get; set; }
+            public string? Id { get; set; }
+
+            /// <summary>
+            /// 情報を一意に識別するID(websocket?)
+            /// </summary>
+            [JsonPropertyName("_id")]
+            public string? Id_ws { get; set; }
 
             /// <summary>
             /// 受信日時。形式は 2006/01/02 15:04:05.999 です。

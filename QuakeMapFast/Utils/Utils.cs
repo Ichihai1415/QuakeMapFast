@@ -136,7 +136,7 @@ namespace QuakeMapFast.Utils
         /// 震度アイコン描画時の透明度を変更します。設定反映時等に呼び出してください。
         /// </summary>
         /// <param name="alpha">透明度(0~1)</param>
-        private static void ChangeAlpha(float alpha)
+        internal static void ChangeAlpha(float alpha)
         {
             var colorMatrix = new ColorMatrix() { Matrix33 = alpha };
             CtrlForm.IA_ScaleIcon = new ImageAttributes();
@@ -147,7 +147,7 @@ namespace QuakeMapFast.Utils
         /// 震度アイコン描画時の透明度を変更します。設定反映時等に呼び出してください。
         /// </summary>
         /// <param name="alpha">透明度(0~255)</param>
-        private static void ChangeAlpha(int alpha)
+        internal static void ChangeAlpha(int alpha)
         {
             ChangeAlpha(alpha / 255f);
         }
