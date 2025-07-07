@@ -54,6 +54,8 @@ namespace QuakeMapFast
 
         private async void CtrlForm_Load(object sender, EventArgs e)
         {
+            //PlaySound(@"C:\Ichihai1415\source\vs\QuakeMapFast\QuakeMapFast\bin\x64\Debug\net9.0-windows7.0\Sound\scale\4.wav");
+            //return;
             //ConWrite($"");
             ConWrite($"[CtrlForm_Load]起動しました");
             ConWrite($"/////QuakeMapFast v{version}/////\nhttps://github.com/Ichihai1415/QuakeMapFast\nこのコンソールを閉じるとQuakeMapFastが終了します。\nその他READMEを参照してください。", ConsoleColor.Cyan);
@@ -214,7 +216,7 @@ namespace QuakeMapFast
                         }
                         catch (Exception ex)
                         {
-                            ConWrite($"[Get](JSON分析失敗)", ex);
+                            ConWrite($"[Get]", ex);
                             Directory.CreateDirectory($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}");
                             File.WriteAllText($"Log\\Error\\{DateTime.Now:yyyyMM}\\{DateTime.Now:dd}\\{DateTime.Now:yyyyMMddHHmmss.ffff}.txt", $"{ex}");
                             continue;

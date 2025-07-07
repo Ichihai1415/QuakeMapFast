@@ -149,22 +149,29 @@ namespace QuakeMapFast.Utils
         /// <param name="fileName">再生するファイル名(sound\\)</param>
         internal static void PlaySound(string fileName)
         {
-            if (!fileName.StartsWith("Sound\\"))
-                fileName = "Sound\\" + fileName;
-            if (!File.Exists(fileName))
+            try
             {
-                ConWrite("[PlaySound]音声ファイルがないため再生しません。");
-                return;
+                if (!fileName.StartsWith("Sound\\") && !fileName.Contains(':'))
+                    fileName = "Sound\\" + fileName;
+                if (!File.Exists(fileName))
+                {
+                    ConWrite("[PlaySound]音声ファイルがないため再生しません。");
+                    return;
+                }
+                ConWrite($"[PlaySound]音声再生開始(\"{fileName}\")");
+                if (player != null)
+                {
+                    player.Stop();
+                    player.Dispose();
+                    player = null;
+                }
+                player = new SoundPlayer(fileName);
+                player.Play();
             }
-            ConWrite($"[PlaySound]音声再生開始(\"{fileName}\")");
-            if (player != null)
+            catch (Exception ex)
             {
-                player.Stop();
-                player.Dispose();
-                player = null;
+                ConWrite("[PlaySound]", ex);
             }
-            player = new SoundPlayer(fileName);
-            player.Play();
         }
 
         public static void WriteLog(Exception ex)
