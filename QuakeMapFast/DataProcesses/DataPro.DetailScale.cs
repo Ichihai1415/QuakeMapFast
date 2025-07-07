@@ -1,7 +1,7 @@
 ﻿using QuakeMapFast.Properties;
-using System;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Text;
 using static QuakeMapFast.CtrlForm;
 using static QuakeMapFast.Utils.JSONClasses;
 using static QuakeMapFast.Utils.Utils;
@@ -116,7 +116,7 @@ namespace QuakeMapFast
 
             g.FillRectangle(Brushes.Black, 1080, 0, 840, 1080);
             g.DrawString("震源・震度情報", new Font(font, 50), Brushes.White, 1090, 10);
-            g.DrawString(json.Earthquake.Time.Remove(16), new Font(font, 30), Brushes.White, 1580, 45);
+            g.DrawString(json.Earthquake.Time[..16], new Font(font, 30), Brushes.White, 1580, 45);
             var dep = json.Earthquake.Hypocenter.Depth == -1 ? "不明" :
                 json.Earthquake.Hypocenter.Depth == 0 ? "ごく浅い" :
                 (json.Earthquake.Hypocenter.Depth + "km");
@@ -159,6 +159,78 @@ namespace QuakeMapFast
                 bitmap.Save($"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png", ImageFormat.Png);
                 ConWrite($"[Draw]output\\{saveTime:yyyyMM}\\{saveTime:dd}に保存しました");
             }
+
+            //震度大きい順前提
+            var intsSt = new StringBuilder();
+            var lastScale = -99;
+            var count = 0;
+            foreach (var pts in json.Points)
+            {
+                if (lastScale != pts.Scale)
+                {
+                    intsSt.Append("《震度");
+                    intsSt.Append(maxIntS);
+                    intsSt.Append('》');
+                }
+                intsSt.Append(pts.Addr);
+                intsSt.Append(' ');
+
+                count++;
+                if (count == 50)
+                    break;
+            }
+
+            //string text = $"震度速報【最大震度{maxIntS}】{time:yyyy/MM/dd HH:mm}\n{intsArea}";
+            //ConWrite(text, ConsoleColor.Cyan);
+            if (debug || readJSON)//todo:
+            {
+                Telop($"0,《現在の情報ではありません》震源・震度情報【最大震度{maxIntS}】,{json.Earthquake.Time[..16]} 震源: {json.Earthquake.Hypocenter.Name} 深さ{dep} M{mag}  {intsSt},{Int2TelopColor(maxIntN)},False,10,1000");
+                //BouyomiChan($"QuakeMapFastの読み上げです。デバッグあるいはJSON読み込みモードのため無効です。");
+            }
+            else
+            {
+                Telop($"0,震源・震度情報【最大震度{maxIntS}】,{json.Earthquake.Time[..16]} 震源: {json.Earthquake.Hypocenter.Name} 深さ{dep} M{mag}  {intsSt},{Int2TelopColor(maxIntN)},False,60,1000");
+                //BouyomiChan($"震度速報、{intsArea_Max3.Replace("\n", "").Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
+            }
+
+            string soundFile;
+            switch (maxIntN)
+            {
+                case 0:
+                    soundFile = "scale\\0.wav";
+                    break;
+                case 1:
+                    soundFile = "scale\\1.wav";
+                    break;
+                case 2:
+                    soundFile = "scale\\2.wav";
+                    break;
+                case 3:
+                    soundFile = "scale\\3.wav";
+                    break;
+                case 4:
+                    soundFile = "scale\\4.wav";
+                    break;
+                case 5:
+                    soundFile = "scale\\5-.wav";
+                    break;
+                case 6:
+                    soundFile = "scale\\5+.wav";
+                    break;
+                case 7:
+                    soundFile = "scale\\6-.wav";
+                    break;
+                case 8:
+                    soundFile = "scale\\6+.wav";
+                    break;
+                case 9:
+                    soundFile = "scale\\7.wav";
+                    break;
+                default:
+                    soundFile = string.Empty;
+                    break;
+            }
+            PlaySound(soundFile);
 
         }
 

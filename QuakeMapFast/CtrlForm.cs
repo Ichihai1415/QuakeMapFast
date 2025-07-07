@@ -125,7 +125,8 @@ namespace QuakeMapFast
             view_all.Show();
 
             SettingReload();
-            Debug(); return;//デバッグ時ここをつける(ここ以降行かせない)
+
+            //Debug(); return;//デバッグ時ここをつける(ここ以降行かせない)
 
             //XPost("test from QuakeMapFast (2)", "D:\\Ichihai1415\\image\\icon\\new - bot.png");
             await Get();
@@ -183,7 +184,7 @@ namespace QuakeMapFast
 
                             int code = (int)json["code"];
                             string id = (string)json["_id"];
-                            string? type = (string)json["issue"]["type"];//ないときあるからこれで
+                            string? type = (string)json["issue"]?["type"];//ないときあるからこれで
                             string codeInfo = P2PInfoCodeName.ContainsKey(code) ? P2PInfoCodeName[code] : "-";
                             string issueInfo = P2PInfoTypeName.ContainsKey(type ?? "") ? P2PInfoTypeName[type ?? ""] : "-";
                             ConWrite($"[Get]受信 id:{id} code:{code}{codeInfo} type:{type}{issueInfo}");
@@ -323,6 +324,8 @@ namespace QuakeMapFast
             Bouyomi_Tone.Value = Settings.Default.Bouyomi_Tone;
 
             Telop_Enable.Checked = Settings.Default.Telop_Enable;
+
+            ChangeAlpha(191);
 
             view_all.SettingReload();
             ConWrite("[SettingReload]設定読み込み完了");
