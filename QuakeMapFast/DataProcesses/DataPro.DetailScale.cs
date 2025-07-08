@@ -172,6 +172,7 @@ namespace QuakeMapFast
                     intsSt.Append("《震度");
                     intsSt.Append(maxIntS);
                     intsSt.Append('》');
+                    lastScale = pts.Scale;
                 }
                 intsSt.Append(pts.Addr);
                 intsSt.Append(' ');
