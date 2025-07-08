@@ -472,5 +472,19 @@ namespace QuakeMapFast.Utils
             };
         }
 
+        public static string GetTsunamiMessege(string domesticTsunami) => domesticTsunami switch
+        {
+            //[ None(なし), Unknown(不明), Checking(調査中), NonEffective(若干の海面変動が予想されるが、被害の心配なし), Watch(津波注意報), Warning(津波予報(種類不明)) ]
+            "None" => "この地震による津波の心配はありません。",
+            "Unknown" => "日本への津波の有無については不明です。",
+            "Checking" => "今後の情報に注意してください。",
+            "NonEffective" => "この地震により、日本の沿岸では若干の海面変動があるかもしれませんが、被害の心配はありません。",
+            "Watch" => "津波警報等（大津波警報・津波警報あるいは津波注意報）を発表中です。",
+            "Warning" => "津波警報等（大津波警報・津波警報あるいは津波注意報）を発表中です。",
+            _ => ""
+        };
+
+
+
     }
 }

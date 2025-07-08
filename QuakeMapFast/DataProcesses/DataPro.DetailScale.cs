@@ -1,4 +1,5 @@
 ﻿using QuakeMapFast.Properties;
+using System;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Text;
@@ -136,7 +137,7 @@ namespace QuakeMapFast
                 g.DrawString(maxIntS, new Font(font, 90, FontStyle.Bold), IntN2TextBrush(maxIntN), 1600, 175);
 
             var maxIntAreas = string.Join(Environment.NewLine, json.Points.Where(x => x.Scale == json.Earthquake.MaxScale).Select(x => x.Addr));
-            //maxIntAreas = "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12";
+            //maxIntAreas = "1\n2\n3\n4\n5\n6\n7\n8\n9\n10";
             g.DrawString(maxIntAreas, new Font(font, 40), Brushes.White, 1100, 360);
 
             g.FillRectangle(Brushes.Black, 1080, 900, 840, 180);
@@ -152,9 +153,9 @@ namespace QuakeMapFast
 
             view_all.ImageChange(bitmap, "");
 
+            var saveTime = DateTime.Now;
             if (Settings.Default.Save_Image)
             {
-                var saveTime = DateTime.Now;
                 Directory.CreateDirectory($"output\\{saveTime:yyyyMM}\\{saveTime:dd}");
                 bitmap.Save($"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png", ImageFormat.Png);
                 ConWrite($"[Draw]output\\{saveTime:yyyyMM}\\{saveTime:dd}に保存しました");
@@ -193,45 +194,26 @@ namespace QuakeMapFast
                 //BouyomiChan($"震度速報、{intsArea_Max3.Replace("\n", "").Replace("《", "、").Replace("》", "、").Replace(" ", "、")}");
             }
 
-            string soundFile;
-            switch (maxIntN)
+            string soundFile = maxIntN switch
             {
-                case 0:
-                    soundFile = "scale\\0.wav";
-                    break;
-                case 1:
-                    soundFile = "scale\\1.wav";
-                    break;
-                case 2:
-                    soundFile = "scale\\2.wav";
-                    break;
-                case 3:
-                    soundFile = "scale\\3.wav";
-                    break;
-                case 4:
-                    soundFile = "scale\\4.wav";
-                    break;
-                case 5:
-                    soundFile = "scale\\5-.wav";
-                    break;
-                case 6:
-                    soundFile = "scale\\5+.wav";
-                    break;
-                case 7:
-                    soundFile = "scale\\6-.wav";
-                    break;
-                case 8:
-                    soundFile = "scale\\6+.wav";
-                    break;
-                case 9:
-                    soundFile = "scale\\7.wav";
-                    break;
-                default:
-                    soundFile = string.Empty;
-                    break;
-            }
+                0 => "scale\\0.wav",
+                1 => "scale\\1.wav",
+                2 => "scale\\2.wav",
+                3 => "scale\\3.wav",
+                4 => "scale\\4.wav",
+                5 => "scale\\5-.wav",
+                6 => "scale\\5+.wav",
+                7 => "scale\\6-.wav",
+                8 => "scale\\6+.wav",
+                9 => "scale\\7.wav",
+                _ => string.Empty,
+            };
             PlaySound(soundFile);
 
+            var dt = DateTime.Parse(json.Earthquake.Time);
+            if (File.Exists("XPosterV2Host - Enable"))
+                if (!debug && !readJSON && maxIntN >= 5)
+                    XPost($"{dt.Day}日{dt.Hour}時{dt.Minute}分ごろ、最大震度{maxIntS}を観測する地震がありました。{GetTsunamiMessege(json.Earthquake.DomesticTsunami)}震源地は{json.Earthquake.Hypocenter.Name}、震源の深さは{dep}、地震の規模を示すマグニチュードは{mag}と推定されています。", $"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png");
         }
 
     }
