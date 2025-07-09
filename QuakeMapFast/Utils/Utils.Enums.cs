@@ -367,5 +367,20 @@ namespace QuakeMapFast.Utils
             Potential = 9
         }
 
+        /// <summary>
+        /// (処理用)
+        /// </summary>
+        public enum PointToken
+        {
+            /// <summary>
+            /// <see cref="JSONClasses.P2PQuake_JMAQuake.C_Point.Pref"/>
+            /// </summary>
+            Pref=0,
+
+            /// <summary>
+            /// <see cref="JSONClasses.P2PQuake_JMAQuake.C_Point.Addr"/>
+            /// </summary>
+            Addr = 1
+        }
     }
 }

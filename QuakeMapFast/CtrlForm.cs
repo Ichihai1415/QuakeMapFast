@@ -202,7 +202,7 @@ namespace QuakeMapFast
                                     switch (type)
                                     {
                                         case "ScalePrompt":
-                                            ScalePrompt(json);
+                                            ScalePrompt_old(json);
                                             break;
                                         case "DetailScale":
                                             DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(jsonText));

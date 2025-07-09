@@ -33,15 +33,15 @@ namespace QuakeMapFast
             ConWrite("[DetailScale]データ処理開始");
 
             var maxIntN = P2PQScale2Int(json.Earthquake.MaxScale);
-            var maxIntS = GetEnumDescription((P2PQ_Scales)(json.Earthquake.MaxScale ?? -1));
+            var maxIntS = GetEnumDescription((P2PQ_Scales)json.Earthquake.MaxScale);
 
             float latSta = 200, latEnd = -200, lonSta = 200, lonEnd = -200;
-            if (json.Earthquake.Hypocenter != null)
+            if (json.Earthquake.Hypocenter != null)//震央を範囲に含めるか設定にする
             {
-                latSta = json.Earthquake.Hypocenter.Latitude ?? 200f;
-                latEnd = json.Earthquake.Hypocenter.Latitude ?? -200f;
-                lonSta = json.Earthquake.Hypocenter.Longitude ?? 200f;
-                lonEnd = json.Earthquake.Hypocenter.Longitude ?? -200f;
+                latSta = json.Earthquake.Hypocenter.Latitude;
+                latEnd = json.Earthquake.Hypocenter.Latitude;
+                lonSta = json.Earthquake.Hypocenter.Longitude;
+                lonEnd = json.Earthquake.Hypocenter.Longitude;
 
             }
 

@@ -1,5 +1,5 @@
-﻿using System.ComponentModel;
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
+using static QuakeMapFast.Utils.JSONClasses;
 
 namespace QuakeMapFast.Utils
 {
@@ -36,10 +36,13 @@ namespace QuakeMapFast.Utils
         };
 
         /// <summary>
-        /// 震度別のList<string>
+        /// 震度別の観測点・区域名のリスト
         /// </summary>
         public class IntList
         {
+            /// <summary>
+            /// 震度1
+            /// </summary>
             public List<string> S1 { get; set; } = [];
             public List<string> S2 { get; set; } = [];
             public List<string> S3 { get; set; } = [];
@@ -49,77 +52,53 @@ namespace QuakeMapFast.Utils
             public List<string> S7 { get; set; } = [];
             public List<string> S8 { get; set; } = [];
             public List<string> S9 { get; set; } = [];
+            public List<string> S10 { get; set; } = [];
         }
 
         /// <summary>
-        /// P2Pjsonの震度をint形式(0,1,..,8,9)に変換します。
+        /// P2Pjsonの震度をint形式(0,1,..,9,10(未入電))に変換します。
         /// </summary>
         /// <param name="scale">P2Pjsonの震度</param>
         /// <returns>int形式の震度</returns>
-        public static int P2PScale2IntN(int scale)
+        public static int P2PScale2IntN(int? scale) => scale switch
         {
-            switch (scale)
-            {
-                case 10:
-                    return 1;
-                case 20:
-                    return 2;
-                case 30:
-                    return 3;
-                case 40:
-                    return 4;
-                case 45:
-                    return 5;
-                case 50:
-                    return 6;
-                case 55:
-                    return 7;
-                case 60:
-                    return 8;
-                case 70:
-                    return 9;
-                default:
-                    return 0;
-            }
-        }
+            10 => 1,
+            20 => 2,
+            30 => 3,
+            40 => 4,
+            45 => 5,
+            50 => 6,
+            55 => 7,
+            60 => 8,
+            70 => 9,
+            46 => 10,
+            _ => 0,
+        };
 
         /// <summary>
-        /// P2Pjsonの震度をstring形式(-,1,..,6強,7)に変換します。
+        ///  P2P地震情報 JSON API v2 の震度をstring形式(-,1,..,6強,7)に変換します。
         /// </summary>
-        /// <param name="scale">P2Pjsonの震度</param>
-        /// <returns>int形式の震度</returns>
-        public static string P2PScale2IntS(int scale)
+        /// <param name="scale">P2P地震情報 JSON API v2 の震度</param>
+        /// <returns>string形式(-,1,..,6強,7)の震度</returns>
+        public static string P2PScale2IntS(int scale) => scale switch
         {
-            switch (scale)
-            {
-                case 10:
-                    return "1";
-                case 20:
-                    return "2";
-                case 30:
-                    return "3";
-                case 40:
-                    return "4";
-                case 45:
-                    return "5弱";
-                case 50:
-                    return "5強";
-                case 55:
-                    return "6弱";
-                case 60:
-                    return "6強";
-                case 70:
-                    return "7";
-                default://-1,99
-                    return "-";
-            }
-        }
+            10 => "1",
+            20 => "2",
+            30 => "3",
+            40 => "4",
+            45 => "5弱",
+            46 => "5弱以上推定未入電",
+            50 => "5強",
+            55 => "6弱",
+            60 => "6強",
+            70 => "7",
+            _ => "-"//-1(なし),99(上限なし(EEW))
+        };
 
         /// <summary>
         /// P2P地震情報 JSON API v2 の震度が6弱以上か判定します。
         /// </summary>
-        /// <param name="scaleFrom">震度の下限</param>
-        /// <param name="scaleTo">震度の上限</param>
+        /// <param name="scale">震度</param>
         /// <returns>6弱以上の場合<c>true</c></returns>
         public static bool P2PQScale2isOver6(int scale)
         {
@@ -136,64 +115,42 @@ namespace QuakeMapFast.Utils
         {
             return scaleTo <= 70 ?
                 scaleTo >= 55 :
-                scaleFrom <= 70 && scaleFrom >= 55;//55<=scaleTo<=70 
+                scaleFrom <= 70 && scaleFrom >= 55;//x程度以上 55<=scaleTo<=70 
         }
 
         /// <summary>
         /// jsonから指定した区分の地区・地点ごとの震度のDictionaryを返します。
         /// </summary>
         /// <param name="points">jsonのpoints</param>
-        /// <param name="token">addr(地点・区分)/pref(県)</param>
+        /// <param name="isPref">addr(地点・区分)/pref(県)</param>
         /// <returns>Dictionary<地区, int形式の震度></returns>
-        public static Dictionary<string, int> P2PQPoints2Dic(JsonNode points, string token)
-        {
-            if (token != "addr" && token != "pref")
-                throw new InvalidEnumArgumentException("tokenはaddrかprefのみです。");
-            return points.AsArray().ToDictionary(pt => (string)pt![token]!, pt => P2PScale2IntN((int)pt!["scale"]!));
-        }
+        public static Dictionary<string, int> P2PQPoints2Dic(JSONClasses.P2PQuake_JMAQuake.C_Point[] points, bool isPref)
+            => points.ToDictionary(pt => isPref ? pt.Pref : pt.Addr, pt => P2PScale2IntN(pt.Scale));
 
         /// <summary>
         /// jsonから震度別の指定した区分の地区を返します。
         /// </summary>
-        /// <param name="json">json</param>
+        /// <param name="points">震度観測点の情報</param>
         /// <param name="token">addr(地点・区分)/pref(県)</param>
         /// <returns>IntList</returns>
-        public static IntList Point2IntList(JsonNode json, string token)
+        public static IntList Point2IntList(P2PQuake_JMAQuake.C_Point[] points, PointToken token)
         {
             var intList = new IntList();
-            foreach (JsonNode json_ in json["points"].AsArray())
-            {
-                switch ((int)json_["scale"])
+            foreach (var point in points)
+                (point.Scale switch
                 {
-                    case 10:
-                        intList.S1.Add((string)json_[token]);
-                        break;
-                    case 20:
-                        intList.S2.Add((string)json_[token]);
-                        break;
-                    case 30:
-                        intList.S3.Add((string)json_[token]);
-                        break;
-                    case 40:
-                        intList.S4.Add((string)json_[token]);
-                        break;
-                    case 45:
-                        intList.S5.Add((string)json_[token]);
-                        break;
-                    case 50:
-                        intList.S6.Add((string)json_[token]);
-                        break;
-                    case 55:
-                        intList.S7.Add((string)json_[token]);
-                        break;
-                    case 60:
-                        intList.S8.Add((string)json_[token]);
-                        break;
-                    case 70:
-                        intList.S9.Add((string)json_[token]);
-                        break;
-                }
-            }
+                    10 => intList.S1,
+                    20 => intList.S2,
+                    30 => intList.S3,
+                    40 => intList.S4,
+                    45 => intList.S5,
+                    50 => intList.S6,
+                    55 => intList.S7,
+                    60 => intList.S8,
+                    70 => intList.S9,
+                    46 => intList.S10,
+                    _ => throw new Exception("未知の震度です。")
+                }).Add(token == PointToken.Pref ? point.Pref : point.Addr);
             return intList;
         }
 
@@ -201,29 +158,29 @@ namespace QuakeMapFast.Utils
         /// IntListから震度別の文字列を返します。
         /// </summary>
         /// <param name="intList">IntList</param>
-        /// <param name="mininumInt">文字列にする最小の震度</param>
+        /// <param name="minimumInt">文字列にする最小の震度</param>
         /// <returns>震度別の文字列</returns>
         /// <remarks>例:《震度4》○○ ○○ \n《震度3》○○ ○○ </remarks>
-        public static string IntList2String(IntList intList, int mininumInt = 0)
+        public static string IntList2String(IntList intList, int minimumInt = 0)
         {
             string output = "\n";
-            if (intList.S9.Count != 0 && mininumInt <= 9)
+            if (intList.S9.Count != 0 && minimumInt <= 9)
                 output += "\n《震度7》" + string.Join(" ", intList.S9);
-            if (intList.S8.Count != 0 && mininumInt <= 8)
+            if (intList.S8.Count != 0 && minimumInt <= 8)
                 output += "\n《震度6強》" + string.Join(" ", intList.S8);
-            if (intList.S7.Count != 0 && mininumInt <= 7)
+            if (intList.S7.Count != 0 && minimumInt <= 7)
                 output += "\n《震度6弱》" + string.Join(" ", intList.S7);
-            if (intList.S6.Count != 0 && mininumInt <= 6)
+            if (intList.S6.Count != 0 && minimumInt <= 6)
                 output += "\n《震度5強》" + string.Join(" ", intList.S6);
-            if (intList.S5.Count != 0 && mininumInt <= 5)
+            if (intList.S5.Count != 0 && minimumInt <= 5)
                 output += "\n《震度5弱》" + string.Join(" ", intList.S5);
-            if (intList.S4.Count != 0 && mininumInt <= 4)
+            if (intList.S4.Count != 0 && minimumInt <= 4)
                 output += "\n《震度4》" + string.Join(" ", intList.S4);
-            if (intList.S3.Count != 0 && mininumInt <= 3)
+            if (intList.S3.Count != 0 && minimumInt <= 3)
                 output += "\n《震度3》" + string.Join(" ", intList.S3);
-            if (intList.S2.Count != 0 && mininumInt <= 2)
+            if (intList.S2.Count != 0 && minimumInt <= 2)
                 output += "\n《震度2》" + string.Join(" ", intList.S2);
-            if (intList.S1.Count != 0 && mininumInt <= 1)
+            if (intList.S1.Count != 0 && minimumInt <= 1)
                 output += "\n《震度1》" + string.Join(" ", intList.S1);
             return output.Replace("\n\n", "");
         }
@@ -233,11 +190,11 @@ namespace QuakeMapFast.Utils
         /// </summary>
         /// <param name="json">json</param>
         /// <param name="Token">addr(地点・区分)/pref(県)</param>
-        /// <param name="MininumInt">文字列にする最小のint形式の震度</param>
+        /// <param name="minimumInt">文字列にする最小のint形式の震度</param>
         /// <returns></returns>
-        public static string Point2String(JsonNode json, string Token, int LowestInt = 0)
+        public static string Point2String(JsonNode json, PointToken token, int minimumInt = 0)
         {
-            return IntList2String(Point2IntList(json, Token), LowestInt);
+            return IntList2String(Point2IntList(json, token),minimumInt);
         }
 
         /// <summary>

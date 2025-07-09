@@ -122,7 +122,7 @@ namespace QuakeMapFast.Utils
             /// 震度観測点の情報
             /// </summary>
             [JsonPropertyName("points")]
-            public C_Point[]? Points { get; set; }
+            public required C_Point[] Points { get; set; }
 
             /// <summary>
             /// 付加文（2024年8月下旬から提供予定）
@@ -140,7 +140,7 @@ namespace QuakeMapFast.Utils
                 /// 発表元
                 /// </summary>
                 [JsonPropertyName("source")]
-                public string? Source { get; set; }
+                public required string Source { get; set; }
 
                 /// <summary>
                 /// 発表日時
@@ -153,7 +153,7 @@ namespace QuakeMapFast.Utils
                 /// </summary>
                 /// <remarks>Enum: [None(なし), Unknown(不明), ScaleOnly(震度), DestinationOnly(震源), ScaleAndDestination(震度・震源)]</remarks>
                 [JsonPropertyName("correct")]
-                public string? Correct { get; set; }
+                public required string Correct { get; set; }
 
                 /// <summary>
                 /// 発表種類
@@ -173,27 +173,27 @@ namespace QuakeMapFast.Utils
                 /// </summary>
                 /// <remarks>Enum: [None(なし), Unknown(不明), Checking(調査中), NonEffective(若干の海面変動が予想されるが、被害の心配なし), Watch(津波注意報), Warning(津波予報(種類不明))]</remarks>
                 [JsonPropertyName("domesticTsunami")]
-                public string? DomesticTsunami { get; set; }
+                public required string DomesticTsunami { get; set; }
 
                 /// <summary>
                 /// 海外での津波の有無
                 /// </summary>
                 /// <remarks>Enum: [None(なし), Unknown(不明), Checking(調査中), NonEffectiveNearby(震源の近傍で小さな津波の可能性があるが、被害の心配なし), WarningNearby(震源の近傍で津波の可能性がある), WarningPacific(太平洋で津波の可能性がある), WarningPacificWide(太平洋の広域で津波の可能性がある), WarningIndian(インド洋で津波の可能性がある), WarningIndianWide(インド洋の広域で津波の可能性がある), Potential(一般にこの規模では津波の可能性がある)]</remarks>
                 [JsonPropertyName("foreignTsunami")]
-                public string? ForeignTsunami { get; set; }
+                public required string ForeignTsunami { get; set; }
 
                 /// <summary>
                 /// 震源情報
                 /// </summary>
                 [JsonPropertyName("hypocenter")]
-                public C_Hypocenter? Hypocenter { get; set; }
+                public required C_Hypocenter Hypocenter { get; set; }
 
                 /// <summary>
                 /// 最大震度。震度情報が存在しない場合は-1となります。
                 /// </summary>
                 /// <remarks>Enum: [ -1(震度情報なし), 10(震度1), 20(震度2), 30(震度3), 40(震度4), 45(震度5弱), 50(震度5強), 55(震度6弱), 60(震度6強), 70(震度7) ]</remarks>
                 [JsonPropertyName("maxScale")]
-                public int? MaxScale { get; set; }
+                public required int MaxScale { get; set; }
 
                 /// <summary>
                 /// 発生日時
@@ -211,31 +211,31 @@ namespace QuakeMapFast.Utils
                 /// 深さ(km)。「ごく浅い」は0、震源情報が存在しない場合は-1となります。
                 /// </summary>
                 [JsonPropertyName("depth")]
-                public int? Depth { get; set; }
+                public required int Depth { get; set; }
 
                 /// <summary>
                 /// 緯度。震源情報が存在しない場合は-200となります。
                 /// </summary>
                 [JsonPropertyName("latitude")]
-                public float? Latitude { get; set; }
+                public required float Latitude { get; set; }
 
                 /// <summary>
                 /// 経度。震源情報が存在しない場合は-200となります。
                 /// </summary>
                 [JsonPropertyName("longitude")]
-                public float? Longitude { get; set; }
+                public required float Longitude { get; set; }
 
                 /// <summary>
                 /// マグニチュード。震源情報が存在しない場合は-1となります。
                 /// </summary>
                 [JsonPropertyName("magnitude")]
-                public float? Magnitude { get; set; }
+                public required float Magnitude { get; set; }
 
                 /// <summary>
                 /// 名称
                 /// </summary>
                 [JsonPropertyName("name")]
-                public string? Name { get; set; }
+                public required string Name { get; set; }
             }
 
             /// <summary>
@@ -247,7 +247,7 @@ namespace QuakeMapFast.Utils
                 /// 自由付加文。ない場合は空文字列となります。気象庁の発表電文に含まれる自由付加文をそのまま提供しており、火山噴火に伴って発表される遠地地震に関する情報では、「大規模な噴火が発生しました」という文言が含まれます（2024年7月現在）。
                 /// </summary>
                 [JsonPropertyName("freeFormComment")]
-                public string? FreeFormComment { get; set; }
+                public required string FreeFormComment { get; set; }
             }
 
             /// <summary>
