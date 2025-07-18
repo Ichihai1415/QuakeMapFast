@@ -124,8 +124,11 @@ namespace QuakeMapFast.Utils
         /// <param name="points">jsonのpoints</param>
         /// <param name="isPref">addr(地点・区分)/pref(県)</param>
         /// <returns>Dictionary<地区, int形式の震度></returns>
-        public static Dictionary<string, int> P2PQPoints2Dic(JSONClasses.P2PQuake_JMAQuake.C_Point[] points, bool isPref)
-            => points.ToDictionary(pt => isPref ? pt.Pref : pt.Addr, pt => P2PScale2IntN(pt.Scale));
+        public static Dictionary<string, int> P2PQPoints2Dic(P2PQuake_JMAQuake.C_Point[] points, PointToken token)
+        {
+            ArgumentNullException.ThrowIfNull(points);
+            return points.ToDictionary(pt => token == PointToken.Pref ? pt.Pref : pt.Addr, pt => P2PScale2IntN(pt.Scale));
+        }
 
         /// <summary>
         /// jsonから震度別の指定した区分の地区を返します。
@@ -188,13 +191,13 @@ namespace QuakeMapFast.Utils
         /// <summary>
         /// jsonから震度別の文字列を返します。
         /// </summary>
-        /// <param name="json">json</param>
+        /// <param name="points">json</param>
         /// <param name="Token">addr(地点・区分)/pref(県)</param>
         /// <param name="minimumInt">文字列にする最小のint形式の震度</param>
         /// <returns></returns>
-        public static string Point2String(JsonNode json, PointToken token, int minimumInt = 0)
+        public static string Point2String(P2PQuake_JMAQuake.C_Point[] points, PointToken token, int minimumInt = 0)
         {
-            return IntList2String(Point2IntList(json, token),minimumInt);
+            return IntList2String(Point2IntList(points, token), minimumInt);
         }
 
         /// <summary>

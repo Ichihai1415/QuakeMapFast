@@ -128,7 +128,7 @@ namespace QuakeMapFast
 
             SettingReload();
 
-            //Debug(); return;//デバッグ時ここをつける(ここ以降行かせない)
+            Debug(); return;//デバッグ時ここをつける(ここ以降行かせない)
 
             //XPost("test from QuakeMapFast (2)", "D:\\Ichihai1415\\image\\icon\\new - bot.png");
             await Get();
@@ -202,7 +202,7 @@ namespace QuakeMapFast
                                     switch (type)
                                     {
                                         case "ScalePrompt":
-                                            ScalePrompt_old(json);
+                                            ScalePrompt(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(jsonText));
                                             break;
                                         case "DetailScale":
                                             DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake>(jsonText));
@@ -257,7 +257,8 @@ namespace QuakeMapFast
 
             //oldDataDraw = false;//現在の情報ではありませんを描画しない場合コメントアウト解除
 
-            DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=0&min_scale=45&quake_type=DetailScale").Result).First());
+            //DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=0&min_scale=45&quake_type=DetailScale").Result).First());
+            DetailScale(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=0&min_scale=70&quake_type=DetailScale").Result).First());
 
 
             //EqDB(JsonSerializer.Deserialize<JMA_EqDB>(client.GetStringAsync("https://www.data.jma.go.jp/eqdb/data/shindo/api/?mode=event&id=20240101161022").Result));//noto
@@ -266,7 +267,8 @@ namespace QuakeMapFast
             //EqDB(JsonSerializer.Deserialize<JMA_EqDB>(client.GetStringAsync("https://www.data.jma.go.jp/eqdb/data/shindo/api/?mode=event&id=20150530202302").Result));//ogasawara
 
 
-            //ScalePrompt(JsonNode.Parse(File.ReadAllText("C:\\Ichihai1415\\source\\vs\\QuakeMapFast\\QuakeMapFast\\bin\\x64\\Debug\\JSON-sample\\scale\\2024-r6noto-last.json")));
+            //ScalePrompt(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=0&min_scale=45&quake_type=ScalePrompt").Result).First());
+            //ScalePrompt(JsonSerializer.Deserialize<P2PQuake_JMAQuake[]>(client.GetStringAsync("https://api.p2pquake.net/v2/jma/quake?limit=1&offset=0&min_scale=70&quake_type=ScalePrompt").Result).First());
             //EEW(JsonNode.Parse(File.ReadAllText("C:\\Ichihai1415\\source\\vs\\QuakeMapFast\\QuakeMapFast\\bin\\x64\\Debug\\JSON-sample\\eew\\2024-r6noto-3.json")));
 
             //ScalePrompt(JsonNode.Parse(File.ReadAllText("C:\\Users\\proje\\source\\repos\\QuakeMapFast\\QuakeMapFast\\bin\\Debug\\Log\\202305\\26\\19\\20230526190603.3438.txt")));

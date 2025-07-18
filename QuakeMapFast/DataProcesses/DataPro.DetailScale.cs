@@ -122,7 +122,7 @@ namespace QuakeMapFast
                 json.Earthquake.Hypocenter.Depth == 0 ? "ごく浅い" :
                 (json.Earthquake.Hypocenter.Depth + "km");
             var mag = json.Earthquake.Hypocenter.Magnitude == -1 ?
-                "不明" : json.Earthquake.Hypocenter.Magnitude?.ToString("0.0") ?? "不明";
+                "不明" : json.Earthquake.Hypocenter.Magnitude.ToString("0.0");
             g.DrawString(json.Earthquake.Hypocenter.Name + " 深さ" + dep + "  M" + mag, new Font(font, 30), Brushes.White, 1095, 95);
             //g.DrawString("山梨県東部・富士五湖 深さごく浅い  M不明", new Font(font, 30), Brushes.White, 1095, 95);
 
@@ -161,16 +161,17 @@ namespace QuakeMapFast
                 ConWrite($"[Draw]output\\{saveTime:yyyyMM}\\{saveTime:dd}に保存しました");
             }
 
+
             //震度大きい順前提
             var intsSt = new StringBuilder();
             var lastScale = -99;
             var count = 0;
-            foreach (var pts in json.Points)
+            foreach (var pts in json.Points.OrderByDescending(x => x.Scale))
             {
                 if (lastScale != pts.Scale)
                 {
                     intsSt.Append("《震度");
-                    intsSt.Append(maxIntS);
+                    intsSt.Append(P2PScale2IntS(pts.Scale));
                     intsSt.Append('》');
                     lastScale = pts.Scale;
                 }

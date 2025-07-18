@@ -34,7 +34,7 @@ namespace QuakeMapFast
             var time = DateTime.Parse(json.Earthquake.Time);
             var maxIntN = P2PScale2IntN(json.Earthquake.MaxScale);
             var maxIntS = P2PScale2IntS(json.Earthquake.MaxScale);
-            var areaInt = P2PQPoints2Dic(json.Points, "addr");
+            var areaInt = P2PQPoints2Dic(json.Points, PointToken.Addr);
 
             var bitmap = DrawMap_Old(areaInt.ToDictionary(x => x.Key, x => IntN2Brush(x.Value)));
             using (Graphics g = Graphics.FromImage(bitmap))
@@ -78,8 +78,8 @@ namespace QuakeMapFast
                 ConWrite($"[Draw]output\\{saveTime:yyyyMM}\\{saveTime:dd}に保存しました");
             }
 
-            string intsArea = Point2String(json.Points, );
-            string intsArea_Max3 = Point2String(json, "addr", maxIntN - 2);//最大震度から3階級(Max6->6,5,4)
+            string intsArea = Point2String(json.Points, PointToken.Addr);
+            string intsArea_Max3 = Point2String(json.Points, PointToken.Addr, maxIntN - 2);//最大震度から3階級(Max6->6,5,4)
             string text = $"震度速報【最大震度{maxIntS}】{time:yyyy/MM/dd HH:mm}\n{intsArea}";
             ConWrite(text, ConsoleColor.Cyan);
             if (debug || readJSON)
@@ -144,7 +144,7 @@ namespace QuakeMapFast
                     XPost(text, $"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png");
         }
 
-
+        /*
         /// <summary>
         /// 震度速報
         /// </summary>
@@ -263,7 +263,7 @@ namespace QuakeMapFast
                 if (!debug && !readJSON)
                     XPost(text, $"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png");
         }
-
+        */
 
     }
 }
