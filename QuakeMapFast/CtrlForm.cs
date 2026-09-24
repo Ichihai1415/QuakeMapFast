@@ -128,7 +128,7 @@ namespace QuakeMapFast
 
             SettingReload();
 
-            Debug(); return;//デバッグ時ここをつける(ここ以降行かせない)
+            //Debug(); return;//デバッグ時ここをつける(ここ以降行かせない)
 
             //XPost("test from QuakeMapFast (2)", "D:\\Ichihai1415\\image\\icon\\new - bot.png");
             await Get();

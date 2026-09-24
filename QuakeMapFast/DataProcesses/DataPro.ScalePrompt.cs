@@ -141,7 +141,8 @@ namespace QuakeMapFast
 
             if (File.Exists("XPosterV2Host - Enable"))
                 if (!debug && !readJSON)
-                    XPost(text, $"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png");
+                    if (maxIntN > 3)
+                        XPost(text, $"output\\{saveTime:yyyyMM}\\{saveTime:dd}\\{saveTime:yyyyMMddHHmmss.ff}.png");
         }
 
         /*
